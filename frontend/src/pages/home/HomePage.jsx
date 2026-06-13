@@ -12,6 +12,7 @@ import logo7 from '../../assets/heroLogo7.png';
 import logo8 from '../../assets/heroLogo8.png';
 import logo9 from '../../assets/heroLogo9.png';
 import logo10 from '../../assets/heroLogo10.png';
+import { Features } from '../../components/layout/Features';
 import './HomePage.css';
 
 const LOGO_IMAGES = [logo1, logo2, logo3, logo4, logo5, logo6, logo7, logo8, logo9, logo10];
@@ -69,13 +70,17 @@ const HomePage = () => {
       const maxScroll = 500; // Animation completes over 500px of scrolling
       const progress = Math.min(scrollY / maxScroll, 1);
       
-      // Interpolation values:
+      // Smooth easing function for more fluid transition
+      const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+      const easedProgress = easeOutCubic(progress);
+      
+      // Interpolation values with easing:
       // At scroll 0: rotateX = 8deg, scale = 0.96, translateZ = -20px, translateY = -20px
       // At scroll 500: rotateX = 0deg, scale = 1.0, translateZ = 0px, translateY = 0px
-      const rotateX = 8 * (1 - progress);
-      const scale = 0.96 + 0.04 * progress;
-      const translateZ = -20 * (1 - progress);
-      const translateY = -20 * (1 - progress);
+      const rotateX = 8 * (1 - easedProgress);
+      const scale = 0.96 + 0.04 * easedProgress;
+      const translateZ = -20 * (1 - easedProgress);
+      const translateY = -20 * (1 - easedProgress);
       
       imageContainerRef.current.style.transform = `perspective(1200px) rotateX(${rotateX}deg) translateY(${translateY}px) scale(${scale}) translateZ(${translateZ}px)`;
     };
@@ -163,6 +168,9 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Unique Features Section */}
+      <Features />
     </div>
   );
 };
