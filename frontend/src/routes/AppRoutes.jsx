@@ -24,6 +24,10 @@ import PurchaseFormPage from "../pages/purchase/PurchaseFormPage";
 import PurchaseDetailPage from "../pages/purchase/PurchaseDetailPage";
 import ChangePasswordPage from "../pages/auth/ChangePasswordPage";
 import UsersPage from "../pages/settings/UsersPage";
+import ManufacturingListPage from "../pages/manufacturing/ManufacturingListPage";
+import ManufacturingDetailPage from "../pages/manufacturing/ManufacturingDetailPage";
+import InventoryHubPage from "../pages/inventory/InventoryHubPage";
+import InventoryProductDetailPage from "../pages/inventory/InventoryProductDetailPage";
 
 
 // Role redirect helper
@@ -269,7 +273,17 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <AppLayout>
-              <ComingSoon title="Manufacturing" />
+              <ManufacturingListPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/manufacturing/:id"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ManufacturingDetailPage />
             </AppLayout>
           </ProtectedRoute>
         }
@@ -312,7 +326,17 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <AppLayout>
-              <ComingSoon title="Inventory" />
+              <InventoryHubPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/inventory/product/:id"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <InventoryProductDetailPage />
             </AppLayout>
           </ProtectedRoute>
         }

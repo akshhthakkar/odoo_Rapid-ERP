@@ -1,4 +1,4 @@
-﻿import prisma from "../config/prisma.js";
+import prisma from "../config/prisma.js";
 import { generateRef } from "./refGen.js";
 import { logAudit } from "./auditLogger.js";
 
@@ -66,7 +66,7 @@ export const trigger = async (product, shortage, salesOrderId, userId, tenantId,
   if (product.procurementType === "MANUFACTURING") {
     const bom = await tx.boM.findFirst({
       where: { productId: product.id, tenantId, isActive: true },
-      include: { operations: true },
+      include: { operations: true, components: true },
     });
 
     if (!bom) {
@@ -96,6 +96,14 @@ export const trigger = async (product, shortage, salesOrderId, userId, tenantId,
             durationMins: op.durationMins,
             sequence: op.sequence,
             status: "PENDING",
+            tenantId,
+          })),
+        },
+        components: {
+          create: bom.components.map((comp) => ({
+            productId: comp.productId,
+            qtyRequired: Number(comp.qty) * shortage,
+            tenantId,
           })),
         },
       },

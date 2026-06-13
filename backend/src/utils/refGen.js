@@ -1,9 +1,11 @@
-﻿import prisma from "../config/prisma.js";
+import prisma from "../config/prisma.js";
 
 const MODEL_MAP = {
   SO: "salesOrder",
   PO: "purchaseOrder",
   MO: "manufacturingOrder",
+  ADJ: "inventoryAdjustment",
+  TRA: "stockTransfer",
 };
 
 /**
