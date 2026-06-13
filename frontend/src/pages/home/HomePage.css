@@ -61,6 +61,42 @@
   animation-delay: var(--slide-delay, 0ms);
 }
 
+/* ── Scroll-triggered reveals (Intersection Observer) ── */
+
+/* Text elements: blur + float up */
+.reveal-text {
+  display: inline;
+  opacity: 0;
+  filter: blur(12px);
+  transform: translateY(10px);
+  transition:
+    opacity   0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    filter    0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--delay, 0ms);
+}
+
+.is-visible .reveal-text {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
+}
+
+/* Card / container elements: slide up only */
+.reveal-card {
+  opacity: 0;
+  transform: translateY(32px);
+  transition:
+    opacity   0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--delay, 0ms);
+}
+
+.is-visible .reveal-card {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* ── Container with glowing ambient top background ── */
 .landing-container {
   min-height: 100vh;

@@ -22,6 +22,13 @@
   z-index: 5;
 }
 
+.hiw__header-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
 .hiw__label-top {
   display: flex;
   width: 100%;
