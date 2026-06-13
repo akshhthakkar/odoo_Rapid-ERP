@@ -16,6 +16,9 @@ import BomFormPage from "../pages/bom/BomFormPage";
 import CustomerFormPage from "../pages/customers/CustomerFormPage";
 import VendorFormPage from "../pages/vendors/VendorFormPage";
 import WorkCenterFormPage from "../pages/workcenters/WorkCenterFormPage";
+import SalesListPage from "../pages/sales/SalesListPage";
+import SalesFormPage from "../pages/sales/SalesFormPage";
+import SalesDetailPage from "../pages/sales/SalesDetailPage";
 
 // Role redirect helper
 import { useAuthStore } from "../store/authStore";
