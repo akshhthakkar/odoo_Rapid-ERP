@@ -4,7 +4,7 @@ const action = process.argv[2];
 
 const run = async () => {
   try {
-    const adminUser = await prisma.user.findUnique({
+    const adminUser = await prisma.user.findFirst({
       where: { email: 'admin@erp.com' }
     });
     const adminId = adminUser ? adminUser.id : 1;

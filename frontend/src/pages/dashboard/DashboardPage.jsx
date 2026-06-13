@@ -71,7 +71,7 @@ const DashboardPage = () => {
             { phase: 'Phase 1', label: 'Authentication & RBAC', done: true },
             { phase: 'Phase 2', label: 'Products, Customers, Vendors', done: true },
             { phase: 'Phase 3', label: 'Bill of Materials Builder', done: true },
-            { phase: 'Phase 4', label: 'Sales Module (MTO trigger)', done: false },
+            { phase: 'Phase 4', label: 'Sales Module (MTO trigger)', done: true },
             { phase: 'Phase 5', label: 'Purchase Module', done: false },
             { phase: 'Phase 6', label: 'Manufacturing Module', done: false },
             { phase: 'Phase 7', label: 'Procurement Automation Engine', done: false },
