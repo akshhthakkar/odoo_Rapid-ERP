@@ -3,6 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCompanyUsers, inviteUser } from '../../api/users.api';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
+import { AlertTriangle, CheckCircle2, Users } from 'lucide-react';
+import Loader from '../../components/ui/Loader';
 
 const ROLES = [
   { value: 'SALES_USER',          label: 'Sales User',          desc: 'Create & manage sales orders' },
@@ -85,8 +87,12 @@ const UsersPage = () => {
             marginBottom: '16px',
             fontSize: '13px',
             color: 'var(--danger)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}>
-            ⚠️ {error}
+            <AlertTriangle size={16} />
+            {error}
           </div>
         )}
 
@@ -99,8 +105,12 @@ const UsersPage = () => {
             marginBottom: '16px',
             fontSize: '13px',
             color: 'var(--success)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}>
-            ✅ {success}
+            <CheckCircle2 size={16} />
+            {success}
           </div>
         )}
 
@@ -176,10 +186,10 @@ const UsersPage = () => {
         </div>
 
         {isLoading ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Loading users...</div>
+          <Loader padding="40px 0" size={28} />
         ) : users.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 40px', color: 'var(--text-muted)' }}>
-            <span style={{ fontSize: '28px' }}>👥</span>
+            <Users size={32} style={{ margin: '0 auto 10px', color: 'var(--text-muted)' }} />
             <p style={{ marginTop: '10px', fontSize: '14px' }}>No users found.</p>
           </div>
         ) : (

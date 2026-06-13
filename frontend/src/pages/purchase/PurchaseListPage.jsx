@@ -5,6 +5,7 @@ import { getPurchaseOrders } from '../../api/purchase.api';
 import { useAuthStore } from '../../store/authStore';
 import Button from '../../components/ui/Button';
 import { LayoutList, FileText, CheckCircle2, Truck, XCircle, Zap, User, Layers, Package } from 'lucide-react';
+import Loader from '../../components/ui/Loader';
 
 const STATUS_CONFIG = {
   DRAFT: { label: 'Draft', bg: 'rgba(148,163,184,0.15)', color: '#94A3B8', border: 'rgba(148,163,184,0.25)' },
@@ -173,9 +174,7 @@ const PurchaseListPage = () => {
         </div>
 
         {isLoading ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-            Loading Purchase Orders…
-          </div>
+          <Loader padding="40px 0" size={28} />
         ) : orders.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 40px', color: 'var(--text-muted)' }}>
             <Package size={40} strokeWidth={1.5} style={{ color: 'var(--text-muted)', marginBottom: '12px', display: 'inline-block' }} />

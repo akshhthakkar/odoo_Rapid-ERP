@@ -16,6 +16,7 @@ import {
 } from "../../api/inventory.api.js";
 import { getProducts } from "../../api/products.api.js";
 import Button from "../../components/ui/Button";
+import Loader from "../../components/ui/Loader";
 import {
   TrendingUp,
   AlertTriangle,
@@ -304,7 +305,7 @@ const InventoryHubPage = () => {
       {activeTab === "dashboard" && (
         <div className="animate-fade-in">
           {isDashboardLoading ? (
-            <div>Loading statistics...</div>
+            <Loader size={24} padding="24px 0" />
           ) : (
             <>
               {/* Widgets Summary */}
@@ -484,7 +485,7 @@ const InventoryHubPage = () => {
 
           {/* Ledger Table */}
           {isLedgerLoading ? (
-            <div>Loading stock ledger movements...</div>
+            <Loader size={24} padding="24px 0" />
           ) : ledger.length === 0 ? (
             <div style={{ textAlign: "center", padding: "40px", color: "var(--text-muted)" }}>No matching inventory movements found.</div>
           ) : (
@@ -529,7 +530,7 @@ const InventoryHubPage = () => {
       {activeTab === "valuation" && (
         <div className="glass-card" style={{ padding: "24px" }}>
           {isValuationLoading ? (
-            <div>Loading valuation ledger...</div>
+            <Loader size={24} padding="24px 0" />
           ) : (
             <>
               {/* Grand Total Header */}
@@ -571,7 +572,7 @@ const InventoryHubPage = () => {
       {activeTab === "adjustments" && (
         <div className="glass-card" style={{ padding: "24px" }}>
           {isAdjustmentsLoading ? (
-            <div>Loading adjustments...</div>
+            <Loader size={24} padding="24px 0" />
           ) : adjustments.length === 0 ? (
             <div style={{ textAlign: "center", padding: "40px", color: "var(--text-muted)" }}>No manual stock adjustments logged yet.</div>
           ) : (
@@ -617,7 +618,7 @@ const InventoryHubPage = () => {
           <div className="glass-card" style={{ padding: "24px", marginBottom: "24px" }}>
             <h3 style={{ fontSize: "16px", fontWeight: 700, marginBottom: "16px" }}>🏢 Active Warehouses</h3>
             {isWhLoading ? (
-              <div>Loading warehouses...</div>
+              <Loader size={24} padding="24px 0" />
             ) : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "16px" }}>
                 {warehouses.map(w => (
@@ -662,7 +663,7 @@ const InventoryHubPage = () => {
           <div className="glass-card" style={{ padding: "24px" }}>
             <h3 style={{ fontSize: "16px", fontWeight: 700, marginBottom: "16px" }}>⇄ Warehouse Stock Transfers</h3>
             {isTransfersLoading ? (
-              <div>Loading stock transfers...</div>
+              <Loader size={24} padding="24px 0" />
             ) : transfers.length === 0 ? (
               <div style={{ textSecondary: "center", color: "var(--text-muted)", fontSize: "13px" }}>No warehouse stock transfers registered.</div>
             ) : (

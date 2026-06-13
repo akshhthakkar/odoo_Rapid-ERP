@@ -4,7 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getBoms, deleteBom } from '../../api/bom.api';
 import { useAuthStore } from '../../store/authStore';
 import Button from '../../components/ui/Button';
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit2, Trash2, AlertTriangle, CheckCircle2, ClipboardList } from 'lucide-react';
+import Loader from '../../components/ui/Loader';
 
 const BomListPage = () => {
   const navigate = useNavigate();
@@ -85,9 +86,10 @@ const BomListPage = () => {
           color: 'var(--danger)',
           fontSize: '13.5px',
           display: 'flex',
+          alignItems: 'center',
           gap: '8px',
         }}>
-          <span>⚠️</span>
+          <AlertTriangle size={16} />
           <span>{errorMessage}</span>
         </div>
       )}
@@ -102,9 +104,10 @@ const BomListPage = () => {
           color: 'var(--success)',
           fontSize: '13.5px',
           display: 'flex',
+          alignItems: 'center',
           gap: '8px',
         }}>
-          <span>✅</span>
+          <CheckCircle2 size={16} />
           <span>{successMessage}</span>
         </div>
       )}
@@ -131,10 +134,10 @@ const BomListPage = () => {
         </div>
 
         {isLoading ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Loading Bills of Materials...</div>
+          <Loader padding="120px 0" size={36} />
         ) : boms.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 40px', color: 'var(--text-muted)' }}>
-            <span style={{ fontSize: '28px' }}>📋</span>
+            <ClipboardList size={32} style={{ margin: '0 auto 10px', color: 'var(--text-muted)' }} />
             <p style={{ marginTop: '10px', fontSize: '14px' }}>No Bills of Materials found.</p>
           </div>
         ) : (
@@ -275,7 +278,7 @@ const BomListPage = () => {
               textAlign: 'center',
             }}
           >
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
+            <AlertTriangle size={48} style={{ color: 'var(--danger)', margin: '0 auto 16px' }} />
             <h3 style={{ margin: '0 0 12px 0', fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)' }}>
               Deactivate Bill of Materials
             </h3>

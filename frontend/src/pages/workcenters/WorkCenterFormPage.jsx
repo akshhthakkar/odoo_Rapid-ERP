@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createWorkCenter } from '../../api/workcenters.api';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
+import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 const WorkCenterFormPage = () => {
   const navigate = useNavigate();
@@ -76,8 +77,12 @@ const WorkCenterFormPage = () => {
             marginBottom: '20px',
             fontSize: '13.5px',
             color: 'var(--danger)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}>
-            ⚠️ {error}
+            <AlertTriangle size={16} />
+            {error}
           </div>
         )}
 
@@ -90,8 +95,12 @@ const WorkCenterFormPage = () => {
             marginBottom: '20px',
             fontSize: '13.5px',
             color: 'var(--success)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}>
-            ✅ {success}
+            <CheckCircle2 size={16} />
+            {success}
           </div>
         )}
 

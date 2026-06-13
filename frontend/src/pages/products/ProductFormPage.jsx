@@ -5,6 +5,7 @@ import { getProductById, createProduct, updateProduct } from '../../api/products
 import { getVendors } from '../../api/vendors.api';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
+import Loader from '../../components/ui/Loader';
 
 const ProductFormPage = () => {
   const { id } = useParams();
@@ -168,11 +169,7 @@ const ProductFormPage = () => {
   };
 
   if (isEdit && isLoadingProduct) {
-    return (
-      <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-        Loading product details...
-      </div>
-    );
+    return <Loader padding="120px 0" size={36} />;
   }
 
   return (

@@ -6,6 +6,8 @@ import { getProducts } from '../../api/products.api';
 import { getWorkCenters } from '../../api/workcenters.api';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
+import { AlertTriangle, CheckCircle2 } from 'lucide-react';
+import Loader from '../../components/ui/Loader';
 
 const BomFormPage = () => {
   const { id } = useParams();
@@ -213,11 +215,7 @@ const BomFormPage = () => {
   };
 
   if (isEdit && isLoadingBom) {
-    return (
-      <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-        Loading Bill of Materials details...
-      </div>
-    );
+    return <Loader padding="120px 0" size={36} />;
   }
 
   return (
@@ -255,8 +253,12 @@ const BomFormPage = () => {
             marginBottom: '20px',
             fontSize: '13.5px',
             color: 'var(--danger)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}>
-            ⚠️ {errorMessage}
+            <AlertTriangle size={16} />
+            {errorMessage}
           </div>
         )}
 
@@ -269,8 +271,12 @@ const BomFormPage = () => {
             marginBottom: '20px',
             fontSize: '13.5px',
             color: 'var(--success)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}>
-            ✅ {successMessage}
+            <CheckCircle2 size={16} />
+            {successMessage}
           </div>
         )}
 

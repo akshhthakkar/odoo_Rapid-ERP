@@ -295,7 +295,7 @@ export const receiveGoods = async (id, receiptsPayload, userId, tenantId) => {
         data: { receivedQty: { increment: receivedQty } },
       });
 
-      await receiveStock(line.productId, receivedQty, Number(line.unitCost), id, tenantId, tx);
+      await receiveStock(line.productId, receivedQty, Number(line.unitCost), id, tenantId, null, tx);
     }
 
     // 3. Re-fetch lines to compute new status

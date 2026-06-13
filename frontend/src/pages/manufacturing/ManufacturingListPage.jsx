@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getManufacturingOrders, createManufacturingOrder } from "../../api/manufacturing.api";
 import { getBoms } from "../../api/bom.api";
 import { Factory, Plus, Search, Calendar, Filter, RefreshCw, X, Loader2, ArrowRight } from "lucide-react";
+import Loader from "../../components/ui/Loader";
 
 const ManufacturingListPage = () => {
   const navigate = useNavigate();
@@ -300,9 +301,7 @@ const ManufacturingListPage = () => {
 
       {/* Main Grid/Table */}
       {loading ? (
-        <div style={{ display: "flex", justifyContent: "center", padding: "64px 0" }}>
-          <Loader2 size={36} className="animate-spin" style={{ color: "#FF540E" }} />
-        </div>
+        <Loader size={36} padding="64px 0" />
       ) : filteredMos.length === 0 ? (
         <div
           style={{
@@ -506,7 +505,7 @@ const ManufacturingListPage = () => {
                 </label>
                 {bomsLoading ? (
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#6B7280", fontSize: "13px" }}>
-                    <Loader2 size={16} className="animate-spin" /> Loading recipes...
+                    <Loader size={16} padding="0" style={{ display: "inline-flex", width: "auto" }} /> Loading recipes...
                   </div>
                 ) : boms.length === 0 ? (
                   <div style={{ color: "#B91C1C", fontSize: "13px", fontWeight: 500 }}>

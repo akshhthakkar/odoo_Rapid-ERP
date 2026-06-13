@@ -6,6 +6,7 @@ import { getVendors } from '../../api/vendors.api';
 import { getProducts } from '../../api/products.api';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
+import { Mail, Phone } from 'lucide-react';
 
 const PurchaseFormPage = () => {
   const navigate = useNavigate();
@@ -122,8 +123,8 @@ const PurchaseFormPage = () => {
               </select>
               {selectedVendor && (
                 <div style={{ marginTop: '8px', padding: '8px 12px', background: 'rgba(255, 84, 14, 0.06)', borderRadius: '8px', fontSize: '12px', color: 'var(--text-muted)' }}>
-                  {selectedVendor.email && <div>✉ {selectedVendor.email}</div>}
-                  {selectedVendor.phone && <div>📞 {selectedVendor.phone}</div>}
+                  {selectedVendor.email && <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Mail size={12} /> {selectedVendor.email}</div>}
+                  {selectedVendor.phone && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}><Phone size={12} /> {selectedVendor.phone}</div>}
                 </div>
               )}
             </div>

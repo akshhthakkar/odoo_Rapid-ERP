@@ -1,4 +1,4 @@
-﻿import prisma from "../../config/prisma.js";
+import prisma from "../../config/prisma.js";
 import { generateRef } from "../../utils/refGen.js";
 import { logAudit } from "../../utils/auditLogger.js";
 import { reserveStock, deliverStock, releaseStock } from "../../utils/stockEngine.js";
@@ -212,7 +212,7 @@ export const deliverSalesOrder = async (orderId, lineDeliveries, userId, tenantI
       const product = await tx.product.findUnique({ where: { id: line.productId } });
       if (qtyToDeliver > Number(product.onHandQty)) throw { status: 400, message: `Insufficient stock on hand for SKU ${line.product.sku}. Physical count: ${Number(product.onHandQty)}, Attempted to deliver: ${qtyToDeliver}.` };
 
-      await deliverStock(line.productId, qtyToDeliver, orderId, tenantId, tx);
+      await deliverStock(line.productId, qtyToDeliver, orderId, tenantId, null, tx);
       await tx.salesOrderLine.update({ where: { id: lineId }, data: { deliveredQty: { increment: qtyToDeliver } } });
     }
 

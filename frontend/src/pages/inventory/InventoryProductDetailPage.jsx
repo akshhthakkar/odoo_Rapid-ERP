@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getProductInventoryDetails } from "../../api/inventory.api.js";
 import Button from "../../components/ui/Button";
 import { ArrowLeft, TrendingUp, Layers, CheckCircle } from "lucide-react";
+import Loader from "../../components/ui/Loader";
 
 const InventoryProductDetailPage = () => {
   const { id } = useParams();
@@ -19,7 +20,7 @@ const InventoryProductDetailPage = () => {
     return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(val);
   };
 
-  if (isLoading) return <div style={{ padding: "40px", textAlign: "center" }}>Loading product stock audit...</div>;
+  if (isLoading) return <Loader padding="120px 0" size={36} />;
   if (error) return <div style={{ padding: "40px", color: "var(--danger)", textAlign: "center" }}>Error loading product details: {error.message}</div>;
 
   return (
