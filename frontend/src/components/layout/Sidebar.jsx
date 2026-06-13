@@ -12,6 +12,7 @@ import {
   History,
   UserPlus
 } from 'lucide-react';
+import rapidLogo from '../../assets/rapid-logo.png';
 
 const ICON_COMPONENTS = {
   dashboard: LayoutDashboard,
@@ -83,13 +84,10 @@ const Sidebar = () => {
         height: 'var(--topbar-height)',
         display: 'flex',
         alignItems: 'center',
-        padding: '0 20px',
+        padding: '0 16px',
         borderBottom: '1px solid #E5E7EB',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <img src="/logo.png" alt="Rapid Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
-          <span style={{ fontSize: '16px', fontWeight: 800, color: '#1F2937' }}>Rapid</span>
-        </div>
+        <img src={rapidLogo} alt="RAPID" style={{ width: '100%', maxHeight: '90px', objectFit: 'contain', objectPosition: 'left center' }} />
       </div>
 
       {/* Navigation */}

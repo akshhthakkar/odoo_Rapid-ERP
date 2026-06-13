@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { login } from '../../api/auth.api';
+import rapidLogo from '../../assets/rapid-logo.png';
 
 const ROLE_HOME = {
   ADMIN:               '/dashboard',
@@ -215,14 +216,13 @@ const LoginPage = () => {
 
         <div className="auth-center-column">
           {/* Row 1: Logo */}
-          <div className="auth-row" style={{ padding: '36px 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <div className="auth-row" style={{ padding: '16px 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <div className="grid-h-line" style={{ top: 0 }} />
             <div className="grid-plus grid-plus-tl">+</div>
             <div className="grid-plus grid-plus-tr">+</div>
 
-             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-               <img src="/logo.png" alt="Rapid Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
-               <span style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.03em' }}>Rapid</span>
+             <div style={{ display: 'flex', alignItems: 'center' }}>
+               <img src={rapidLogo} alt="RAPID" style={{ height: '130px', objectFit: 'contain' }} />
              </div>
 
             <div className="grid-h-line" style={{ bottom: 0 }} />

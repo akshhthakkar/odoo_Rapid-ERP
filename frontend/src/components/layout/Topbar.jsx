@@ -13,6 +13,9 @@ const PAGE_TITLES = {
   '/inventory':     { title: 'Inventory',          subtitle: 'Stock ledger and movements' },
   '/audit':         { title: 'Audit Log',          subtitle: 'Full system activity trail' },
   '/register':      { title: 'Add User',           subtitle: 'Create a new team member account' },
+  '/customers/new':   { title: 'Add Customer',       subtitle: 'Create a new customer profile' },
+  '/vendors/new':     { title: 'Add Vendor',         subtitle: 'Create a new supplier profile' },
+  '/workcenters/new': { title: 'Add Work Center',     subtitle: 'Create a new manufacturing assembly line' },
 };
 
 const Topbar = () => {
