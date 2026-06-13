@@ -7,6 +7,7 @@ import { getVendors } from '../../api/vendors.api';
 import { getWorkCenters } from '../../api/workcenters.api';
 import { useAuthStore } from '../../store/authStore';
 import Button from '../../components/ui/Button';
+import { SquarePen, Trash2, CheckCircle2, Archive, Zap, Package, LayoutList } from 'lucide-react';
 
 const ProductListPage = () => {
   const navigate = useNavigate();
@@ -19,6 +20,8 @@ const ProductListPage = () => {
     return params.get('tab') || 'products';
   });
   const [deleteError, setDeleteError] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');   // 'all' | 'active' | 'archived'
+  const [sourceFilter, setSourceFilter] = useState('all');   // 'all' | 'mto' | 'mts'
 
   // ─── QUERY CALLS ────────────────────────────────────────────────────────────
   const { data: products = [], isLoading: isLoadingProd } = useQuery({
@@ -77,6 +80,43 @@ const ProductListPage = () => {
     if (qty <= 50) return 'badge-warning';
     return 'badge-success';
   };
+
+  // ─── FILTERED PRODUCTS ──────────────────────────────────────────────────────
+  const filteredProducts = products.filter((p) => {
+    const isActive = p.isActive !== false;
+    if (statusFilter === 'active' && !isActive) return false;
+    if (statusFilter === 'archived' && isActive) return false;
+    const isMTO = p.procureOnDemand === true;
+    if (sourceFilter === 'mto' && !isMTO) return false;
+    if (sourceFilter === 'mts' && isMTO) return false;
+    return true;
+  });
+
+  // ─── CHIP STYLE HELPER ──────────────────────────────────────────────────────
+  const chipStyle = (active, color) => ({
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    padding: '5px 12px',
+    borderRadius: '9999px',
+    border: active ? `1.5px solid ${color}` : '1.5px solid rgba(0,0,0,0.08)',
+    background: active ? `${color}18` : 'rgba(0,0,0,0.03)',
+    color: active ? color : 'var(--text-secondary)',
+    fontSize: '12.5px',
+    fontWeight: active ? 600 : 500,
+    cursor: 'pointer',
+    transition: 'all 0.18s ease',
+    userSelect: 'none',
+    whiteSpace: 'nowrap',
+  });
+
+  const dotStyle = (color) => ({
+    width: '7px',
+    height: '7px',
+    borderRadius: '50%',
+    background: color,
+    flexShrink: 0,
+  });
 
   return (
     <div className="animate-fade-in" style={{ fontFamily: 'var(--font-family)' }}>
@@ -144,7 +184,7 @@ const ProductListPage = () => {
       {/* ─── TAB 1: PRODUCTS ────────────────────────────────────────────────── */}
       {activeTab === 'products' && (
         <div className="glass-card" style={{ padding: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div>
               <h3 style={{ fontSize: '16px', fontWeight: 700 }}>Product Catalog</h3>
               <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Manage item specifications, prices, and stock counts.</p>
@@ -157,6 +197,55 @@ const ProductListPage = () => {
               >
                 + Add Product
               </Button>
+            )}
+          </div>
+
+          {/* ── Filter Chips ── */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--border)' }}>
+
+            {/* Status chips */}
+            <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: '2px' }}>Status</span>
+
+            <button style={chipStyle(statusFilter === 'all', '#6B7280')} onClick={() => setStatusFilter('all')}>
+              <LayoutList size={13} strokeWidth={2.5} />
+              All
+            </button>
+            <button style={chipStyle(statusFilter === 'active', '#10B981')} onClick={() => setStatusFilter('active')}>
+              <CheckCircle2 size={13} strokeWidth={2.5} />
+              Active
+            </button>
+            <button style={chipStyle(statusFilter === 'archived', '#EF4444')} onClick={() => setStatusFilter('archived')}>
+              <Archive size={13} strokeWidth={2.5} />
+              Archived
+            </button>
+
+            {/* Separator */}
+            <div style={{ width: '1px', height: '20px', background: 'var(--border)', margin: '0 4px' }} />
+
+            {/* Source chips */}
+            <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: '2px' }}>Source</span>
+
+            <button style={chipStyle(sourceFilter === 'all', '#6B7280')} onClick={() => setSourceFilter('all')}>
+              <LayoutList size={13} strokeWidth={2.5} />
+              All
+            </button>
+            <button style={chipStyle(sourceFilter === 'mto', '#3B82F6')} onClick={() => setSourceFilter('mto')}>
+              <Zap size={13} strokeWidth={2.5} />
+              Make to Order
+            </button>
+            <button style={chipStyle(sourceFilter === 'mts', '#8B5CF6')} onClick={() => setSourceFilter('mts')}>
+              <Package size={13} strokeWidth={2.5} />
+              Make to Stock
+            </button>
+
+            {/* Clear filters */}
+            {(statusFilter !== 'all' || sourceFilter !== 'all') && (
+              <button
+                onClick={() => { setStatusFilter('all'); setSourceFilter('all'); }}
+                style={{ marginLeft: 'auto', fontSize: '13px', color: '#EF4444', background: 'rgba(239,68,68,0.07)', border: '1.5px solid rgba(239,68,68,0.25)', borderRadius: '9999px', padding: '6px 14px', cursor: 'pointer', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}
+              >
+                ✕ Clear filters
+              </button>
             )}
           </div>
 
@@ -185,7 +274,13 @@ const ProductListPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {products.map((p) => (
+                  {filteredProducts.length === 0 ? (
+                    <tr>
+                      <td colSpan={10} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)', fontSize: '13.5px' }}>
+                        No products match the selected filters.
+                      </td>
+                    </tr>
+                  ) : filteredProducts.map((p) => (
                     <tr key={p.id}>
                       <td style={{ fontWeight: 600, color: '#FF540E' }}>{p.sku}</td>
                       <td>
@@ -213,39 +308,73 @@ const ProductListPage = () => {
                       </td>
                       {(canManageProducts || canDeleteProduct) && (
                         <td style={{ textAlign: 'right' }}>
-                          <div style={{ display: 'inline-flex', gap: '8px' }}>
+                          <div style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}>
                             {canManageProducts && (
                               <button
                                 onClick={() => navigate(`/products/edit/${p.id}`)}
+                                title="Edit product"
                                 style={{
-                                  background: 'transparent',
-                                  border: 'none',
-                                  color: 'var(--text-secondary)',
+                                  width: '32px',
+                                  height: '32px',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  borderRadius: '8px',
+                                  border: '1px solid rgba(59,130,246,0.25)',
+                                  background: 'rgba(59,130,246,0.08)',
+                                  color: '#3B82F6',
                                   cursor: 'pointer',
-                                  fontSize: '13px',
-                                  padding: '4px 8px',
+                                  transition: 'all 0.15s ease',
+                                  flexShrink: 0,
                                 }}
-                                onMouseEnter={(e) => e.target.style.color = '#FF540E'}
-                                onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.background = 'rgba(59,130,246,0.18)';
+                                  e.currentTarget.style.borderColor = 'rgba(59,130,246,0.5)';
+                                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(59,130,246,0.12)';
+                                  e.currentTarget.style.transform = 'translateY(-1px)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background = 'rgba(59,130,246,0.08)';
+                                  e.currentTarget.style.borderColor = 'rgba(59,130,246,0.25)';
+                                  e.currentTarget.style.boxShadow = 'none';
+                                  e.currentTarget.style.transform = 'translateY(0)';
+                                }}
                               >
-                                Edit
+                                <SquarePen size={14} strokeWidth={2} />
                               </button>
                             )}
                             {canDeleteProduct && (
                               <button
                                 onClick={() => handleDeleteProduct(p.id, p.name)}
+                                title="Delete product"
                                 style={{
-                                  background: 'transparent',
-                                  border: 'none',
-                                  color: 'var(--text-muted)',
+                                  width: '32px',
+                                  height: '32px',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  borderRadius: '8px',
+                                  border: '1px solid rgba(239,68,68,0.25)',
+                                  background: 'rgba(239,68,68,0.08)',
+                                  color: '#EF4444',
                                   cursor: 'pointer',
-                                  fontSize: '13px',
-                                  padding: '4px 8px',
+                                  transition: 'all 0.15s ease',
+                                  flexShrink: 0,
                                 }}
-                                onMouseEnter={(e) => e.target.style.color = 'var(--danger)'}
-                                onMouseLeave={(e) => e.target.style.color = 'var(--text-muted)'}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.background = 'rgba(239,68,68,0.18)';
+                                  e.currentTarget.style.borderColor = 'rgba(239,68,68,0.5)';
+                                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.12)';
+                                  e.currentTarget.style.transform = 'translateY(-1px)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background = 'rgba(239,68,68,0.08)';
+                                  e.currentTarget.style.borderColor = 'rgba(239,68,68,0.25)';
+                                  e.currentTarget.style.boxShadow = 'none';
+                                  e.currentTarget.style.transform = 'translateY(0)';
+                                }}
                               >
-                                Delete
+                                <Trash2 size={14} strokeWidth={2} />
                               </button>
                             )}
                           </div>
@@ -255,6 +384,11 @@ const ProductListPage = () => {
                   ))}
                 </tbody>
               </table>
+              {filteredProducts.length > 0 && (
+                <div style={{ paddingTop: '12px', fontSize: '12px', color: 'var(--text-muted)' }}>
+                  Showing {filteredProducts.length} of {products.length} product{products.length !== 1 ? 's' : ''}
+                </div>
+              )}
             </div>
           )}
         </div>
