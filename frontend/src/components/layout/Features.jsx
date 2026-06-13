@@ -5,7 +5,8 @@ import feat3 from '../../assets/feat3.png';
 import feat4 from '../../assets/feat4.png';
 import { useInView } from '../../hooks/useInView';
 
-const TITLE_LINE1 = ['One', 'Platform.', 'Total', 'Control.'];
+const TITLE_LINE1_STATIC = ['One', 'Platform.'];
+const TITLE_LINE1_ORANGE = ['Total', 'Control.'];
 const TITLE_LINE2 = ['Built', 'For', 'Operational', 'Excellence.'];
 
 const CARDS = [
@@ -38,22 +39,37 @@ export const Features = () => {
         {/* Title — word-by-word progressive blur reveal, two explicit lines */}
         <h2 className="features-title">
           <span className="features-title-line">
-            {TITLE_LINE1.map((word, i) => (
+            {TITLE_LINE1_STATIC.map((word, i) => (
               <span
-                key={i}
+                key={`static-${i}`}
                 className="reveal-text"
                 style={{ '--delay': wordDelay(i) }}
               >
                 {word}{' '}
               </span>
             ))}
+            <em>
+              {TITLE_LINE1_ORANGE.map((word, i) => (
+                <span
+                  key={`orange-${i}`}
+                  className="reveal-text"
+                  style={{ '--delay': wordDelay(TITLE_LINE1_STATIC.length + i) }}
+                >
+                  {word}{' '}
+                </span>
+              ))}
+            </em>
           </span>
           <span className="features-title-line">
             {TITLE_LINE2.map((word, i) => (
               <span
-                key={i}
+                key={`line2-${i}`}
                 className="reveal-text"
-                style={{ '--delay': wordDelay(TITLE_LINE1.length + i) }}
+                style={{
+                  '--delay': wordDelay(
+                    TITLE_LINE1_STATIC.length + TITLE_LINE1_ORANGE.length + i
+                  )
+                }}
               >
                 {word}{' '}
               </span>

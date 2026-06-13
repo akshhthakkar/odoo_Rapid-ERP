@@ -385,6 +385,11 @@
   display: block;
 }
 
+.features-title em {
+  color: var(--accent);
+  font-style: normal;
+}
+
 .features-subtitle {
   font-size: 1.15rem;
   color: #4B5563;
