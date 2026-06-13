@@ -142,7 +142,7 @@ const RegisterPage = () => {
                   <div style={{
                     fontSize: '13px',
                     fontWeight: 600,
-                    color: form.role === r.value ? '#FF8A58' : 'var(--text-primary)',
+                    color: form.role === r.value ? 'var(--accent)' : 'var(--text-primary)',
                     marginBottom: '2px',
                   }}>
                     {r.label}

@@ -302,7 +302,7 @@ const ProductFormPage = () => {
                   width: '52px',
                   height: '28px',
                   borderRadius: '9999px',
-                  background: form.procureOnDemand ? '#FF540E' : 'rgba(255,255,255,0.1)',
+                  background: form.procureOnDemand ? '#FF540E' : '#E5E7EB',
                   border: 'none',
                   position: 'relative',
                   cursor: 'pointer',
@@ -377,41 +377,41 @@ const ProductFormPage = () => {
             </p>
 
             <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-end', marginBottom: '16px' }}>
-              <div style={{ flex: 2 }}>
+              <div style={{ flex: 2, display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <label className="form-label">Select Vendor</label>
                 <select
                   value={vendorSelect}
                   onChange={(e) => setVendorSelect(e.target.value)}
                   className="erp-input erp-select"
-                  style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)' }}
+                  style={{ background: '#FFFFFF', color: 'var(--text-primary)' }}
                 >
-                  <option value="" style={{ background: 'var(--bg-secondary)', color: 'var(--text-muted)' }}>
+                  <option value="" style={{ background: '#FFFFFF', color: 'var(--text-muted)' }}>
                     -- Choose Vendor --
                   </option>
                   {availableVendors.map(v => (
-                    <option key={v.id} value={v.id} style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>
+                    <option key={v.id} value={v.id} style={{ background: '#FFFFFF', color: 'var(--text-primary)' }}>
                       {v.name}
                     </option>
                   ))}
                 </select>
               </div>
 
-              <div style={{ flex: 1.2 }}>
-                <Input
+              <div style={{ flex: 1.2, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label className="form-label" htmlFor="vendor-unit-price">Purchase Price ($)</label>
+                <input
                   id="vendor-unit-price"
-                  label="Purchase Price ($)"
                   type="text"
                   placeholder="120.00"
                   value={vendorCost}
                   onChange={(e) => setVendorCost(e.target.value)}
-                  style={{ marginBottom: 0 }}
+                  className="erp-input"
                 />
               </div>
 
               <Button
                 type="button"
                 onClick={handleAddVendor}
-                style={{ padding: '11px 18px', border: '1px solid rgba(255,84,14,0.4)', background: 'rgba(255,84,14,0.1)', color: '#FF8A58' }}
+                style={{ padding: '11px 18px', border: '1px solid rgba(255, 84, 14, 0.2)', background: 'rgba(255, 84, 14, 0.08)', color: '#FF540E' }}
               >
                 + Link
               </Button>

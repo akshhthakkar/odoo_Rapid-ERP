@@ -28,7 +28,7 @@ const DashboardPage = () => {
         }} />
 
         <div style={{ position: 'relative' }}>
-          <p style={{ fontSize: '13px', color: '#FF8A58', fontWeight: 600, marginBottom: '6px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+          <p style={{ fontSize: '13px', color: 'var(--accent)', fontWeight: 600, marginBottom: '6px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
             Welcome back
           </p>
           <h2 style={{ fontSize: '26px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>
@@ -45,7 +45,7 @@ const DashboardPage = () => {
         {[
           { label: 'Database', status: 'Connected', color: 'var(--success)', icon: '🗄️' },
           { label: 'Auth & RBAC', status: 'Active', color: 'var(--success)', icon: '🔐' },
-          { label: 'Your Role', status: user?.role?.replace(/_/g, ' ') || '—', color: '#FF8A58', icon: '👤' },
+          { label: 'Your Role', status: user?.role?.replace(/_/g, ' ') || '—', color: 'var(--accent)', icon: '👤' },
           { label: 'API Status', status: 'Healthy', color: 'var(--success)', icon: '⚡' },
         ].map((card) => (
           <div key={card.label} className="glass-card" style={{ padding: '20px' }}>
