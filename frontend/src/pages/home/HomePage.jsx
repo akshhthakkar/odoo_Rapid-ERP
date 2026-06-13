@@ -13,6 +13,7 @@ import logo8 from '../../assets/heroLogo8.png';
 import logo9 from '../../assets/heroLogo9.png';
 import logo10 from '../../assets/heroLogo10.png';
 import { Features } from '../../components/layout/Features';
+import HowItWorks from '../../components/layout/HowItWorks';
 import { CreditCard } from 'lucide-react';
 import './HomePage.css';
 
@@ -170,6 +171,9 @@ const HomePage = () => {
 
       {/* Unique Features Section */}
       <Features />
+
+      {/* How It Works Section */}
+      <HowItWorks />
     </div>
   );
 };
