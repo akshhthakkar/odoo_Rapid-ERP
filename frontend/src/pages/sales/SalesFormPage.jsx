@@ -6,6 +6,7 @@ import { getCustomers } from '../../api/customers.api';
 import { getProducts } from '../../api/products.api';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
+import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 const SalesFormPage = () => {
   const navigate = useNavigate();
@@ -171,8 +172,12 @@ const SalesFormPage = () => {
             marginBottom: '20px',
             fontSize: '13.5px',
             color: 'var(--danger)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}>
-            ⚠️ {errorMessage}
+            <AlertTriangle size={16} />
+            {errorMessage}
           </div>
         )}
 
@@ -185,8 +190,12 @@ const SalesFormPage = () => {
             marginBottom: '20px',
             fontSize: '13.5px',
             color: 'var(--success)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}>
-            ✅ {successMessage}
+            <CheckCircle2 size={16} />
+            {successMessage}
           </div>
         )}
 
@@ -291,17 +300,17 @@ const SalesFormPage = () => {
                           const free = Number(pDetail.freeToUseQty || 0);
                           const needed = Number(line.qty) || 0;
                           
-                          let stockStatus = { label: 'Out of Stock', color: 'var(--danger)', icon: '🔴' };
+                          let stockStatus = { label: 'Out of Stock', color: 'var(--danger)' };
                           if (free >= needed && needed > 0) {
-                            stockStatus = { label: 'In Stock', color: 'var(--success)', icon: '🟢' };
+                            stockStatus = { label: 'In Stock', color: 'var(--success)' };
                           } else if (free > 0 && free < needed) {
-                            stockStatus = { label: 'Partial Stock', color: 'var(--warning)', icon: '🟡' };
+                            stockStatus = { label: 'Partial Stock', color: 'var(--warning)' };
                           }
 
                           return (
                             <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginTop: '4px', paddingLeft: '4px', flexWrap: 'wrap' }}>
-                              <span style={{ fontSize: '11px', fontWeight: 600, color: stockStatus.color, display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                <span>{stockStatus.icon}</span> {stockStatus.label} (Avail: {free})
+                              <span style={{ fontSize: '11px', fontWeight: 600, color: stockStatus.color, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                <span style={{ width: 8, height: 8, borderRadius: '50%', background: stockStatus.color, display: 'inline-block' }} /> {stockStatus.label} (Avail: {free})
                               </span>
                               <span style={{
                                 padding: '1px 5px',

@@ -76,6 +76,7 @@ export const inviteUserService = async ({ name, email, role }, invitedBy) => {
   return {
     message: 'User invited successfully',
     emailSent,
+    tempPassword,
     user: { id: user.id, name: user.name, email: user.email, role: user.role },
   };
 };

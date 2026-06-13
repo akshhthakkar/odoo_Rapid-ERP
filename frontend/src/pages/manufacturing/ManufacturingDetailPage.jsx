@@ -544,12 +544,12 @@ const ManufacturingDetailPage = () => {
                         {isConsumed ? (
                           <span style={{ fontSize: "13px", color: "#10B981", fontWeight: 600 }}>Deducted</span>
                         ) : hasShortage ? (
-                          <span style={{ display: "inline-flex", padding: "2px 8px", background: "#FEF2F2", color: "#DC2626", borderRadius: "9999px", fontSize: "11px", fontWeight: 600 }}>
-                            🔴 Shortage
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "2px 8px", background: "#FEF2F2", color: "#DC2626", borderRadius: "9999px", fontSize: "11px", fontWeight: 600 }}>
+                            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#DC2626", display: "inline-block" }} /> Shortage
                           </span>
                         ) : (
-                          <span style={{ display: "inline-flex", padding: "2px 8px", background: "#ECFDF5", color: "#10B981", borderRadius: "9999px", fontSize: "11px", fontWeight: 600 }}>
-                            🟢 Available
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "2px 8px", background: "#ECFDF5", color: "#10B981", borderRadius: "9999px", fontSize: "11px", fontWeight: 600 }}>
+                            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10B981", display: "inline-block" }} /> Available
                           </span>
                         )}
                       </td>

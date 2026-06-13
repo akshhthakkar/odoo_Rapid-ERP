@@ -4,7 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { getSalesOrders } from '../../api/sales.api';
 import { useAuthStore } from '../../store/authStore';
 import Button from '../../components/ui/Button';
-import { LayoutList, FileText, CheckCircle2, Truck, XCircle } from 'lucide-react';
+import { LayoutList, FileText, CheckCircle2, Truck, XCircle, TrendingUp } from 'lucide-react';
+import Loader from '../../components/ui/Loader';
 
 const SalesListPage = () => {
   const navigate = useNavigate();
@@ -126,10 +127,10 @@ const SalesListPage = () => {
         </div>
 
         {isLoading ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Loading Sales Orders...</div>
+          <Loader padding="40px 0" size={28} />
         ) : orders.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 40px', color: 'var(--text-muted)' }}>
-            <span style={{ fontSize: '28px' }}>📈</span>
+            <TrendingUp size={32} style={{ margin: '0 auto 10px', color: 'var(--text-muted)' }} />
             <p style={{ marginTop: '10px', fontSize: '14px' }}>No sales orders found.</p>
           </div>
         ) : (

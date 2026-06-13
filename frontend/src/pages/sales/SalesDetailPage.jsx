@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getSalesOrderById, confirmSalesOrder, deliverSalesOrder, cancelSalesOrder } from '../../api/sales.api';
 import { useAuthStore } from '../../store/authStore';
 import Button from '../../components/ui/Button';
+import { Calendar, AlertTriangle, CheckCircle2, Package, Ban, Link, ArrowDownToLine, Settings } from 'lucide-react';
+import Loader from '../../components/ui/Loader';
 
 const SalesDetailPage = () => {
   const { id } = useParams();
@@ -149,11 +151,7 @@ const SalesDetailPage = () => {
   };
 
   if (isLoading) {
-    return (
-      <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-        Loading Sales Order details...
-      </div>
-    );
+    return <Loader padding="120px 0" size={36} />;
   }
 
   if (!order) {
@@ -185,8 +183,8 @@ const SalesDetailPage = () => {
           <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', marginTop: '4px', display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
             <span>Quote Date: {new Date(order.orderDate).toLocaleString()}</span>
             {order.requestedDeliveryDate && (
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}>
-                📅 Requested Delivery: <strong>{new Date(order.requestedDeliveryDate).toLocaleDateString()}</strong>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '2px 8px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }}>
+                <Calendar size={14} /> Requested Delivery: <strong>{new Date(order.requestedDeliveryDate).toLocaleDateString()}</strong>
               </span>
             )}
           </p>
@@ -249,8 +247,12 @@ const SalesDetailPage = () => {
           marginBottom: '20px',
           color: 'var(--danger)',
           fontSize: '13.5px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
         }}>
-          ⚠️ {errorMessage}
+          <AlertTriangle size={16} />
+          {errorMessage}
         </div>
       )}
 
@@ -263,8 +265,12 @@ const SalesDetailPage = () => {
           marginBottom: '20px',
           color: 'var(--success)',
           fontSize: '13.5px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
         }}>
-          ✅ {successMessage}
+          <CheckCircle2 size={16} />
+          {successMessage}
         </div>
       )}
 
@@ -278,8 +284,8 @@ const SalesDetailPage = () => {
           marginBottom: '24px',
           fontSize: '13.5px'
         }}>
-          <h4 style={{ fontWeight: 700, color: '#FF8A58', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span>📦</span> MTO Replenishment Actions Triggered
+          <h4 style={{ fontWeight: 700, color: '#FF8A58', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Package size={16} /> MTO Replenishment Actions Triggered
           </h4>
           <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {(triggeredProcurements.length > 0 ? triggeredProcurements : order.replenishments).map((rep, idx) => {
@@ -322,7 +328,7 @@ const SalesDetailPage = () => {
       <div className="glass-card" style={{ padding: '24px', marginBottom: '24px' }}>
         {order.status === 'CANCELLED' ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--danger)', fontWeight: 700 }}>
-            <span>🚫</span> THIS SALES ORDER HAS BEEN CANCELLED
+            <Ban size={16} /> THIS SALES ORDER HAS BEEN CANCELLED
           </div>
         ) : (() => {
           const hasProcurement = order.replenishments?.length > 0 || order.purchaseOrders?.length > 0 || order.manufacturingOrders?.length > 0;
@@ -449,7 +455,7 @@ const SalesDetailPage = () => {
       {(order.purchaseOrders?.length > 0 || order.manufacturingOrders?.length > 0) && (
         <div className="glass-card" style={{ padding: '24px', marginBottom: '24px' }}>
           <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>🔗</span> Linked Procurement Documents
+            <Link size={16} style={{ color: 'var(--text-primary)' }} /> Linked Procurement Documents
           </h3>
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
             {order.purchaseOrders?.map(po => (
@@ -463,7 +469,7 @@ const SalesDetailPage = () => {
                 alignItems: 'center',
                 gap: '8px'
               }}>
-                <span style={{ color: 'var(--success)' }}>📥</span>
+                <ArrowDownToLine size={16} style={{ color: 'var(--success)' }} />
                 <span><strong>{po.orderRef}</strong> (Purchase - <span style={{ color: 'var(--text-muted)' }}>{po.status}</span>)</span>
               </div>
             ))}
@@ -478,7 +484,7 @@ const SalesDetailPage = () => {
                 alignItems: 'center',
                 gap: '8px'
               }}>
-                <span style={{ color: '#FF8A58' }}>⚙️</span>
+                <Settings size={16} style={{ color: '#FF8A58' }} />
                 <span><strong>{mo.moRef}</strong> (Manufacture - <span style={{ color: 'var(--text-muted)' }}>{mo.status}</span>)</span>
               </div>
             ))}

@@ -10,7 +10,9 @@ import {
   ClipboardList,
   Boxes,
   History,
-  UserPlus
+  UserPlus,
+  BarChart3,
+  FileDown
 } from 'lucide-react';
 import rapidLogo from '../../assets/rapid-logo.png';
 
@@ -24,6 +26,8 @@ const ICON_COMPONENTS = {
   inventory: Boxes,
   audit: History,
   users: UserPlus,
+  analytics: BarChart3,
+  reports: FileDown,
 };
 
 const SECTIONS = [
@@ -47,6 +51,8 @@ const SECTIONS = [
   {
     title: 'System',
     items: [
+      { path: '/analytics', label: 'Analytics', icon: 'analytics', roles: ['ADMIN', 'BUSINESS_OWNER', 'SALES_USER', 'PURCHASE_USER', 'MANUFACTURING_USER', 'INVENTORY_MANAGER'] },
+      { path: '/reports', label: 'Reports', icon: 'reports', roles: ['ADMIN', 'BUSINESS_OWNER', 'SALES_USER', 'PURCHASE_USER', 'MANUFACTURING_USER', 'INVENTORY_MANAGER'] },
       { path: '/audit', label: 'Audit Log', icon: 'audit', roles: ['ADMIN', 'BUSINESS_OWNER', 'INVENTORY_MANAGER'] },
       { path: '/settings/users', label: 'Users', icon: 'users', roles: ['ADMIN'] },
     ]

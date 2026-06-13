@@ -7,7 +7,8 @@ import { getVendors } from '../../api/vendors.api';
 import { getWorkCenters } from '../../api/workcenters.api';
 import { useAuthStore } from '../../store/authStore';
 import Button from '../../components/ui/Button';
-import { SquarePen, Trash2, CheckCircle2, Archive, Zap, Package, LayoutList } from 'lucide-react';
+import { SquarePen, Trash2, CheckCircle2, Archive, Zap, Package, LayoutList, User, Building2, Settings } from 'lucide-react';
+import Loader from '../../components/ui/Loader';
 
 const ProductListPage = () => {
   const navigate = useNavigate();
@@ -250,10 +251,10 @@ const ProductListPage = () => {
           </div>
 
           {isLoadingProd ? (
-            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Loading products...</div>
+            <Loader padding="40px 0" size={28} />
           ) : products.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px 40px', color: 'var(--text-muted)' }}>
-              <span style={{ fontSize: '28px' }}>📦</span>
+              <Package size={32} style={{ margin: '0 auto 10px', color: 'var(--text-muted)' }} />
               <p style={{ marginTop: '10px', fontSize: '14px' }}>No products found. Click "Add Product" to create one.</p>
             </div>
           ) : (
@@ -414,10 +415,10 @@ const ProductListPage = () => {
           </div>
 
           {isLoadingCust ? (
-            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Loading customers...</div>
+            <Loader padding="40px 0" size={28} />
           ) : customers.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px 40px', color: 'var(--text-muted)' }}>
-              <span style={{ fontSize: '28px' }}>👤</span>
+              <User size={32} style={{ margin: '0 auto 10px', color: 'var(--text-muted)' }} />
               <p style={{ marginTop: '10px', fontSize: '14px' }}>No customers configured yet.</p>
             </div>
           ) : (
@@ -467,10 +468,10 @@ const ProductListPage = () => {
           </div>
 
           {isLoadingVend ? (
-            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Loading vendors...</div>
+            <Loader padding="40px 0" size={28} />
           ) : vendors.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px 40px', color: 'var(--text-muted)' }}>
-              <span style={{ fontSize: '28px' }}>🏢</span>
+              <Building2 size={32} style={{ margin: '0 auto 10px', color: 'var(--text-muted)' }} />
               <p style={{ marginTop: '10px', fontSize: '14px' }}>No suppliers configured yet.</p>
             </div>
           ) : (
@@ -520,10 +521,10 @@ const ProductListPage = () => {
           </div>
 
           {isLoadingWc ? (
-            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Loading work centers...</div>
+            <Loader padding="40px 0" size={28} />
           ) : workcenters.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px 40px', color: 'var(--text-muted)' }}>
-              <span style={{ fontSize: '28px' }}>⚙️</span>
+              <Settings size={32} style={{ margin: '0 auto 10px', color: 'var(--text-muted)' }} />
               <p style={{ marginTop: '10px', fontSize: '14px' }}>No work centers configured yet.</p>
             </div>
           ) : (
