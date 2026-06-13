@@ -8,40 +8,40 @@ import { useInView } from '../../hooks/useInView';
 const STEPS = [
   {
     num: '01',
-    label: 'One-line setup',
-    headingStatic: 'Install ChatFrame in',
+    label: 'Quick onboarding',
+    headingStatic: 'Set up your company in',
     headingItalic: 'minutes',
-    desc: 'Add a single script to your product and instantly enable AI-powered customer support across your platform.',
+    desc: 'Register your tenant, invite your team with role-based access, and configure your product catalog, vendors, and work centers before your first order.',
     img: hiv1,
-    imgAlt: 'Script installation illustration',
+    imgAlt: 'Company onboarding setup illustration',
     flip: false,
   },
   {
     num: '02',
-    label: 'AI automation',
-    headingStatic: 'Let AI handle',
-    headingItalic: 'repetitive support',
-    desc: 'ChatFrame automatically responds to common customer queries, resolves repetitive tickets, and assists your team in real time.',
+    label: 'Sales & delivery',
+    headingStatic: 'Confirm orders, ship',
+    headingItalic: 'automatically',
+    desc: 'Create a sales order, confirm it to instantly reserve stock, and deliver line items. Low-stock products auto-trigger purchase or manufacturing replenishment.',
     img: hiv3,
-    imgAlt: 'AI working illustration',
+    imgAlt: 'Sales order and delivery flow illustration',
     flip: true,
   },
   {
     num: '03',
-    label: 'Unified workspace',
-    headingStatic: 'Manage support from',
-    headingItalic: 'one place',
-    desc: 'Track conversations, monitor team performance, and manage customer support operations through a single unified dashboard.',
+    label: 'Full supply chain',
+    headingStatic: 'Procure, produce,',
+    headingItalic: 'track everything',
+    desc: 'Receive purchase materials, run manufacturing work orders against your Bill of Materials, and watch the stock ledger update in real time across every movement.',
     img: hiv2,
-    imgAlt: 'Workspace and insights illustration',
+    imgAlt: 'Supply chain and inventory tracking illustration',
     flip: false,
   },
 ];
 
 // Split "Simple setup," → ['Simple', 'setup,'] and italic words separately
 // Section heading words with staggered delays
-const HEADING_STATIC_WORDS = ['Simple', 'setup,'];
-const HEADING_ITALIC_WORDS = ['powerful', 'results'];
+const HEADING_STATIC_WORDS = ['Simple', 'workflows,'];
+const HEADING_ITALIC_WORDS = ['powerful', 'outcomes'];
 const wordDelay = (i) => `${80 + i * 70}ms`;
 // After 4 words: 80 + 4*70 = 360ms
 const SUBHEADING_DELAY = '380ms';
@@ -111,7 +111,7 @@ const HowItWorks = () => {
 
         {/* Subheading — blur reveal after heading */}
         <p className="hiw__subheading reveal-text" style={{ '--delay': SUBHEADING_DELAY }}>
-          Get ChatFrame running in minutes, not hours
+          From your first order to your last delivery — every step is tracked, automated, and audited.
         </p>
       </div>
 
