@@ -10,6 +10,12 @@ export const verifyToken = (req, res, next) => {
 
   try {
     req.user = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Reject legacy tokens that don't have tenantId (from before multi-tenancy)
+    if (!req.user.tenantId) {
+      return res.status(401).json({ message: 'Session expired or invalid (missing tenant). Please log out and log back in.' });
+    }
+
     next();
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
