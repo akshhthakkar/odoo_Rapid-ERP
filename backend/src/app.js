@@ -8,6 +8,8 @@ import vendorRoutes from './modules/vendors/vendors.routes.js';
 import workCenterRoutes from './modules/workcenters/workcenters.routes.js';
 import bomRoutes from './modules/bom/bom.routes.js';
 import salesRoutes from './modules/sales/sales.routes.js';
+import companyRoutes from './modules/company/company.routes.js';
+import usersRoutes from './modules/users/users.routes.js';
 
 const app = express();
 
@@ -37,6 +39,8 @@ app.use('/api/vendors', vendorRoutes);
 app.use('/api/workcenters', workCenterRoutes);
 app.use('/api/bom', bomRoutes);
 app.use('/api/sales', salesRoutes);
+app.use('/api/company', companyRoutes);
+app.use('/api/users', usersRoutes);
 
 // Placeholder for future modules — will be wired in subsequent phases
 // app.use('/api/purchase', purchaseRoutes);

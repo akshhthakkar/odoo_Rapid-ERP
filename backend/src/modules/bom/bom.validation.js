@@ -1,7 +1,7 @@
 import prisma from '../../config/prisma.js';
 
 // Recursive check for circular dependencies
-export const checkCircularDependency = async (finishedProductId, componentProductIds, visited = new Set()) => {
+export const checkCircularDependency = async (finishedProductId, componentProductIds, tenantId, visited = new Set()) => {
   if (componentProductIds.includes(finishedProductId)) {
     return true;
   }
@@ -12,13 +12,13 @@ export const checkCircularDependency = async (finishedProductId, componentProduc
 
     // Fetch the active BoM for this component
     const subBom = await prisma.boM.findFirst({
-      where: { productId: compId, isActive: true },
+      where: { productId: compId, tenantId, isActive: true },
       include: { components: true }
     });
 
     if (subBom) {
       const subComponentIds = subBom.components.map(c => c.productId);
-      if (await checkCircularDependency(finishedProductId, subComponentIds, visited)) {
+      if (await checkCircularDependency(finishedProductId, subComponentIds, tenantId, visited)) {
         return true;
       }
     }
@@ -78,11 +78,11 @@ export const validateBomPayload = (data) => {
   }
 };
 
-export const validateBomExistences = async (data) => {
+export const validateBomExistences = async (data, tenantId) => {
   const { productId, components, operations } = data;
 
   // 1. Finished product exists
-  const product = await prisma.product.findUnique({ where: { id: Number(productId) } });
+  const product = await prisma.product.findFirst({ where: { id: Number(productId), tenantId } });
   if (!product) {
     throw { status: 400, message: `Finished product with ID ${productId} does not exist` };
   }
@@ -91,7 +91,7 @@ export const validateBomExistences = async (data) => {
   const componentIds = components.map(c => Number(c.productId));
   const uniqueComponentIds = [...new Set(componentIds)];
   const existingProducts = await prisma.product.findMany({
-    where: { id: { in: uniqueComponentIds } }
+    where: { id: { in: uniqueComponentIds }, tenantId }
   });
 
   if (existingProducts.length !== uniqueComponentIds.length) {
@@ -104,7 +104,7 @@ export const validateBomExistences = async (data) => {
   const workCenterIds = operations.map(o => Number(o.workCenterId));
   const uniqueWcIds = [...new Set(workCenterIds)];
   const existingWcs = await prisma.workCenter.findMany({
-    where: { id: { in: uniqueWcIds } }
+    where: { id: { in: uniqueWcIds }, tenantId }
   });
 
   if (existingWcs.length !== uniqueWcIds.length) {
@@ -114,7 +114,7 @@ export const validateBomExistences = async (data) => {
   }
 };
 
-export const validateCircularGuards = async (productId, components) => {
+export const validateCircularGuards = async (productId, components, tenantId) => {
   const prodId = Number(productId);
   const compIds = components.map(c => Number(c.productId));
 
@@ -124,8 +124,9 @@ export const validateCircularGuards = async (productId, components) => {
   }
 
   // Circular reference check
-  const isCircular = await checkCircularDependency(prodId, compIds);
+  const isCircular = await checkCircularDependency(prodId, compIds, tenantId);
   if (isCircular) {
     throw { status: 400, message: 'Circular component dependency detected. This configuration is not allowed.' };
   }
 };
+

@@ -48,7 +48,7 @@ const SECTIONS = [
     title: 'System',
     items: [
       { path: '/audit', label: 'Audit Log', icon: 'audit', roles: ['ADMIN', 'BUSINESS_OWNER', 'INVENTORY_MANAGER'] },
-      { path: '/register', label: 'Add User', icon: 'users', roles: ['ADMIN'] },
+      { path: '/settings/users', label: 'Users', icon: 'users', roles: ['ADMIN'] },
     ]
   }
 ];

@@ -1,15 +1,16 @@
-import prisma from '../config/prisma.js';
+﻿import prisma from "../config/prisma.js";
 
 /**
- * Reserve stock for a product line on SO confirmation
+ * Reserve stock for a product line on SO confirmation.
  * @param {number} productId
  * @param {number} qty - quantity requested
  * @param {number} referenceId - SalesOrder ID
+ * @param {number} tenantId - Tenant owning this movement
  * @param {object} tx - Prisma transaction client
  */
-export const reserveStock = async (productId, qty, referenceId, tx = prisma) => {
-  const product = await tx.product.findUnique({
-    where: { id: productId }
+export const reserveStock = async (productId, qty, referenceId, tenantId, tx = prisma) => {
+  const product = await tx.product.findFirst({
+    where: { id: productId, tenantId },
   });
 
   if (!product) {
@@ -26,29 +27,26 @@ export const reserveStock = async (productId, qty, referenceId, tx = prisma) => 
   if (toReserve > 0) {
     await tx.product.update({
       where: { id: productId },
-      data: {
-        reservedQty: { increment: toReserve }
-      }
+      data: { reservedQty: { increment: toReserve } },
     });
 
     let orderRef = `SO #${referenceId}`;
-    const order = await tx.salesOrder.findUnique({
-      where: { id: referenceId },
-      select: { orderRef: true }
+    const order = await tx.salesOrder.findFirst({
+      where: { id: referenceId, tenantId },
+      select: { orderRef: true },
     });
-    if (order) {
-      orderRef = order.orderRef;
-    }
+    if (order) orderRef = order.orderRef;
 
     await tx.stockMovement.create({
       data: {
         productId,
-        movementType: 'SALE_RESERVE',
-        qty: -toReserve, // Reserving stock is a negative entry in availability
-        referenceType: 'SALE',
+        tenantId,
+        movementType: "SALE_RESERVE",
+        qty: -toReserve,
+        referenceType: "SALE",
         referenceId,
-        reason: `${orderRef} Reservation`
-      }
+        reason: `${orderRef} Reservation`,
+      },
     });
   }
 
@@ -56,116 +54,114 @@ export const reserveStock = async (productId, qty, referenceId, tx = prisma) => 
 };
 
 /**
- * Record delivery, decreasing onHand and reserved counts, and posting SALE_DELIVERY
+ * Record delivery, decreasing onHand and reserved counts.
  * @param {number} productId
  * @param {number} qty
  * @param {number} referenceId - SalesOrder ID
+ * @param {number} tenantId
  * @param {object} tx - Prisma transaction client
  */
-export const deliverStock = async (productId, qty, referenceId, tx = prisma) => {
+export const deliverStock = async (productId, qty, referenceId, tenantId, tx = prisma) => {
   await tx.product.update({
     where: { id: productId },
     data: {
       onHandQty: { decrement: qty },
-      reservedQty: { decrement: qty }
-    }
+      reservedQty: { decrement: qty },
+    },
   });
 
   let orderRef = `SO #${referenceId}`;
-  const order = await tx.salesOrder.findUnique({
-    where: { id: referenceId },
-    select: { orderRef: true }
+  const order = await tx.salesOrder.findFirst({
+    where: { id: referenceId, tenantId },
+    select: { orderRef: true },
   });
-  if (order) {
-    orderRef = order.orderRef;
-  }
+  if (order) orderRef = order.orderRef;
 
-  // 1. Log SALE_DELIVERY movement (physical stock reduction)
+  // Physical stock reduction
   await tx.stockMovement.create({
     data: {
       productId,
-      movementType: 'SALE_DELIVERY',
-      qty: -qty, // Outgoing is recorded as negative quantity
-      referenceType: 'SALE',
+      tenantId,
+      movementType: "SALE_DELIVERY",
+      qty: -qty,
+      referenceType: "SALE",
       referenceId,
-      reason: `${orderRef} Delivery`
-    }
+      reason: `${orderRef} Delivery`,
+    },
   });
 
-  // 2. Log SALE_RELEASE movement (virtual reservation release)
-  // Delivery automatically releases reservation.
+  // Virtual reservation release — delivery automatically releases reservation
   await tx.stockMovement.create({
     data: {
       productId,
-      movementType: 'SALE_RELEASE',
-      qty: qty, // Releasing reservation is a positive entry in availability
-      referenceType: 'SALE',
+      tenantId,
+      movementType: "SALE_RELEASE",
+      qty: qty,
+      referenceType: "SALE",
       referenceId,
-      reason: `${orderRef} Release (Delivered)`
-    }
+      reason: `${orderRef} Release (Delivered)`,
+    },
   });
 };
 
 /**
- * Release reserved stock back to the free pool on SO cancellation
+ * Release reserved stock back to the free pool on SO cancellation.
  * @param {number} productId
  * @param {number} qty
  * @param {number} referenceId - SalesOrder ID
+ * @param {number} tenantId
  * @param {object} tx - Prisma transaction client
  */
-export const releaseStock = async (productId, qty, referenceId, tx = prisma) => {
+export const releaseStock = async (productId, qty, referenceId, tenantId, tx = prisma) => {
   await tx.product.update({
     where: { id: productId },
-    data: {
-      reservedQty: { decrement: qty }
-    }
+    data: { reservedQty: { decrement: qty } },
   });
 
   let orderRef = `SO #${referenceId}`;
-  const order = await tx.salesOrder.findUnique({
-    where: { id: referenceId },
-    select: { orderRef: true }
+  const order = await tx.salesOrder.findFirst({
+    where: { id: referenceId, tenantId },
+    select: { orderRef: true },
   });
-  if (order) {
-    orderRef = order.orderRef;
-  }
+  if (order) orderRef = order.orderRef;
 
   await tx.stockMovement.create({
     data: {
       productId,
-      movementType: 'SALE_RELEASE',
-      qty: qty, // Releasing reservation is a positive entry in availability
-      referenceType: 'SALE',
+      tenantId,
+      movementType: "SALE_RELEASE",
+      qty: qty,
+      referenceType: "SALE",
       referenceId,
-      reason: `${orderRef} Release`
-    }
+      reason: `${orderRef} Release`,
+    },
   });
 };
 
 /**
- * Manually adjust stock for a product, recording a STOCK_ADJUSTMENT movement
+ * Manually adjust stock for a product (STOCK_ADJUSTMENT movement).
  * @param {number} productId
- * @param {number} qty - adjustment quantity (positive to add stock, negative to subtract)
- * @param {string} reason - description of adjustment reason
+ * @param {number} qty - positive to add, negative to subtract
+ * @param {number} tenantId
+ * @param {string} reason
  * @param {object} tx - Prisma transaction client
  */
-export const adjustStock = async (productId, qty, reason = 'Inventory Count Correction', tx = prisma) => {
+export const adjustStock = async (productId, qty, tenantId, reason = "Inventory Count Correction", tx = prisma) => {
   const adjustedProduct = await tx.product.update({
     where: { id: productId },
-    data: {
-      onHandQty: { increment: qty }
-    }
+    data: { onHandQty: { increment: qty } },
   });
 
   await tx.stockMovement.create({
     data: {
       productId,
-      movementType: 'STOCK_ADJUSTMENT',
+      tenantId,
+      movementType: "STOCK_ADJUSTMENT",
       qty,
-      referenceType: 'ADJUSTMENT',
+      referenceType: "ADJUSTMENT",
       referenceId: productId,
-      reason
-    }
+      reason,
+    },
   });
 
   return adjustedProduct;

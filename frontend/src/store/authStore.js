@@ -16,6 +16,15 @@ export const useAuthStore = create((set) => ({
     set({ user: null, token: null });
   },
 
+  updateUser: (fields) =>
+    set((state) => {
+      const updatedUser = state.user ? { ...state.user, ...fields } : null;
+      if (updatedUser) {
+        localStorage.setItem('erp_user', JSON.stringify(updatedUser));
+      }
+      return { user: updatedUser };
+    }),
+
   // Call on app init to restore session from localStorage
   hydrate: () => {
     const token = localStorage.getItem('erp_token');

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
-import { login } from '../../api/auth.api';
+import { changePassword } from '../../api/users.api';
 import rapidLogo from '../../assets/rapid-logo.png';
 
 const ROLE_HOME = {
@@ -13,50 +13,49 @@ const ROLE_HOME = {
   MANUFACTURING_USER:  '/manufacturing',
 };
 
-const LoginPage = () => {
+const ChangePasswordPage = () => {
   const navigate = useNavigate();
-  const { setAuth, token } = useAuthStore();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { user, updateUser } = useAuthStore();
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-
-  // If already logged in, redirect to the role's home page
-  if (token) {
-    const user = useAuthStore.getState().user;
-    return <Navigate to={ROLE_HOME[user?.role] || '/dashboard'} replace />;
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
-    if (!email.trim() || !password.trim()) {
-      setError('Please enter your email and password.');
+    if (!currentPassword.trim() || !newPassword.trim() || !confirmPassword.trim()) {
+      setError('All fields are required.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError('New password and confirm password do not match.');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setError('New password must be at least 6 characters.');
       return;
     }
 
     setLoading(true);
     try {
-      const { token: jwt, user } = await login({ email: email.trim(), password });
-      setAuth(user, jwt);
-      if (user.mustChangePassword) {
-        navigate('/change-password', { replace: true });
-      } else {
-        navigate(ROLE_HOME[user.role] || '/dashboard', { replace: true });
-      }
+      await changePassword({ currentPassword, newPassword });
+      setSuccess('Password changed successfully! Redirecting...');
+      updateUser({ mustChangePassword: false });
+      setTimeout(() => {
+        navigate(ROLE_HOME[user?.role] || '/dashboard', { replace: true });
+      }, 1500);
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed.');
+      setError(err.response?.data?.message || 'Failed to change password.');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleDemoCredentials = (dEmail, dPass) => {
-    setEmail(dEmail);
-    setPassword(dPass);
   };
 
   return (
@@ -74,7 +73,6 @@ const LoginPage = () => {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
-        /* Vertical grid lines extending through the full screen height */
         .grid-v-line {
           position: absolute;
           top: 0;
@@ -104,7 +102,6 @@ const LoginPage = () => {
           box-sizing: border-box;
         }
 
-        /* Horizontal grid lines extending screen-wide */
         .grid-h-line {
           position: absolute;
           left: -100vw;
@@ -114,7 +111,6 @@ const LoginPage = () => {
           pointer-events: none;
         }
 
-        /* Monospace intersection plus symbol style */
         .grid-plus {
           position: absolute;
           font-size: 13px;
@@ -137,7 +133,6 @@ const LoginPage = () => {
         .grid-plus-bl { bottom: -6px; left: -5px; }
         .grid-plus-br { bottom: -6px; right: -5px; }
 
-        /* Form styling */
         .auth-label {
           display: block;
           font-size: 13px;
@@ -162,10 +157,6 @@ const LoginPage = () => {
         .auth-input:focus {
           border-color: #FF540E;
           box-shadow: 0 0 0 3px rgba(255, 84, 14, 0.15);
-        }
-
-        .auth-input::placeholder {
-          color: #9CA3AF;
         }
 
         .auth-button-submit {
@@ -194,32 +185,14 @@ const LoginPage = () => {
           opacity: 0.6;
           cursor: not-allowed;
         }
-
-        .auth-footnote {
-          font-size: 11.5px;
-          color: #94A3B8;
-          text-align: center;
-          line-height: 1.5;
-        }
-
-        .auth-footnote a {
-          color: #64748B;
-          text-decoration: underline;
-          transition: color 0.15s;
-        }
-
-        .auth-footnote a:hover {
-          color: #0F172A;
-        }
       `}</style>
 
       <div className="auth-page-container">
-        {/* Full-height vertical grid lines */}
         <div className="grid-v-line grid-v-line-left" />
         <div className="grid-v-line grid-v-line-right" />
 
         <div className="auth-center-column">
-          {/* Row 1: Logo */}
+          {/* Logo */}
           <div className="auth-row" style={{ padding: '16px 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <div className="grid-h-line" style={{ top: 0 }} />
             <div className="grid-plus grid-plus-tl">+</div>
@@ -234,17 +207,19 @@ const LoginPage = () => {
             <div className="grid-plus grid-plus-br">+</div>
           </div>
 
-          {/* Row 2: Title Header */}
+          {/* Title Header */}
           <div className="auth-row" style={{ padding: '24px 40px', textAlign: 'center' }}>
-            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 700, color: '#0F172A' }}>Log In</h2>
+            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 700, color: '#0F172A' }}>Set a New Password</h2>
+            <p style={{ margin: '8px 0 0 0', fontSize: '13px', color: '#64748B' }}>
+              For security, you must update your password before proceeding.
+            </p>
             <div className="grid-h-line" style={{ bottom: 0 }} />
             <div className="grid-plus grid-plus-bl">+</div>
             <div className="grid-plus grid-plus-br">+</div>
           </div>
 
-          {/* Row 3: Credentials Form */}
+          {/* Form */}
           <div className="auth-row" style={{ padding: '36px 40px' }}>
-            {/* Success message */}
             {success && (
               <div style={{
                 background: 'rgba(16,185,129,0.08)',
@@ -259,9 +234,8 @@ const LoginPage = () => {
               </div>
             )}
 
-            {/* Error message */}
             {error && (
-              <div className="animate-shake" style={{
+              <div style={{
                 background: 'rgba(239,68,68,0.08)',
                 border: '1px solid rgba(239,68,68,0.25)',
                 borderRadius: '8px',
@@ -278,129 +252,48 @@ const LoginPage = () => {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} id="auth-form">
+            <form onSubmit={handleSubmit}>
               <div style={{ marginBottom: '18px' }}>
-                <label className="auth-label">Email</label>
+                <label className="auth-label">Current / Temporary Password</label>
                 <input
-                  id="auth-email"
-                  type="email"
-                  className="auth-input"
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  autoComplete="email"
-                />
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label className="auth-label">Password</label>
-                <input
-                  id="auth-password"
                   type="password"
                   className="auth-input"
                   placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="current-password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                />
+              </div>
+
+              <div style={{ marginBottom: '18px' }}>
+                <label className="auth-label">New Password</label>
+                <input
+                  type="password"
+                  className="auth-input"
+                  placeholder="••••••••"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+              </div>
+
+              <div style={{ marginBottom: '24px' }}>
+                <label className="auth-label">Confirm New Password</label>
+                <input
+                  type="password"
+                  className="auth-input"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                 />
               </div>
 
               <button
-                id="btn-auth-submit"
                 type="submit"
                 className="auth-button-submit"
                 disabled={loading}
               >
-                {loading ? 'Processing...' : 'Log In'}
+                {loading ? 'Updating...' : 'Change Password'}
               </button>
             </form>
-
-            <div className="grid-h-line" style={{ bottom: 0 }} />
-            <div className="grid-plus grid-plus-bl">+</div>
-            <div className="grid-plus grid-plus-br">+</div>
-          </div>
-
-          {/* Row 4: Redirect Option */}
-          <div className="auth-row" style={{ padding: '24px 40px', textAlign: 'center' }}>
-            <div style={{ fontSize: '14px', color: '#64748B' }}>
-              Don't have an account?{' '}
-              <a
-                href="/signup"
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate('/signup');
-                }}
-                style={{
-                  color: '#FF540E',
-                  textDecoration: 'none',
-                  fontWeight: '600',
-                  transition: 'color 0.2s',
-                }}
-                onMouseEnter={(e) => e.target.style.color = '#E04300'}
-                onMouseLeave={(e) => e.target.style.color = '#FF540E'}
-              >
-                Sign Up
-              </a>
-            </div>
-
-            <div className="grid-h-line" style={{ bottom: 0 }} />
-            <div className="grid-plus grid-plus-bl">+</div>
-            <div className="grid-plus grid-plus-br">+</div>
-          </div>
-
-          {/* Row 5: Footer & Credentials Demo */}
-          <div className="auth-row" style={{ padding: '24px 40px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div className="auth-footnote">
-              By logging in, you agree to our <a href="#terms">Terms of Service</a> and <a href="#privacy">Privacy Policy</a>.
-            </div>
-
-            {/* Quick Demo Credentials */}
-            <div style={{
-              padding: '12px',
-              background: '#F1F5F9',
-              borderRadius: '8px',
-              border: '1px solid #E2E8F0',
-            }}>
-              <p style={{ fontSize: '10.5px', fontWeight: 700, color: '#475569', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.4px', textAlign: 'center' }}>
-                Demo Credentials
-              </p>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <button
-                  type="button"
-                  onClick={() => handleDemoCredentials('admin@erp.com', 'Admin@123')}
-                  style={{
-                    flex: 1,
-                    padding: '6px',
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    color: '#FF540E',
-                    background: '#FFFFFF',
-                    border: '1px solid #E2E8F0',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Admin Demo
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDemoCredentials('sarah@erp.com', 'Pass@123')}
-                  style={{
-                    flex: 1,
-                    padding: '6px',
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    color: '#64748B',
-                    background: '#FFFFFF',
-                    border: '1px solid #E2E8F0',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Sales Demo
-                </button>
-              </div>
-            </div>
 
             <div className="grid-h-line" style={{ bottom: 0 }} />
             <div className="grid-plus grid-plus-bl">+</div>
@@ -412,4 +305,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default ChangePasswordPage;
