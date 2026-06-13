@@ -13,6 +13,7 @@ import logo8 from '../../assets/heroLogo8.png';
 import logo9 from '../../assets/heroLogo9.png';
 import logo10 from '../../assets/heroLogo10.png';
 import { Features } from '../../components/layout/Features';
+import { CreditCard } from 'lucide-react';
 import './HomePage.css';
 
 const LOGO_IMAGES = [logo1, logo2, logo3, logo4, logo5, logo6, logo7, logo8, logo9, logo10];
@@ -157,7 +158,10 @@ const HomePage = () => {
             <button className="hero-cta-btn" onClick={() => navigate('/signup')}>
               Get Started For Free
             </button>
-            <span className="hero-subtext">💳 No credit card required</span>
+            <span className="hero-subtext">
+              <CreditCard size={14} style={{ color: '#FF540E', strokeWidth: 2 }} />
+              No credit card required
+            </span>
           </div>
         </div>
 
