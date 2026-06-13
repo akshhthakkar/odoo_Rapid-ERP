@@ -216,7 +216,7 @@ const LoginPage = () => {
 
         <div className="auth-center-column">
           {/* Row 1: Logo */}
-          <div className="auth-row" style={{ padding: '36px 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <div className="auth-row" style={{ padding: '16px 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <div className="grid-h-line" style={{ top: 0 }} />
             <div className="grid-plus grid-plus-tl">+</div>
             <div className="grid-plus grid-plus-tr">+</div>
