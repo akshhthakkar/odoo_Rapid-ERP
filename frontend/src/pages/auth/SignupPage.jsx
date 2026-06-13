@@ -1,31 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
-import { register } from '../../api/auth.api';
+import { registerCompany } from '../../api/company.api';
 import rapidLogo from '../../assets/rapid-logo.png';
-
-const ROLE_HOME = {
-  ADMIN:               '/dashboard',
-  BUSINESS_OWNER:      '/dashboard',
-  INVENTORY_MANAGER:   '/dashboard',
-  SALES_USER:          '/sales',
-  PURCHASE_USER:       '/purchase',
-  MANUFACTURING_USER:  '/manufacturing',
-};
 
 const SignupPage = () => {
   const navigate = useNavigate();
-  const { token } = useAuthStore();
+  const { setAuth, token } = useAuthStore();
+  const [companyName, setCompanyName] = useState('');
+  const [adminName, setAdminName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // If already logged in, redirect to the role's home page
+  // If already logged in, redirect
   if (token) {
-    const user = useAuthStore.getState().user;
-    return <Navigate to={ROLE_HOME[user?.role] || '/dashboard'} replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   const handleSubmit = async (e) => {
@@ -33,25 +26,37 @@ const SignupPage = () => {
     setError('');
     setSuccess('');
 
-    if (!email.trim() || !password.trim()) {
-      setError('Please enter your email and password.');
+    if (!companyName.trim() || !adminName.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
+      setError('All fields are required.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Password and confirm password do not match.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.');
       return;
     }
 
     setLoading(true);
     try {
-      const name = email.split('@')[0];
-      await register({ name, email: email.trim(), password, role: 'SALES_USER' });
-      setSuccess('Account created successfully! Redirecting to Log In...');
+      const data = await registerCompany({
+        companyName: companyName.trim(),
+        adminName: adminName.trim(),
+        email: email.trim(),
+        password,
+      });
+
+      setSuccess('Company and Admin account registered successfully! Redirecting...');
+      setAuth(data.user, data.token);
       setTimeout(() => {
-        navigate('/login', { replace: true });
-      }, 2000);
+        navigate('/dashboard', { replace: true });
+      }, 1500);
     } catch (err) {
-      if (err.response?.status === 401 || err.response?.status === 403) {
-        setError('Public registration is restricted on this ERP. Please contact your system Administrator.');
-      } else {
-        setError(err.response?.data?.message || 'Registration failed.');
-      }
+      setError(err.response?.data?.message || 'Registration failed.');
     } finally {
       setLoading(false);
     }
@@ -72,7 +77,6 @@ const SignupPage = () => {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
-        /* Vertical grid lines extending through the full screen height */
         .grid-v-line {
           position: absolute;
           top: 0;
@@ -102,7 +106,6 @@ const SignupPage = () => {
           box-sizing: border-box;
         }
 
-        /* Horizontal grid lines extending screen-wide */
         .grid-h-line {
           position: absolute;
           left: -100vw;
@@ -112,7 +115,6 @@ const SignupPage = () => {
           pointer-events: none;
         }
 
-        /* Monospace intersection plus symbol style */
         .grid-plus {
           position: absolute;
           font-size: 13px;
@@ -135,7 +137,6 @@ const SignupPage = () => {
         .grid-plus-bl { bottom: -6px; left: -5px; }
         .grid-plus-br { bottom: -6px; right: -5px; }
 
-        /* Form styling */
         .auth-label {
           display: block;
           font-size: 13px;
@@ -160,10 +161,6 @@ const SignupPage = () => {
         .auth-input:focus {
           border-color: #FF540E;
           box-shadow: 0 0 0 3px rgba(255, 84, 14, 0.15);
-        }
-
-        .auth-input::placeholder {
-          color: #9CA3AF;
         }
 
         .auth-button-submit {
@@ -205,19 +202,14 @@ const SignupPage = () => {
           text-decoration: underline;
           transition: color 0.15s;
         }
-
-        .auth-footnote a:hover {
-          color: #0F172A;
-        }
       `}</style>
 
       <div className="auth-page-container">
-        {/* Full-height vertical grid lines */}
         <div className="grid-v-line grid-v-line-left" />
         <div className="grid-v-line grid-v-line-right" />
 
         <div className="auth-center-column">
-          {/* Row 1: Logo */}
+          {/* Logo */}
           <div className="auth-row" style={{ padding: '16px 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <div className="grid-h-line" style={{ top: 0 }} />
             <div className="grid-plus grid-plus-tl">+</div>
@@ -232,17 +224,16 @@ const SignupPage = () => {
             <div className="grid-plus grid-plus-br">+</div>
           </div>
 
-          {/* Row 2: Title Header */}
+          {/* Title Header */}
           <div className="auth-row" style={{ padding: '24px 40px', textAlign: 'center' }}>
-            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 700, color: '#0F172A' }}>Sign Up</h2>
+            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 700, color: '#0F172A' }}>Register Company</h2>
             <div className="grid-h-line" style={{ bottom: 0 }} />
             <div className="grid-plus grid-plus-bl">+</div>
             <div className="grid-plus grid-plus-br">+</div>
           </div>
 
-          {/* Row 3: Credentials Form */}
+          {/* Form */}
           <div className="auth-row" style={{ padding: '36px 40px' }}>
-            {/* Success message */}
             {success && (
               <div style={{
                 background: 'rgba(16,185,129,0.08)',
@@ -257,7 +248,6 @@ const SignupPage = () => {
               </div>
             )}
 
-            {/* Error message */}
             {error && (
               <div className="animate-shake" style={{
                 background: 'rgba(239,68,68,0.08)',
@@ -276,40 +266,68 @@ const SignupPage = () => {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} id="auth-form">
+            <form onSubmit={handleSubmit}>
               <div style={{ marginBottom: '18px' }}>
-                <label className="auth-label">Email</label>
+                <label className="auth-label">Company Name</label>
                 <input
-                  id="auth-email"
-                  type="email"
+                  type="text"
                   className="auth-input"
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  autoComplete="email"
+                  placeholder="Acme Corp"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
                 />
               </div>
 
-              <div style={{ marginBottom: '20px' }}>
+              <div style={{ marginBottom: '18px' }}>
+                <label className="auth-label">Administrator Name</label>
+                <input
+                  type="text"
+                  className="auth-input"
+                  placeholder="Alice Smith"
+                  value={adminName}
+                  onChange={(e) => setAdminName(e.target.value)}
+                />
+              </div>
+
+              <div style={{ marginBottom: '18px' }}>
+                <label className="auth-label">Administrator Email</label>
+                <input
+                  type="email"
+                  className="auth-input"
+                  placeholder="alice@company.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+
+              <div style={{ marginBottom: '18px' }}>
                 <label className="auth-label">Password</label>
                 <input
-                  id="auth-password"
                   type="password"
                   className="auth-input"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="new-password"
+                />
+              </div>
+
+              <div style={{ marginBottom: '24px' }}>
+                <label className="auth-label">Confirm Password</label>
+                <input
+                  type="password"
+                  className="auth-input"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                 />
               </div>
 
               <button
-                id="btn-auth-submit"
                 type="submit"
                 className="auth-button-submit"
                 disabled={loading}
               >
-                {loading ? 'Processing...' : 'Create Account'}
+                {loading ? 'Registering...' : 'Register & Start'}
               </button>
             </form>
 
@@ -318,10 +336,10 @@ const SignupPage = () => {
             <div className="grid-plus grid-plus-br">+</div>
           </div>
 
-          {/* Row 4: Redirect Option */}
+          {/* Redirect to Log In */}
           <div className="auth-row" style={{ padding: '24px 40px', textAlign: 'center' }}>
             <div style={{ fontSize: '14px', color: '#64748B' }}>
-              Already have an account?{' '}
+              Already registered?{' '}
               <a
                 href="/login"
                 onClick={(e) => {
@@ -334,22 +352,9 @@ const SignupPage = () => {
                   fontWeight: '600',
                   transition: 'color 0.2s',
                 }}
-                onMouseEnter={(e) => e.target.style.color = '#E04300'}
-                onMouseLeave={(e) => e.target.style.color = '#FF540E'}
               >
                 Log In
               </a>
-            </div>
-
-            <div className="grid-h-line" style={{ bottom: 0 }} />
-            <div className="grid-plus grid-plus-bl">+</div>
-            <div className="grid-plus grid-plus-br">+</div>
-          </div>
-
-          {/* Row 5: Footer */}
-          <div className="auth-row" style={{ padding: '20px 40px' }}>
-            <div className="auth-footnote">
-              By signing up, you agree to our <a href="#terms">Terms of Service</a> and <a href="#privacy">Privacy Policy</a>.
             </div>
 
             <div className="grid-h-line" style={{ bottom: 0 }} />
@@ -363,4 +368,3 @@ const SignupPage = () => {
 };
 
 export default SignupPage;
-

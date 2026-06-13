@@ -1,23 +1,24 @@
-import prisma from '../config/prisma.js';
+﻿import prisma from "../config/prisma.js";
 
 /**
  * Creates an audit log entry for any significant action.
- * Call this inside every service method that changes state.
  *
  * @param {object} params
+ * @param {number} params.tenantId
  * @param {number|null} params.userId
- * @param {string} params.action         - e.g. 'SALES_ORDER_CONFIRMED'
- * @param {string} params.entityType     - e.g. 'SalesOrder'
+ * @param {string} params.action
+ * @param {string} params.entityType
  * @param {number} params.entityId
- * @param {string} params.description    - Human-readable description
- * @param {object} [params.metadata]     - Any extra JSON context
+ * @param {string} params.description
+ * @param {object} [params.metadata]
  * @param {number} [params.salesOrderId]
  * @param {number} [params.purchaseOrderId]
  * @param {number} [params.manufacturingOrderId]
- * @param {object} [tx]                  - Prisma transaction client
+ * @param {object} [tx] - Prisma transaction client
  */
 export const logAudit = async (
   {
+    tenantId,
     userId,
     action,
     entityType,
@@ -32,6 +33,7 @@ export const logAudit = async (
 ) => {
   return tx.auditLog.create({
     data: {
+      tenantId,
       userId,
       action,
       entityType,

@@ -21,7 +21,7 @@ export const registerUser = async ({ name, email, password, role }) => {
   }
 
   // Duplicate check
-  const existing = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+  const existing = await prisma.user.findFirst({ where: { email: email.toLowerCase() } });
   if (existing) {
     throw { status: 409, message: 'A user with this email already exists' };
   }
@@ -44,13 +44,8 @@ export const registerUser = async ({ name, email, password, role }) => {
     },
   });
 
-  await logAudit({
-    userId: user.id,
-    action: 'USER_REGISTERED',
-    entityType: 'User',
-    entityId: user.id,
-    description: `New user registered: ${user.name} (${user.email}) with role ${user.role}`,
-  });
+  // NOTE: registerUser is deprecated — use POST /api/company/register instead.
+  // logAudit intentionally omitted here since tenantId is unknown in this path.
 
   return user;
 };
@@ -63,23 +58,34 @@ export const loginUser = async ({ email, password }) => {
     throw { status: 400, message: 'Email and password are required' };
   }
 
-  const user = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } });
+  const users = await prisma.user.findMany({ where: { email: email.toLowerCase().trim() } });
+
+  let matchedUser = null;
+  for (const u of users) {
+    const isMatch = await bcrypt.compare(password, u.passwordHash);
+    if (isMatch) {
+      matchedUser = u;
+      break;
+    }
+  }
 
   // Intentionally vague for security — don't reveal which field was wrong
-  if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+  if (!matchedUser) {
     throw { status: 401, message: 'Invalid email or password' };
   }
 
-  if (!user.isActive) {
+  if (!matchedUser.isActive) {
     throw { status: 403, message: 'Account is deactivated. Contact your admin.' };
   }
 
   const payload = {
-    id: user.id,
-    uid: user.uid,
-    email: user.email,
-    role: user.role,
-    name: user.name,
+    id: matchedUser.id,
+    uid: matchedUser.uid,
+    email: matchedUser.email,
+    role: matchedUser.role,
+    name: matchedUser.name,
+    tenantId: matchedUser.tenantId,
+    mustChangePassword: matchedUser.mustChangePassword,
   };
 
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
@@ -98,7 +104,8 @@ export const getCurrentUser = async (userId) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
-      id: true, uid: true, name: true, email: true, role: true, isActive: true, createdAt: true,
+      id: true, uid: true, name: true, email: true, role: true,
+      isActive: true, tenantId: true, mustChangePassword: true, createdAt: true,
     },
   });
 

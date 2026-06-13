@@ -11,8 +11,11 @@ router.post('/login', login);
 // Protected — any authenticated user
 router.get('/me', verifyToken, me);
 
-// Protected — ADMIN only: create new users
-// First admin is bootstrapped via seed. No open registration.
-router.post('/register', verifyToken, requireRole('ADMIN'), register);
+// Deprecated — returns 410 Gone. Use POST /api/company/register to create a new company account.
+router.post('/register', (req, res) => {
+  res.status(410).json({
+    message: 'This endpoint is deprecated. Use POST /api/company/register to create a new company account.',
+  });
+});
 
 export default router;

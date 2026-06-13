@@ -19,6 +19,9 @@ import WorkCenterFormPage from "../pages/workcenters/WorkCenterFormPage";
 import SalesListPage from "../pages/sales/SalesListPage";
 import SalesFormPage from "../pages/sales/SalesFormPage";
 import SalesDetailPage from "../pages/sales/SalesDetailPage";
+import ChangePasswordPage from "../pages/auth/ChangePasswordPage";
+import UsersPage from "../pages/settings/UsersPage";
+
 
 // Role redirect helper
 import { useAuthStore } from "../store/authStore";
@@ -106,6 +109,28 @@ const AppRoutes = () => {
           <ProtectedRoute allowedRoles={["ADMIN"]}>
             <AppLayout>
               <RegisterPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Set a new password on first login */}
+      <Route
+        path="/change-password"
+        element={
+          <ProtectedRoute>
+            <ChangePasswordPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ADMIN-only: manage users */}
+      <Route
+        path="/settings/users"
+        element={
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <AppLayout>
+              <UsersPage />
             </AppLayout>
           </ProtectedRoute>
         }
