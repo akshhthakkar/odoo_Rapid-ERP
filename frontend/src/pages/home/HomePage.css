@@ -381,6 +381,10 @@
   max-width: 800px;
 }
 
+.features-title-line {
+  display: block;
+}
+
 .features-subtitle {
   font-size: 1.15rem;
   color: #4B5563;

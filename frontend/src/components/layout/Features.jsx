@@ -5,16 +5,14 @@ import feat3 from '../../assets/feat3.png';
 import feat4 from '../../assets/feat4.png';
 import { useInView } from '../../hooks/useInView';
 
-const TITLE_WORDS = [
-  'One', 'Platform.', 'Total', 'Control.',
-  'Built', 'For', 'Operational', 'Excellence',
-];
+const TITLE_LINE1 = ['One', 'Platform.', 'Total', 'Control.'];
+const TITLE_LINE2 = ['Built', 'For', 'Operational', 'Excellence.'];
 
 const CARDS = [
-  { src: feat1, alt: 'Unified Metrics',        title: 'Unified Metrics',        desc: 'See your MRR and active users in one clean, unified view — no more switching tabs.' },
-  { src: feat2, alt: 'AI Growth Insights',      title: 'AI Growth Insights',      desc: 'Actionable suggestions from your data, without digging into spreadsheets or dashboards.' },
-  { src: feat3, alt: 'Product Usage Tracking',  title: 'Product Usage Tracking',  desc: 'Track how users engage with your app live to uncover patterns and optimize features.' },
-  { src: feat4, alt: 'Feature Impact Analysis', title: 'Feature Impact Analysis', desc: "Know exactly which features drive long-term retention—and which ones don't contribute." },
+  { src: feat1, alt: 'Sales Order Management',   title: 'Sales Order Management',   desc: 'Create, confirm, and deliver sales orders with automatic stock reservation and real-time inventory allocation.' },
+  { src: feat2, alt: 'Smart Procurement Engine', title: 'Smart Procurement Engine', desc: 'Auto-trigger Purchase or Manufacturing Orders on demand when stock runs short — zero manual intervention.' },
+  { src: feat3, alt: 'Manufacturing & BoM',       title: 'Manufacturing & BoM',       desc: 'Define Bills of Materials with multi-level components, work center routing, and sequence-based production stages.' },
+  { src: feat4, alt: 'Live Inventory Ledger',     title: 'Live Inventory Ledger',     desc: 'Every receipt, delivery, and consumption writes to a tamper-proof stock ledger with full movement traceability.' },
 ];
 
 // Word delay: starts at 100ms, +60ms per word
@@ -34,25 +32,38 @@ export const Features = () => {
       <div className="features-header">
         {/* Badge */}
         <span className="features-badge reveal-text" style={{ '--delay': '0ms' }}>
-          Unique Features
+          Core Features
         </span>
 
-        {/* Title — word-by-word progressive blur reveal */}
+        {/* Title — word-by-word progressive blur reveal, two explicit lines */}
         <h2 className="features-title">
-          {TITLE_WORDS.map((word, i) => (
-            <span
-              key={i}
-              className="reveal-text"
-              style={{ '--delay': wordDelay(i) }}
-            >
-              {word}{' '}
-            </span>
-          ))}
+          <span className="features-title-line">
+            {TITLE_LINE1.map((word, i) => (
+              <span
+                key={i}
+                className="reveal-text"
+                style={{ '--delay': wordDelay(i) }}
+              >
+                {word}{' '}
+              </span>
+            ))}
+          </span>
+          <span className="features-title-line">
+            {TITLE_LINE2.map((word, i) => (
+              <span
+                key={i}
+                className="reveal-text"
+                style={{ '--delay': wordDelay(TITLE_LINE1.length + i) }}
+              >
+                {word}{' '}
+              </span>
+            ))}
+          </span>
         </h2>
 
         {/* Subtitle */}
         <p className="features-subtitle reveal-text" style={{ '--delay': SUBTITLE_DELAY }}>
-          Everything your business needs to plan, track, and scale operations efficiently.
+          Everything your business needs to manage products, orders, manufacturing, and inventory — all in one place.
         </p>
       </div>
 
