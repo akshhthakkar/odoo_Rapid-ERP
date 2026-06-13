@@ -1,102 +1,5 @@
 /* ─── HomePage.css ─── */
 
-/* ── Progressive Blur Reveal Animation ── */
-
-/* Whole-element fade-up blur (badge, subtitle, CTA) */
-@keyframes blurReveal {
-  0% {
-    opacity: 0;
-    filter: blur(14px);
-    transform: translateY(10px);
-  }
-  100% {
-    opacity: 1;
-    filter: blur(0px);
-    transform: translateY(0px);
-  }
-}
-
-.blur-reveal {
-  opacity: 0;
-  animation: blurReveal 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: var(--blur-delay, 0ms);
-}
-
-/* Word-level left-to-right blur reveal (h1 words) */
-@keyframes wordBlurReveal {
-  0% {
-    opacity: 0;
-    filter: blur(16px);
-    transform: translateX(-10px);
-  }
-  100% {
-    opacity: 1;
-    filter: blur(0px);
-    transform: translateX(0px);
-  }
-}
-
-.word-blur-reveal {
-  display: inline;
-  opacity: 0;
-  animation: wordBlurReveal 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: var(--word-delay, 0ms);
-}
-
-/* Simple slide-up entry (badge, button, subtext) */
-@keyframes slideUp {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0px);
-  }
-}
-
-.slide-up {
-  opacity: 0;
-  animation: slideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: var(--slide-delay, 0ms);
-}
-
-/* ── Scroll-triggered reveals (Intersection Observer) ── */
-
-/* Text elements: blur + float up */
-.reveal-text {
-  display: inline;
-  opacity: 0;
-  filter: blur(12px);
-  transform: translateY(10px);
-  transition:
-    opacity   0.75s cubic-bezier(0.22, 1, 0.36, 1),
-    filter    0.75s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
-  transition-delay: var(--delay, 0ms);
-}
-
-.is-visible .reveal-text {
-  opacity: 1;
-  filter: blur(0);
-  transform: translateY(0);
-}
-
-/* Card / container elements: slide up only */
-.reveal-card {
-  opacity: 0;
-  transform: translateY(32px);
-  transition:
-    opacity   0.65s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
-  transition-delay: var(--delay, 0ms);
-}
-
-.is-visible .reveal-card {
-  opacity: 1;
-  transform: translateY(0);
-}
-
 /* ── Container with glowing ambient top background ── */
 .landing-container {
   min-height: 100vh;
@@ -255,7 +158,126 @@
   gap: 6px;
 }
 
+/* ── Floating Cards/Icons ── */
+/* ── Floating Partner/Brand Logos ── */
+.floating-logos-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 40%;
+  pointer-events: none;
+  z-index: 1;
+  overflow: visible;
+}
 
+.floating-logo-outer {
+  position: absolute;
+  animation: floatWander1 6s ease-in-out infinite alternate;
+  will-change: transform;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-logo-mid {
+  transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  will-change: transform;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-logo-inner {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  box-shadow: 
+    0 10px 25px -5px rgba(0, 0, 0, 0.05),
+    0 8px 10px -6px rgba(0, 0, 0, 0.03),
+    0 1px 0px rgba(255, 255, 255, 0.8) inset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  cursor: pointer;
+  pointer-events: auto;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+.floating-logo-inner:hover {
+  /* Add slight twist on hover without scaling */
+  transform: rotate(5deg) !important;
+  border-color: rgba(255, 84, 14, 0.25);
+  box-shadow: 
+    0 20px 35px -5px rgba(255, 84, 14, 0.12),
+    0 10px 15px -5px rgba(0, 0, 0, 0.05),
+    0 0 0 3px rgba(255, 84, 14, 0.08);
+}
+
+.floating-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: grayscale(10%) contrast(95%);
+  transition: filter 0.3s ease, transform 0.3s ease;
+  transform: scale(1.45);
+}
+
+.floating-logo-inner:hover .floating-logo-img {
+  filter: grayscale(0%) contrast(100%);
+  transform: scale(1.45);
+}
+
+/* 2D Floating / Wandering Animations */
+@keyframes floatWander1 {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(-8px, -15px) rotate(1.5deg);
+  }
+  100% {
+    transform: translate(6px, 8px) rotate(-1deg);
+  }
+}
+
+@keyframes floatWander2 {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(10px, -12px) rotate(-1deg);
+  }
+  100% {
+    transform: translate(-8px, 10px) rotate(1.5deg);
+  }
+}
+
+@keyframes floatWander3 {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(-10px, 10px) rotate(1deg);
+  }
+  100% {
+    transform: translate(8px, -15px) rotate(-1.5deg);
+  }
+}
+
+@keyframes floatWander4 {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(10px, 12px) rotate(-1.5deg);
+  }
+  100% {
+    transform: translate(-8px, -10px) rotate(1deg);
+  }
+}
 
 /* ── Dashboard Image Showcase Area (Bottom 50%) ── */
 .hero-image-wrapper {
@@ -293,6 +315,11 @@
 }
 
 /* ── Responsive Styling ── */
+@media (max-width: 1100px) {
+  .floating-logos-container {
+    display: none; /* Hide floating logos completely to ensure zero overlap on smaller screens */
+  }
+}
 
 @media (max-width: 992px) {
   .hero-section {
@@ -381,15 +408,6 @@
   max-width: 800px;
 }
 
-.features-title-line {
-  display: block;
-}
-
-.features-title em {
-  color: var(--accent);
-  font-style: normal;
-}
-
 .features-subtitle {
   font-size: 1.15rem;
   color: #4B5563;
@@ -460,4 +478,48 @@
   font-size: 0.95rem;
   color: #4B5563;
   line-height: 1.6;
+}
+/* ── Scroll-triggered reveals (Intersection Observer) ── */
+
+/* Text elements: blur + float up */
+.reveal-text {
+  display: inline;
+  opacity: 0;
+  filter: blur(12px);
+  transform: translateY(10px);
+  transition:
+    opacity   0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    filter    0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--delay, 0ms);
+}
+
+.is-visible .reveal-text {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
+}
+
+/* Card / container elements: slide up only */
+.reveal-card {
+  opacity: 0;
+  transform: translateY(32px);
+  transition:
+    opacity   0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--delay, 0ms);
+}
+
+.is-visible .reveal-card {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.features-title-line {
+  display: block;
+}
+
+.features-title em {
+  color: var(--accent);
+  font-style: normal;
 }

@@ -28,14 +28,6 @@ import ManufacturingListPage from "../pages/manufacturing/ManufacturingListPage"
 import ManufacturingDetailPage from "../pages/manufacturing/ManufacturingDetailPage";
 import InventoryHubPage from "../pages/inventory/InventoryHubPage";
 import InventoryProductDetailPage from "../pages/inventory/InventoryProductDetailPage";
-import AnalyticsDashboardPage from "../pages/analytics/AnalyticsDashboardPage";
-import SalesAnalyticsPage from "../pages/analytics/SalesAnalyticsPage";
-import PurchaseAnalyticsPage from "../pages/analytics/PurchaseAnalyticsPage";
-import InventoryAnalyticsPage from "../pages/analytics/InventoryAnalyticsPage";
-import ManufacturingAnalyticsPage from "../pages/analytics/ManufacturingAnalyticsPage";
-import ReportsPage from "../pages/reports/ReportsPage";
-import AuditLogPage from "../pages/audit/AuditLogPage";
-import { Ban, Hammer } from "lucide-react";
 
 
 // Role redirect helper
@@ -79,7 +71,7 @@ const AppRoutes = () => {
               color: "var(--text-primary)",
             }}
           >
-            <Ban size={64} style={{ color: "var(--danger)", marginBottom: 16 }} />
+            <div style={{ fontSize: 64, marginBottom: 16 }}>🚫</div>
             <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>
               Access Denied
             </h1>
@@ -350,71 +342,11 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/analytics"
-        element={
-          <ProtectedRoute>
-            <AppLayout>
-              <AnalyticsDashboardPage />
-            </AppLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/analytics/sales"
-        element={
-          <ProtectedRoute allowedRoles={["ADMIN", "BUSINESS_OWNER", "SALES_USER"]}>
-            <AppLayout>
-              <SalesAnalyticsPage />
-            </AppLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/analytics/purchase"
-        element={
-          <ProtectedRoute allowedRoles={["ADMIN", "BUSINESS_OWNER", "PURCHASE_USER"]}>
-            <AppLayout>
-              <PurchaseAnalyticsPage />
-            </AppLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/analytics/inventory"
-        element={
-          <ProtectedRoute allowedRoles={["ADMIN", "BUSINESS_OWNER", "INVENTORY_MANAGER"]}>
-            <AppLayout>
-              <InventoryAnalyticsPage />
-            </AppLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/analytics/manufacturing"
-        element={
-          <ProtectedRoute allowedRoles={["ADMIN", "BUSINESS_OWNER", "MANUFACTURING_USER"]}>
-            <AppLayout>
-              <ManufacturingAnalyticsPage />
-            </AppLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/reports"
-        element={
-          <ProtectedRoute>
-            <AppLayout>
-              <ReportsPage />
-            </AppLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
         path="/audit"
         element={
-          <ProtectedRoute allowedRoles={["ADMIN", "BUSINESS_OWNER", "INVENTORY_MANAGER"]}>
+          <ProtectedRoute>
             <AppLayout>
-              <AuditLogPage />
+              <ComingSoon title="Audit Log" />
             </AppLayout>
           </ProtectedRoute>
         }
@@ -447,10 +379,11 @@ const ComingSoon = ({ title }) => (
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        fontSize: 28,
         marginBottom: 8,
       }}
     >
-      <Hammer size={28} style={{ color: "var(--accent)" }} />
+      🔨
     </div>
     <h2 style={{ fontSize: 20, fontWeight: 700 }}>{title} Module</h2>
     <p style={{ color: "var(--text-muted)", fontSize: 14 }}>

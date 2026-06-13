@@ -395,7 +395,7 @@ const Topbar = () => {
               setTimeout(() => setIsFocused(false), 200);
             }}
             style={{
-              width: isFocused ? '260px' : '190px',
+              width: isFocused ? '380px' : '280px',
               height: '32px',
               background: isFocused ? '#FFFFFF' : '#F3F4F6',
               border: '1px solid',
@@ -410,7 +410,7 @@ const Topbar = () => {
             }}
           />
           
-          {/* Keyboard shortcut badge or clear query button */}
+          {/* Clear query button */}
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
@@ -440,7 +440,7 @@ const Topbar = () => {
                 position: 'absolute',
                 top: '40px',
                 right: 0,
-                width: '360px',
+                width: '420px',
                 maxHeight: '380px',
                 background: '#FFFFFF',
                 border: '1px solid #E5E7EB',
@@ -532,7 +532,7 @@ const Topbar = () => {
                           <span style={{
                             fontSize: '11px',
                             color: '#6B7280',
-                            maxWidth: '250px',
+                            maxWidth: '310px',
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
