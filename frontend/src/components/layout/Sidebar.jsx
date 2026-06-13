@@ -71,19 +71,18 @@ const Sidebar = () => {
           <div style={{
             width: 36,
             height: 36,
-            background: 'linear-gradient(135deg, #FF540E, #CC3300)',
+            background: 'rgba(255, 255, 255, 0.03)',
             borderRadius: '10px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 15px rgba(255,84,14,0.4)',
+            border: '1px solid var(--border)',
+            boxShadow: '0 4px 15px rgba(255, 84, 14, 0.1)',
           }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
-              <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <img src="/logo.png" alt="Rapid Logo" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
           </div>
           <div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>Mini ERP</div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>Rapid</div>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.5px' }}>Demand to Delivery</div>
           </div>
         </div>
