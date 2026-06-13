@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getBoms, deleteBom } from '../../api/bom.api';
 import { useAuthStore } from '../../store/authStore';
 import Button from '../../components/ui/Button';
+import { Edit2, Trash2 } from 'lucide-react';
 
 const BomListPage = () => {
   const navigate = useNavigate();
@@ -177,37 +178,61 @@ const BomListPage = () => {
                     </td>
                     {canManageBom && (
                       <td style={{ textAlign: 'right' }}>
-                        <div style={{ display: 'inline-flex', gap: '8px' }}>
+                        <div style={{ display: 'inline-flex', gap: '8px', justifyContent: 'flex-end' }}>
                           <button
                             onClick={() => navigate(`/bom/edit/${bom.id}`)}
                             style={{
-                              background: 'transparent',
-                              border: 'none',
-                              color: 'var(--text-secondary)',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '8px',
+                              background: 'rgba(37, 99, 235, 0.06)',
+                              border: '1px solid rgba(37, 99, 235, 0.2)',
+                              color: '#2563EB',
                               cursor: 'pointer',
-                              fontSize: '13px',
-                              padding: '4px 8px',
+                              transition: 'all 0.15s ease',
                             }}
-                            onMouseEnter={(e) => e.target.style.color = '#FF8A58'}
-                            onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = 'rgba(37, 99, 235, 0.12)';
+                              e.currentTarget.style.transform = 'translateY(-1px)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = 'rgba(37, 99, 235, 0.06)';
+                              e.currentTarget.style.transform = 'translateY(0)';
+                            }}
+                            title="Edit BoM"
                           >
-                            Edit
+                            <Edit2 size={14} strokeWidth={2.5} />
                           </button>
                           {bom.isActive && (
                             <button
                               onClick={() => handleDelete(bom.id, bom.product?.name)}
                               style={{
-                                background: 'transparent',
-                                border: 'none',
-                                color: 'var(--text-muted)',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '8px',
+                                background: 'rgba(220, 38, 38, 0.06)',
+                                border: '1px solid rgba(220, 38, 38, 0.2)',
+                                color: '#DC2626',
                                 cursor: 'pointer',
-                                fontSize: '13px',
-                                padding: '4px 8px',
+                                transition: 'all 0.15s ease',
                               }}
-                              onMouseEnter={(e) => e.target.style.color = 'var(--danger)'}
-                              onMouseLeave={(e) => e.target.style.color = 'var(--text-muted)'}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(220, 38, 38, 0.12)';
+                                e.currentTarget.style.transform = 'translateY(-1px)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(220, 38, 38, 0.06)';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                              }}
+                              title="Deactivate BoM"
                             >
-                              Deactivate
+                              <Trash2 size={14} strokeWidth={2.5} />
                             </button>
                           )}
                         </div>
