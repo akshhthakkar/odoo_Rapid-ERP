@@ -14,6 +14,7 @@ import purchaseRoutes from './modules/purchase/purchase.routes.js';
 import manufacturingRoutes from './modules/manufacturing/manufacturing.routes.js';
 import inventoryRoutes from './modules/inventory/inventory.routes.js';
 import analyticsRoutes from './modules/analytics/analytics.routes.js';
+import dashboardRoutes from './modules/dashboard/dashboard.routes.js';
 
 const app = express();
 
@@ -49,8 +50,7 @@ app.use('/api/purchase', purchaseRoutes);
 app.use('/api/manufacturing', manufacturingRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/analytics', analyticsRoutes);
-// app.use('/api/audit', auditRoutes);
-// app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // ─── 404 HANDLER ─────────────────────────────────────────────────────────────
 

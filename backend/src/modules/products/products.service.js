@@ -12,6 +12,8 @@ const formatProduct = (product) => {
     onHandQty: onHand,
     reservedQty: reserved,
     freeToUseQty: onHand - reserved,
+    reorderLevel: Number(product.reorderLevel) || 0,
+    preferredStock: Number(product.preferredStock) || 0,
     vendors: product.vendors?.map((pv) => ({
       id: pv.id,
       vendorId: pv.vendorId,
@@ -40,7 +42,7 @@ export const getProductById = async (id, tenantId) => {
 };
 
 export const createProduct = async (data, userId, tenantId) => {
-  const { name, sku, description, salesPrice, costPrice, procureOnDemand, procurementType, isActive, vendors } = data;
+  const { name, sku, description, salesPrice, costPrice, procureOnDemand, procurementType, isActive, vendors, reorderLevel, preferredStock } = data;
 
   if (!name || !sku) throw { status: 400, message: "Name and SKU are required" };
   if (salesPrice === undefined || costPrice === undefined) throw { status: 400, message: "Sales price and Cost price are required" };
@@ -75,6 +77,8 @@ export const createProduct = async (data, userId, tenantId) => {
         procureOnDemand: !!procureOnDemand,
         procurementType: procurementType || "PURCHASE",
         isActive: isActive !== undefined ? !!isActive : true,
+        reorderLevel: reorderLevel !== undefined ? Number(reorderLevel) : undefined,
+        preferredStock: preferredStock !== undefined ? Number(preferredStock) : undefined,
         tenantId,
         vendors: vendors && vendors.length > 0 ? {
           create: vendors.map((v) => ({ vendorId: Number(v.vendorId), unitPrice: Number(v.unitPrice) })),
@@ -94,7 +98,7 @@ export const createProduct = async (data, userId, tenantId) => {
 };
 
 export const updateProduct = async (id, data, userId, tenantId) => {
-  const { name, sku, description, salesPrice, costPrice, procureOnDemand, procurementType, isActive, vendors } = data;
+  const { name, sku, description, salesPrice, costPrice, procureOnDemand, procurementType, isActive, vendors, reorderLevel, preferredStock } = data;
 
   const existingProduct = await prisma.product.findFirst({ where: { id, tenantId } });
   if (!existingProduct) throw { status: 404, message: "Product not found" };
@@ -146,6 +150,8 @@ export const updateProduct = async (id, data, userId, tenantId) => {
         procureOnDemand: procureOnDemand !== undefined ? !!procureOnDemand : undefined,
         procurementType: procurementType !== undefined ? procurementType : undefined,
         isActive: isActive !== undefined ? !!isActive : undefined,
+        reorderLevel: reorderLevel !== undefined ? Number(reorderLevel) : undefined,
+        preferredStock: preferredStock !== undefined ? Number(preferredStock) : undefined,
         vendors: vendors && vendors.length > 0 ? {
           create: vendors.map((v) => ({ vendorId: Number(v.vendorId), unitPrice: Number(v.unitPrice) })),
         } : undefined,
