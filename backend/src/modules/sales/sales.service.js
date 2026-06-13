@@ -130,7 +130,8 @@ export const createSalesOrder = async (data, userId, tenantId) => {
       include: { customer: true, lines: { include: { product: true } } },
     });
 
-    await logAudit({ tenantId, userId, action: "SALES_ORDER_CREATED", entityType: "SalesOrder", entityId: order.id,
+    await logAudit({ tenantId, userId, action: "SO_CREATED", entityType: "SalesOrder", entityId: order.id,
+      entityRef: orderRef,
       description: `Sales Order ${orderRef} created in Draft state`, salesOrderId: order.id }, tx);
 
     return order;
@@ -172,7 +173,8 @@ export const confirmSalesOrder = async (orderId, userId, tenantId) => {
 
     const updated = await tx.salesOrder.update({ where: { id: orderId }, data: { status: "CONFIRMED" } });
 
-    await logAudit({ tenantId, userId, action: "SALES_ORDER_CONFIRMED", entityType: "SalesOrder", entityId: orderId,
+    await logAudit({ tenantId, userId, action: "SO_CONFIRMED", entityType: "SalesOrder", entityId: orderId,
+      entityRef: order.orderRef,
       description: "Sales Order confirmed. Stock reserved. MTO Replenishments triggered for shortages.",
       salesOrderId: orderId, metadata: { triggered: triggeredProcurements } }, tx);
 
@@ -224,8 +226,9 @@ export const deliverSalesOrder = async (orderId, lineDeliveries, userId, tenantI
     await tx.salesOrder.update({ where: { id: orderId }, data: { status: newStatus } });
 
     await logAudit({ tenantId, userId,
-      action: newStatus === "FULLY_DELIVERED" ? "SALES_ORDER_DELIVERED" : "SALES_ORDER_PARTIALLY_DELIVERED",
+      action: newStatus === "FULLY_DELIVERED" ? "SO_FULLY_DELIVERED" : "SO_PARTIALLY_DELIVERED",
       entityType: "SalesOrder", entityId: orderId,
+      entityRef: order.orderRef,
       description: newStatus === "FULLY_DELIVERED" ? "Sales Order fully delivered." : "Partial delivery recorded.",
       salesOrderId: orderId, metadata: { linesDelivered: lineDeliveries } }, tx);
   });
@@ -258,7 +261,8 @@ export const cancelSalesOrder = async (orderId, userId, tenantId) => {
 
     await tx.salesOrder.update({ where: { id: orderId }, data: { status: "CANCELLED" } });
 
-    await logAudit({ tenantId, userId, action: "SALES_ORDER_CANCELLED", entityType: "SalesOrder", entityId: orderId,
+    await logAudit({ tenantId, userId, action: "SO_CANCELLED", entityType: "SalesOrder", entityId: orderId,
+      entityRef: order.orderRef,
       description: "Sales Order cancelled. Stock reservations released.", salesOrderId: orderId }, tx);
   });
 

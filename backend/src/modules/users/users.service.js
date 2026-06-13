@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import prisma from '../../config/prisma.js';
 import { sendUserInvitationEmail } from '../../utils/emailService.js';
+import { logAudit, getDiff } from '../../utils/auditLogger.js';
 
 const generateTempPassword = () => {
   const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#!';
@@ -14,7 +15,7 @@ export const inviteUserService = async ({ name, email, role }, invitedBy) => {
     throw { status: 400, message: 'Name, email, and role are required' };
   }
 
-  const validRoles = ['SALES_USER', 'PURCHASE_USER', 'MANUFACTURING_USER', 'INVENTORY_MANAGER', 'BUSINESS_OWNER'];
+  const validRoles = ['SALES_USER', 'PURCHASE_USER', 'MANUFACTURING_USER', 'INVENTORY_MANAGER', 'BUSINESS_OWNER', 'ADMIN'];
   if (!validRoles.includes(role)) {
     throw { status: 400, message: 'Invalid role. Valid roles: ' + validRoles.join(', ') };
   }
@@ -54,8 +55,27 @@ export const inviteUserService = async ({ name, email, role }, invitedBy) => {
       email: email.toLowerCase().trim(),
       role,
       invitedById: invitedBy.id,
-      expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000), // 48 hours expiry
+      expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000),
     },
+  });
+
+  // Log invitation audit trail
+  await logAudit({
+    tenantId: invitedBy.tenantId,
+    userId: invitedBy.id,
+    action: "USER_INVITED",
+    entityType: "User",
+    entityId: user.id,
+    description: `User "${user.name}" invited with role ${role}`,
+  });
+
+  await logAudit({
+    tenantId: invitedBy.tenantId,
+    userId: invitedBy.id,
+    action: "INVITATION_SENT",
+    entityType: "User",
+    entityId: user.id,
+    description: `Invitation email queued to be sent to ${user.email}`,
   });
 
   // Non-blocking email — failure is logged but never crashes the endpoint
@@ -116,7 +136,9 @@ export const changePasswordService = async ({ currentPassword, newPassword }, us
   const valid = await bcrypt.compare(currentPassword, user.passwordHash);
   if (!valid) throw { status: 401, message: 'Current password is incorrect' };
 
-  await prisma.user.update({
+  const wasForced = user.mustChangePassword;
+
+  const updated = await prisma.user.update({
     where: { id: userId },
     data: {
       passwordHash: await bcrypt.hash(newPassword, 12),
@@ -124,5 +146,93 @@ export const changePasswordService = async ({ currentPassword, newPassword }, us
     },
   });
 
+  if (wasForced) {
+    await logAudit({
+      tenantId: user.tenantId,
+      userId,
+      action: "INVITATION_ACCEPTED",
+      entityType: "User",
+      entityId: userId,
+      description: `User "${user.name}" accepted invitation and completed registration`,
+    });
+  } else {
+    await logAudit({
+      tenantId: user.tenantId,
+      userId,
+      action: "PASSWORD_CHANGED",
+      entityType: "User",
+      entityId: userId,
+      description: `User "${user.name}" changed account password`,
+    });
+  }
+
   return { message: 'Password changed successfully' };
+};
+
+// ─── UPDATE USER STATUS ───────────────────────────────────────────────────────
+
+export const updateUserStatusService = async (id, isActive, adminUser) => {
+  if (isActive === undefined) throw { status: 400, message: "isActive status is required" };
+
+  const user = await prisma.user.findFirst({
+    where: { id: Number(id), tenantId: adminUser.tenantId }
+  });
+  if (!user) throw { status: 404, message: "User not found" };
+
+  if (user.id === adminUser.id) throw { status: 400, message: "You cannot change your own active status" };
+
+  const updated = await prisma.user.update({
+    where: { id: user.id },
+    data: { isActive: !!isActive }
+  });
+
+  const { oldValues, newValues } = getDiff(user, updated);
+  
+  await logAudit({
+    tenantId: adminUser.tenantId,
+    userId: adminUser.id,
+    action: updated.isActive ? "USER_CREATED" : "USER_DEACTIVATED",
+    entityType: "User",
+    entityId: user.id,
+    description: `User "${user.name}" status updated to ${updated.isActive ? 'Active' : 'Inactive'}`,
+    oldValues,
+    newValues
+  });
+
+  return updated;
+};
+
+// ─── UPDATE USER ROLE ─────────────────────────────────────────────────────────
+
+export const updateUserRoleService = async (id, role, adminUser) => {
+  if (!role) throw { status: 400, message: "Role is required" };
+  const validRoles = ['SALES_USER', 'PURCHASE_USER', 'MANUFACTURING_USER', 'INVENTORY_MANAGER', 'BUSINESS_OWNER', 'ADMIN'];
+  if (!validRoles.includes(role)) throw { status: 400, message: "Invalid role" };
+
+  const user = await prisma.user.findFirst({
+    where: { id: Number(id), tenantId: adminUser.tenantId }
+  });
+  if (!user) throw { status: 404, message: "User not found" };
+
+  if (user.id === adminUser.id) throw { status: 400, message: "You cannot change your own role" };
+
+  const updated = await prisma.user.update({
+    where: { id: user.id },
+    data: { role }
+  });
+
+  const { oldValues, newValues } = getDiff(user, updated);
+
+  await logAudit({
+    tenantId: adminUser.tenantId,
+    userId: adminUser.id,
+    action: "ROLE_CHANGED",
+    entityType: "User",
+    entityId: user.id,
+    description: `User "${user.name}" role updated from ${user.role} to ${role}`,
+    oldValues,
+    newValues
+  });
+
+  return updated;
 };

@@ -1,5 +1,5 @@
 import prisma from "../../config/prisma.js";
-import { logAudit } from "../../utils/auditLogger.js";
+import { logAudit, getDiff } from "../../utils/auditLogger.js";
 
 const formatProduct = (product) => {
   if (!product) return null;
@@ -88,6 +88,7 @@ export const createProduct = async (data, userId, tenantId) => {
     });
 
     await logAudit({ tenantId, userId, action: "PRODUCT_CREATED", entityType: "Product", entityId: product.id,
+      entityRef: product.sku,
       description: `Product "${product.name}" (SKU: ${product.sku}) created`,
       metadata: { sku: product.sku, salesPrice: Number(product.salesPrice) } }, tx);
 
@@ -159,9 +160,18 @@ export const updateProduct = async (id, data, userId, tenantId) => {
       include: { vendors: { include: { vendor: true } } },
     });
 
+    const { oldValues, newValues } = getDiff(existingProduct, product);
     await logAudit({ tenantId, userId, action: "PRODUCT_UPDATED", entityType: "Product", entityId: product.id,
+      entityRef: product.sku,
       description: `Product "${product.name}" (SKU: ${product.sku}) updated`,
+      oldValues, newValues,
       metadata: { sku: product.sku, salesPrice: Number(product.salesPrice) } }, tx);
+
+    if (existingProduct.isActive && !product.isActive) {
+      await logAudit({ tenantId, userId, action: "PRODUCT_ARCHIVED", entityType: "Product", entityId: product.id,
+        entityRef: product.sku,
+        description: `Product "${product.name}" (SKU: ${product.sku}) archived/deactivated` }, tx);
+    }
 
     return product;
   });
@@ -197,6 +207,7 @@ export const deleteProduct = async (id, userId, tenantId) => {
     await tx.stockMovement.deleteMany({ where: { productId: id, tenantId } });
     await tx.product.delete({ where: { id } });
     await logAudit({ tenantId, userId, action: "PRODUCT_DELETED", entityType: "Product", entityId: id,
+      entityRef: product.sku,
       description: `Product "${product.name}" (SKU: ${product.sku}) deleted` }, tx);
   });
 

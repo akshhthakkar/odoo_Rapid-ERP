@@ -1,5 +1,5 @@
-﻿import prisma from "../../config/prisma.js";
-import { logAudit } from "../../utils/auditLogger.js";
+import prisma from "../../config/prisma.js";
+import { logAudit, getDiff } from "../../utils/auditLogger.js";
 
 export const getCustomers = async (tenantId) => {
   return prisma.customer.findMany({
@@ -20,7 +20,6 @@ export const createCustomer = async (data, userId, tenantId) => {
     if (!emailRegex.test(email.trim())) {
       throw { status: 400, message: "Invalid email format" };
     }
-    // Check tenant-scoped email uniqueness
     const existing = await prisma.customer.findFirst({
       where: { tenantId, email: email.trim().toLowerCase() },
     });
@@ -37,6 +36,7 @@ export const createCustomer = async (data, userId, tenantId) => {
         phone: phone?.trim() || null,
         address: address?.trim() || null,
         tenantId,
+        isActive: true,
       },
     });
 
@@ -47,12 +47,86 @@ export const createCustomer = async (data, userId, tenantId) => {
         action: "CUSTOMER_CREATED",
         entityType: "Customer",
         entityId: created.id,
+        entityRef: created.email || `CUST-${created.id}`,
         description: `Customer "${created.name}" created`,
       },
       tx
     );
 
     return created;
+  });
+
+  return customer;
+};
+
+export const updateCustomer = async (id, data, userId, tenantId) => {
+  const { name, email, phone, address, isActive } = data;
+
+  const existing = await prisma.customer.findFirst({ where: { id, tenantId } });
+  if (!existing) throw { status: 404, message: "Customer not found" };
+
+  if (name !== undefined && !name.trim()) {
+    throw { status: 400, message: "Customer name cannot be empty" };
+  }
+
+  if (email && email.trim() && email.trim().toLowerCase() !== existing.email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      throw { status: 400, message: "Invalid email format" };
+    }
+    const conflict = await prisma.customer.findFirst({
+      where: { tenantId, email: email.trim().toLowerCase() },
+    });
+    if (conflict) {
+      throw { status: 409, message: `A customer with email "${email}" already exists` };
+    }
+  }
+
+  const customer = await prisma.$transaction(async (tx) => {
+    const updated = await tx.customer.update({
+      where: { id },
+      data: {
+        name: name !== undefined ? name.trim() : undefined,
+        email: email !== undefined ? (email?.trim().toLowerCase() || null) : undefined,
+        phone: phone !== undefined ? (phone?.trim() || null) : undefined,
+        address: address !== undefined ? (address?.trim() || null) : undefined,
+        isActive: isActive !== undefined ? !!isActive : undefined,
+      },
+    });
+
+    const { oldValues, newValues } = getDiff(existing, updated);
+
+    await logAudit(
+      {
+        tenantId,
+        userId,
+        action: "CUSTOMER_UPDATED",
+        entityType: "Customer",
+        entityId: updated.id,
+        entityRef: updated.email || `CUST-${updated.id}`,
+        description: `Customer "${updated.name}" updated`,
+        oldValues,
+        newValues,
+      },
+      tx
+    );
+
+    if (existing.isActive && !updated.isActive) {
+      await logAudit(
+        {
+          tenantId,
+          userId,
+          action: "CUSTOMER_ARCHIVED",
+          entityType: "Customer",
+          entityId: updated.id,
+          entityRef: updated.email || `CUST-${updated.id}`,
+          description: `Customer "${updated.name}" archived/deactivated`,
+        },
+        tx
+      );
+    }
+
+    return updated;
   });
 
   return customer;

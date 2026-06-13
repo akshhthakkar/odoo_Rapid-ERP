@@ -176,8 +176,9 @@ export const createPurchaseOrder = async (data, userId, tenantId) => {
     });
 
     await logAudit({
-      tenantId, userId, action: 'PURCHASE_ORDER_CREATED',
+      tenantId, userId, action: 'PO_CREATED',
       entityType: 'PurchaseOrder', entityId: created.id,
+      entityRef: orderRef,
       description: `Purchase Order ${orderRef} created with ${lines.length} line(s).`,
       purchaseOrderId: created.id,
       metadata: { vendorId, lineCount: lines.length },
@@ -210,8 +211,9 @@ export const confirmPurchaseOrder = async (id, userId, tenantId) => {
     });
 
     await logAudit({
-      tenantId, userId, action: 'PURCHASE_ORDER_SENT',
+      tenantId, userId, action: 'PO_SENT',
       entityType: 'PurchaseOrder', entityId: id,
+      entityRef: po.orderRef,
       description: `Purchase Order ${po.orderRef} confirmed and sent to vendor.`,
       purchaseOrderId: id,
     }, tx);
@@ -323,10 +325,11 @@ export const receiveGoods = async (id, receiptsPayload, userId, tenantId) => {
 
     // 4. Audit log
     const totalReceived = receipts.reduce((sum, r) => sum + Number(r.receivedQty), 0);
-    const auditAction = newStatus === 'RECEIVED' ? 'PURCHASE_ORDER_RECEIVED' : 'PURCHASE_RECEIPT_CREATED';
+    const auditAction = newStatus === 'RECEIVED' ? 'PO_RECEIVED' : 'PO_PARTIALLY_RECEIVED';
     await logAudit({
       tenantId, userId, action: auditAction,
       entityType: 'PurchaseOrder', entityId: id,
+      entityRef: po.orderRef,
       description: `Received ${totalReceived} unit(s) on Purchase Order ${po.orderRef}. Status → ${newStatus}.`,
       purchaseOrderId: id,
       metadata: { receiptId: receipt.id, lines: receipts, newStatus },
@@ -359,8 +362,9 @@ export const cancelPurchaseOrder = async (id, userId, tenantId) => {
     });
 
     await logAudit({
-      tenantId, userId, action: 'PURCHASE_ORDER_CANCELLED',
+      tenantId, userId, action: 'PO_CANCELLED',
       entityType: 'PurchaseOrder', entityId: id,
+      entityRef: po.orderRef,
       description: `Purchase Order ${po.orderRef} cancelled.`,
       purchaseOrderId: id,
     }, tx);

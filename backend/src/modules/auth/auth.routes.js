@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, login, me } from './auth.controller.js';
+import { register, login, me, logout } from './auth.controller.js';
 import { verifyToken } from '../../middleware/auth.js';
 import { requireRole } from '../../middleware/roles.js';
 
@@ -10,6 +10,7 @@ router.post('/login', login);
 
 // Protected — any authenticated user
 router.get('/me', verifyToken, me);
+router.post('/logout', verifyToken, logout);
 
 // Deprecated — returns 410 Gone. Use POST /api/company/register to create a new company account.
 router.post('/register', (req, res) => {

@@ -219,11 +219,11 @@ async function test_dashboardData() {
   });
 
   const dbHighVolume = await apiAdminA("GET", "/dashboard");
-  const volumeAlert = dbHighVolume.alerts.find(a => a.type === "WAREHOUSE_CAPACITY");
+  const volumeAlert = dbHighVolume.alerts.find(a => a.type === "INVENTORY_VOLUME_THRESHOLD");
   if (!volumeAlert) {
-    fail("Expected WAREHOUSE_CAPACITY alert to be triggered for warehouse total qty > 2000");
+    fail("Expected INVENTORY_VOLUME_THRESHOLD alert to be triggered for warehouse total qty > 2000");
   }
-  pass("High Stock Volume Alert triggered successfully: " + volumeAlert.message);
+  pass("Inventory Volume Threshold Alert triggered successfully: " + volumeAlert.message);
 
   // 4. Verify Audit Trail logging for DASHBOARD_VIEWED
   // The recentActivity list or the global audit trail must contain the action

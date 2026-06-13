@@ -1,5 +1,5 @@
 import prisma from "../../config/prisma.js";
-import { logAudit } from "../../utils/auditLogger.js";
+import { logAudit, getDiff } from "../../utils/auditLogger.js";
 import { validateBomPayload, validateBomExistences, validateCircularGuards } from "./bom.validation.js";
 
 const formatBom = (bom) => {
@@ -82,6 +82,7 @@ export const createBom = async (data, userId, tenantId) => {
     });
 
     await logAudit({ tenantId, userId, action: "BOM_CREATED", entityType: "BoM", entityId: bom.id,
+      entityRef: `${bom.product.sku}-BOM`,
       description: `Bill of Materials created for finished product "${bom.product.name}" (Version: ${bom.version})`,
       metadata: { productId: bom.productId, version: bom.version } }, tx);
 
@@ -126,8 +127,11 @@ export const updateBom = async (id, data, userId, tenantId) => {
       include: { product: true, components: { include: { product: true } }, operations: { include: { workCenter: true } } },
     });
 
+    const { oldValues, newValues } = getDiff(existingBom, bom);
     await logAudit({ tenantId, userId, action: "BOM_UPDATED", entityType: "BoM", entityId: bom.id,
+      entityRef: `${bom.product.sku}-BOM`,
       description: `Bill of Materials updated for product "${bom.product.name}" (Version: ${bom.version})`,
+      oldValues, newValues,
       metadata: { productId: bom.productId, version: bom.version } }, tx);
 
     return bom;
@@ -146,6 +150,7 @@ export const softDeleteBom = async (id, userId, tenantId) => {
   const deactivated = await prisma.$transaction(async (tx) => {
     const updated = await tx.boM.update({ where: { id }, data: { isActive: false } });
     await logAudit({ tenantId, userId, action: "BOM_DEACTIVATED", entityType: "BoM", entityId: id,
+      entityRef: `${bom.product.sku}-BOM`,
       description: `Bill of Materials deactivated for product "${bom.product.name}"` }, tx);
     return updated;
   });

@@ -292,6 +292,40 @@ const ExecutiveDashboardPage = () => {
         <WarehouseValueChart warehouseHeatMap={data.inventory?.warehouseHeatMap} />
       </div>
 
+      {/* Today's Inventory Ledger Summary Card */}
+      <div className="glass-card" style={{ padding: "24px" }}>
+        <h3 style={{ fontSize: "15px", fontWeight: 700, color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+          <Boxes size={18} style={{ color: "var(--accent)" }} />
+          Today's Stock Ledger Activity Summary
+        </h3>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
+          <div style={{ background: "rgba(59,130,246,0.03)", border: "1px solid rgba(59,130,246,0.1)", padding: "14px 16px", borderRadius: "10px" }}>
+            <span style={{ fontSize: "10.5px", color: "var(--text-muted)", fontWeight: 700, textTransform: "uppercase" }}>PURCHASES INWARD</span>
+            <h4 style={{ fontSize: "18px", fontWeight: 800, marginTop: "6px", color: "#3B82F6" }}>
+              +{data.inventory?.todaySummary?.purchases || 0} units
+            </h4>
+          </div>
+          <div style={{ background: "rgba(249,115,22,0.03)", border: "1px solid rgba(249,115,22,0.1)", padding: "14px 16px", borderRadius: "10px" }}>
+            <span style={{ fontSize: "10.5px", color: "var(--text-muted)", fontWeight: 700, textTransform: "uppercase" }}>SALES OUTWARD</span>
+            <h4 style={{ fontSize: "18px", fontWeight: 800, marginTop: "6px", color: "#F97316" }}>
+              -{data.inventory?.todaySummary?.sales || 0} units
+            </h4>
+          </div>
+          <div style={{ background: "rgba(168,85,247,0.03)", border: "1px solid rgba(168,85,247,0.1)", padding: "14px 16px", borderRadius: "10px" }}>
+            <span style={{ fontSize: "10.5px", color: "var(--text-muted)", fontWeight: 700, textTransform: "uppercase" }}>PRODUCTION PRODUCED</span>
+            <h4 style={{ fontSize: "18px", fontWeight: 800, marginTop: "6px", color: "#A855F7" }}>
+              +{data.inventory?.todaySummary?.production || 0} units
+            </h4>
+          </div>
+          <div style={{ background: "rgba(236,72,153,0.03)", border: "1px solid rgba(236,72,153,0.1)", padding: "14px 16px", borderRadius: "10px" }}>
+            <span style={{ fontSize: "10.5px", color: "var(--text-muted)", fontWeight: 700, textTransform: "uppercase" }}>COMPONENTS CONSUMED</span>
+            <h4 style={{ fontSize: "18px", fontWeight: 800, marginTop: "6px", color: "#EC4899" }}>
+              -{data.inventory?.todaySummary?.consumption || 0} units
+            </h4>
+          </div>
+        </div>
+      </div>
+
       {/* Command Centers Grid */}
       <div style={{
         display: "grid",

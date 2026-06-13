@@ -201,6 +201,7 @@ model Customer {
   email     String?
   phone     String?
   address   String?
+  isActive  Boolean  @default(true)
   tenantId  Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -218,6 +219,7 @@ model Vendor {
   email     String?
   phone     String?
   address   String?
+  isActive  Boolean  @default(true)
   tenantId  Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -488,8 +490,13 @@ model AuditLog {
   action               String
   entityType           String
   entityId             Int
+  entityRef            String?
   description          String
   metadata             Json?
+  oldValues            Json?
+  newValues            Json?
+  ipAddress            String?
+  userAgent            String?
   salesOrderId         Int?
   purchaseOrderId      Int?
   manufacturingOrderId Int?

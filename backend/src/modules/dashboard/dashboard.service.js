@@ -50,7 +50,8 @@ export const getExecutiveDashboard = async (tenantId, query = {}, user = {}) => 
     delayedPosList,
     products,
     balances,
-    salesToday
+    salesToday,
+    todayMovements
   ] = await Promise.all([
     // Reuse analytics queries
     analyticsService.getSalesAnalytics(tenantId, query),
@@ -203,6 +204,14 @@ export const getExecutiveDashboard = async (tenantId, query = {}, user = {}) => 
         orderDate: { gte: startOfToday }
       },
       include: { lines: true }
+    }),
+
+    // Today's Stock Movements for ledger summary
+    prisma.stockMovement.findMany({
+      where: {
+        tenantId,
+        createdAt: { gte: startOfToday }
+      }
     })
   ]);
 
@@ -234,6 +243,21 @@ export const getExecutiveDashboard = async (tenantId, query = {}, user = {}) => 
     }
   });
   const productionOutput = Object.entries(outputMap).map(([date, qty]) => ({ date, qty }));
+
+  // 5.5 Compute Today's Inventory Movements Summary
+  let todayPurchases = 0;
+  let todaySales = 0;
+  let todayProduction = 0;
+  let todayConsumption = 0;
+
+  todayMovements.forEach(m => {
+    const qty = Math.abs(Number(m.qty));
+    if (m.movementType === "PURCHASE_RECEIPT") todayPurchases += qty;
+    else if (m.movementType === "SALE_DELIVERY") todaySales += qty;
+    else if (m.movementType === "MANUFACTURING_PRODUCE") todayProduction += qty;
+    else if (m.movementType === "MANUFACTURING_CONSUME") todayConsumption += qty;
+  });
+
 
   // 6. Compute Inventory Alerts and Warehouse Heat Map values
   let lowStockCount = 0;
@@ -278,9 +302,9 @@ export const getExecutiveDashboard = async (tenantId, query = {}, user = {}) => 
   Object.entries(warehouseBalances).forEach(([code, data]) => {
     if (data.qty > 2000) {
       volumeAlerts.push({
-        type: 'WAREHOUSE_CAPACITY',
+        type: 'INVENTORY_VOLUME_THRESHOLD',
         severity: 'MEDIUM',
-        message: `High Stock Volume Alert: Warehouse ${data.name} stores ${data.qty.toFixed(0)} units`,
+        message: `Inventory Volume Threshold Alert: Warehouse ${data.name} stores ${data.qty.toFixed(0)} units`,
         actionUrl: '/inventory'
       });
     }
@@ -452,7 +476,13 @@ export const getExecutiveDashboard = async (tenantId, query = {}, user = {}) => 
       warehouseHeatMap: inventoryAnalytics.warehouseValuation.map(w => ({
         warehouseCode: w.warehouse,
         value: w.value
-      }))
+      })),
+      todaySummary: {
+        purchases: todayPurchases,
+        sales: todaySales,
+        production: todayProduction,
+        consumption: todayConsumption
+      }
     },
     alerts: alerts.slice(0, 15),
     recentActivity: auditLogs.map(log => ({

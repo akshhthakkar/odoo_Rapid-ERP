@@ -71,10 +71,27 @@ export const loginUser = async ({ email, password }) => {
 
   // Intentionally vague for security — don't reveal which field was wrong
   if (!matchedUser) {
+    if (users.length > 0) {
+      await logAudit({
+        tenantId: users[0].tenantId,
+        action: "LOGIN_FAILED",
+        entityType: "User",
+        entityId: users[0].id,
+        description: `Failed login attempt for user ${email}`,
+      });
+    }
     throw { status: 401, message: 'Invalid email or password' };
   }
 
   if (!matchedUser.isActive) {
+    await logAudit({
+      tenantId: matchedUser.tenantId,
+      userId: matchedUser.id,
+      action: "LOGIN_FAILED",
+      entityType: "User",
+      entityId: matchedUser.id,
+      description: `Blocked login attempt for deactivated user ${email}`,
+    });
     throw { status: 403, message: 'Account is deactivated. Contact your admin.' };
   }
 
@@ -90,6 +107,15 @@ export const loginUser = async ({ email, password }) => {
 
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || '24h',
+  });
+
+  await logAudit({
+    tenantId: matchedUser.tenantId,
+    userId: matchedUser.id,
+    action: "LOGIN_SUCCESS",
+    entityType: "User",
+    entityId: matchedUser.id,
+    description: `User "${matchedUser.name}" logged in successfully`,
   });
 
   return {

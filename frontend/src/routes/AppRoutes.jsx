@@ -28,6 +28,8 @@ import ManufacturingListPage from "../pages/manufacturing/ManufacturingListPage"
 import ManufacturingDetailPage from "../pages/manufacturing/ManufacturingDetailPage";
 import InventoryHubPage from "../pages/inventory/InventoryHubPage";
 import InventoryProductDetailPage from "../pages/inventory/InventoryProductDetailPage";
+import InventoryLedgerPage from "../pages/inventory/InventoryLedgerPage";
+
 import AnalyticsDashboardPage from "../pages/analytics/AnalyticsDashboardPage";
 import SalesAnalyticsPage from "../pages/analytics/SalesAnalyticsPage";
 import PurchaseAnalyticsPage from "../pages/analytics/PurchaseAnalyticsPage";
@@ -349,6 +351,17 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/inventory/ledger"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <InventoryLedgerPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/analytics"
         element={

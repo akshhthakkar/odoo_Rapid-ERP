@@ -15,6 +15,9 @@ import manufacturingRoutes from './modules/manufacturing/manufacturing.routes.js
 import inventoryRoutes from './modules/inventory/inventory.routes.js';
 import analyticsRoutes from './modules/analytics/analytics.routes.js';
 import dashboardRoutes from './modules/dashboard/dashboard.routes.js';
+import auditRoutes from './modules/audit/audit.routes.js';
+import inventoryLedgerRoutes from './modules/inventoryLedger/inventoryLedger.routes.js';
+import { requestContextMiddleware } from './middleware/requestContext.js';
 
 const app = express();
 
@@ -25,6 +28,7 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json());
+app.use(requestContextMiddleware);
 app.use(express.urlencoded({ extended: true }));
 
 // ─── ROUTES ───────────────────────────────────────────────────────────────────
@@ -48,9 +52,12 @@ app.use('/api/company', companyRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/purchase', purchaseRoutes);
 app.use('/api/manufacturing', manufacturingRoutes);
+app.use('/api/inventory/ledger', inventoryLedgerRoutes); // Must be registered before general /api/inventory
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/audit', auditRoutes);
+
 
 // ─── 404 HANDLER ─────────────────────────────────────────────────────────────
 

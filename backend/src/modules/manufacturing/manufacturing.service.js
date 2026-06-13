@@ -171,9 +171,10 @@ export const createManufacturingOrder = async (data, userId, tenantId) => {
     await logAudit({
       tenantId,
       userId,
-      action: "MANUFACTURING_ORDER_CREATED",
+      action: "MO_CREATED",
       entityType: "ManufacturingOrder",
       entityId: createdMo.id,
+      entityRef: moRef,
       description: `Manufacturing Order ${moRef} created in Draft state for finished product "${product.name}"`,
       manufacturingOrderId: createdMo.id,
     }, tx);
@@ -215,9 +216,10 @@ export const confirmManufacturingOrder = async (id, userId, tenantId) => {
     await logAudit({
       tenantId,
       userId,
-      action: "MANUFACTURING_ORDER_CONFIRMED",
+      action: "MO_CONFIRMED",
       entityType: "ManufacturingOrder",
       entityId: mo.id,
+      entityRef: mo.moRef,
       description: `Manufacturing Order ${mo.moRef} confirmed. Component requirements locked.`,
       manufacturingOrderId: mo.id,
     }, tx);
@@ -287,6 +289,7 @@ export const startManufacturingOrder = async (id, userId, tenantId) => {
         action: "WORK_ORDER_STARTED",
         entityType: "WorkOrder",
         entityId: firstWo.id,
+        entityRef: mo.moRef,
         description: `Work Order operation "${firstWo.operationName}" started.`,
         manufacturingOrderId: mo.id,
       }, tx);
@@ -309,9 +312,10 @@ export const startManufacturingOrder = async (id, userId, tenantId) => {
     await logAudit({
       tenantId,
       userId,
-      action: "MANUFACTURING_STARTED",
+      action: "MO_STARTED",
       entityType: "ManufacturingOrder",
       entityId: mo.id,
+      entityRef: mo.moRef,
       description: `Manufacturing started. Raw components consumed.`,
       manufacturingOrderId: mo.id,
     }, tx);
@@ -319,9 +323,10 @@ export const startManufacturingOrder = async (id, userId, tenantId) => {
     await logAudit({
       tenantId,
       userId,
-      action: "COMPONENTS_CONSUMED",
+      action: "MANUFACTURING_CONSUME",
       entityType: "ManufacturingOrder",
       entityId: mo.id,
+      entityRef: mo.moRef,
       description: `Consumed components for MO ${mo.moRef}.`,
       manufacturingOrderId: mo.id,
     }, tx);
@@ -371,6 +376,7 @@ export const startWorkOrder = async (moId, woId, userId, tenantId) => {
     action: "WORK_ORDER_STARTED",
     entityType: "WorkOrder",
     entityId: targetWo.id,
+    entityRef: mo.moRef,
     description: `Work Order operation "${targetWo.operationName}" started.`,
     manufacturingOrderId: mo.id,
   });
@@ -406,6 +412,7 @@ export const completeWorkOrder = async (moId, woId, userId, tenantId) => {
     action: "WORK_ORDER_COMPLETED",
     entityType: "WorkOrder",
     entityId: targetWo.id,
+    entityRef: mo.moRef,
     description: `Work Order operation "${targetWo.operationName}" completed.`,
     manufacturingOrderId: mo.id,
   });
@@ -481,6 +488,7 @@ export const completeManufacturingOrder = async (id, userId, tenantId) => {
       action: "FINISHED_GOODS_PRODUCED",
       entityType: "ManufacturingOrder",
       entityId: mo.id,
+      entityRef: mo.moRef,
       description: `Finished goods produced: +${mo.qty} units of "${mo.product?.name || 'product'}".`,
       manufacturingOrderId: mo.id,
     }, tx);
@@ -491,6 +499,7 @@ export const completeManufacturingOrder = async (id, userId, tenantId) => {
       action: "MANUFACTURING_COMPLETED",
       entityType: "ManufacturingOrder",
       entityId: mo.id,
+      entityRef: mo.moRef,
       description: `Manufacturing order completed successfully.`,
       manufacturingOrderId: mo.id,
     }, tx);
@@ -531,6 +540,7 @@ export const cancelManufacturingOrder = async (id, userId, tenantId) => {
       action: "MANUFACTURING_CANCELLED",
       entityType: "ManufacturingOrder",
       entityId: mo.id,
+      entityRef: mo.moRef,
       description: `Manufacturing order ${mo.moRef} cancelled.`,
       manufacturingOrderId: mo.id,
     }, tx);
