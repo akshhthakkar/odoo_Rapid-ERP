@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "SalesOrderLine" ADD COLUMN     "reservedQty" DECIMAL(12,3) NOT NULL DEFAULT 0,
+ADD COLUMN     "shortageQty" DECIMAL(12,3) NOT NULL DEFAULT 0;

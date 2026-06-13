@@ -35,7 +35,7 @@ const DashboardPage = () => {
             {user?.name} 👋
           </h2>
           <p style={{ fontSize: '14px', color: 'var(--text-secondary)', maxWidth: 500 }}>
-            Your Mini ERP system is up and running. Modules are being activated phase by phase.
+            Your Rapid Enterprise system is up and running. Modules are being activated phase by phase.
           </p>
         </div>
       </div>
@@ -69,8 +69,8 @@ const DashboardPage = () => {
           {[
             { phase: 'Phase 0', label: 'Project Setup & DB Migration', done: true },
             { phase: 'Phase 1', label: 'Authentication & RBAC', done: true },
-            { phase: 'Phase 2', label: 'Products, Customers, Vendors', done: false },
-            { phase: 'Phase 3', label: 'Bill of Materials Builder', done: false },
+            { phase: 'Phase 2', label: 'Products, Customers, Vendors', done: true },
+            { phase: 'Phase 3', label: 'Bill of Materials Builder', done: true },
             { phase: 'Phase 4', label: 'Sales Module (MTO trigger)', done: false },
             { phase: 'Phase 5', label: 'Purchase Module', done: false },
             { phase: 'Phase 6', label: 'Manufacturing Module', done: false },

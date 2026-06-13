@@ -33,9 +33,9 @@ enum SalesOrderStatus {
 
 enum PurchaseOrderStatus {
   DRAFT
-  CONFIRMED
+  SENT
   PARTIALLY_RECEIVED
-  FULLY_RECEIVED
+  RECEIVED
   CANCELLED
 }
 
@@ -54,11 +54,20 @@ enum WorkOrderStatus {
 }
 
 enum StockMovementType {
+  SALE_RESERVE
+  SALE_RELEASE
   SALE_DELIVERY
   PURCHASE_RECEIPT
-  MO_CONSUMPTION
-  MO_PRODUCTION
-  MANUAL_ADJUSTMENT
+  MANUFACTURING_CONSUME
+  MANUFACTURING_PRODUCE
+  STOCK_ADJUSTMENT
+}
+
+enum ReplenishmentStatus {
+  NOT_STARTED
+  TRIGGERED
+  IN_PROGRESS
+  COMPLETED
 }
 
 // ─── USERS ────────────────────────────────────────────────────────────────────
@@ -99,6 +108,7 @@ model Product {
   // Procurement
   procureOnDemand Boolean         @default(false)
   procurementType ProcurementType @default(PURCHASE)
+  isActive        Boolean         @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -156,30 +166,36 @@ model ProductVendor {
 // ─── SALES ────────────────────────────────────────────────────────────────────
 
 model SalesOrder {
-  id         Int              @id @default(autoincrement())
-  uid        String           @unique @default(cuid())
-  orderRef   String           @unique
-  customerId Int
-  userId     Int
-  status     SalesOrderStatus @default(DRAFT)
-  orderDate  DateTime         @default(now())
-  notes      String?
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
+  id                    Int                 @id @default(autoincrement())
+  uid                   String              @unique @default(cuid())
+  orderRef              String              @unique
+  customerId            Int
+  userId                Int
+  status                SalesOrderStatus    @default(DRAFT)
+  orderDate             DateTime            @default(now())
+  requestedDeliveryDate DateTime?
+  notes                 String?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
 
-  customer  Customer         @relation(fields: [customerId], references: [id])
-  user      User             @relation(fields: [userId], references: [id])
-  lines     SalesOrderLine[]
-  auditLogs AuditLog[]       @relation("SaleAudit")
+  customer            Customer             @relation(fields: [customerId], references: [id])
+  user                User                 @relation(fields: [userId], references: [id])
+  lines               SalesOrderLine[]
+  purchaseOrders      PurchaseOrder[]
+  manufacturingOrders ManufacturingOrder[]
+  auditLogs           AuditLog[]           @relation("SaleAudit")
 }
 
 model SalesOrderLine {
-  id           Int     @id @default(autoincrement())
-  salesOrderId Int
-  productId    Int
-  qty          Decimal @db.Decimal(12, 3)
-  deliveredQty Decimal @default(0) @db.Decimal(12, 3)
-  unitPrice    Decimal @db.Decimal(12, 2)
+  id                  Int                 @id @default(autoincrement())
+  salesOrderId        Int
+  productId           Int
+  qty                 Decimal             @db.Decimal(12, 3)
+  reservedQty         Decimal             @default(0) @db.Decimal(12, 3)
+  shortageQty         Decimal             @default(0) @db.Decimal(12, 3)
+  deliveredQty        Decimal             @default(0) @db.Decimal(12, 3)
+  unitPrice           Decimal             @db.Decimal(12, 2)
+  replenishmentStatus ReplenishmentStatus @default(NOT_STARTED)
 
   salesOrder SalesOrder @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
   product    Product    @relation(fields: [productId], references: [id])
@@ -188,21 +204,23 @@ model SalesOrderLine {
 // ─── PURCHASE ─────────────────────────────────────────────────────────────────
 
 model PurchaseOrder {
-  id        Int                 @id @default(autoincrement())
-  uid       String              @unique @default(cuid())
-  orderRef  String              @unique
-  vendorId  Int
-  userId    Int
-  status    PurchaseOrderStatus @default(DRAFT)
-  orderDate DateTime            @default(now())
-  notes     String?
-  createdAt DateTime            @default(now())
-  updatedAt DateTime            @updatedAt
+  id           Int                 @id @default(autoincrement())
+  uid          String              @unique @default(cuid())
+  orderRef     String              @unique
+  vendorId     Int
+  userId       Int
+  salesOrderId Int?
+  status       PurchaseOrderStatus @default(DRAFT)
+  orderDate    DateTime            @default(now())
+  notes        String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
 
-  vendor    Vendor              @relation(fields: [vendorId], references: [id])
-  user      User                @relation(fields: [userId], references: [id])
-  lines     PurchaseOrderLine[]
-  auditLogs AuditLog[]          @relation("PurchaseAudit")
+  vendor     Vendor              @relation(fields: [vendorId], references: [id])
+  user       User                @relation(fields: [userId], references: [id])
+  salesOrder SalesOrder?         @relation(fields: [salesOrderId], references: [id])
+  lines      PurchaseOrderLine[]
+  auditLogs  AuditLog[]          @relation("PurchaseAudit")
 }
 
 model PurchaseOrderLine {
@@ -279,6 +297,7 @@ model ManufacturingOrder {
   bomId         Int
   qty           Decimal                  @db.Decimal(12, 3)
   userId        Int
+  salesOrderId  Int?
   status        ManufacturingOrderStatus @default(DRAFT)
   scheduledDate DateTime?
   completedAt   DateTime?
@@ -286,11 +305,12 @@ model ManufacturingOrder {
   createdAt     DateTime                 @default(now())
   updatedAt     DateTime                 @updatedAt
 
-  product    Product    @relation(fields: [productId], references: [id])
-  bom        BoM        @relation(fields: [bomId], references: [id])
-  user       User       @relation(fields: [userId], references: [id])
+  product    Product     @relation(fields: [productId], references: [id])
+  bom        BoM         @relation(fields: [bomId], references: [id])
+  user       User        @relation(fields: [userId], references: [id])
+  salesOrder SalesOrder? @relation(fields: [salesOrderId], references: [id])
   workOrders WorkOrder[]
-  auditLogs  AuditLog[] @relation("MoAudit")
+  auditLogs  AuditLog[]  @relation("MoAudit")
 }
 
 model WorkOrder {
@@ -317,6 +337,7 @@ model StockMovement {
   qty           Decimal           @db.Decimal(12, 3)
   referenceType String
   referenceId   Int
+  reason        String?
   notes         String?
   createdAt     DateTime          @default(now())
 

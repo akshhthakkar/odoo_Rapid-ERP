@@ -24,7 +24,7 @@ const Topbar = () => {
   const navigate = useNavigate();
   const [logoutHovered, setLogoutHovered] = useState(false);
 
-  const pageInfo = PAGE_TITLES[location.pathname] || { title: 'Mini ERP', subtitle: '' };
+  const pageInfo = PAGE_TITLES[location.pathname] || { title: 'Rapid Enterprise', subtitle: '' };
 
   const handleLogout = () => {
     logout();
@@ -47,7 +47,7 @@ const Topbar = () => {
       {/* Left side: Breadcrumb path */}
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', fontSize: '13px', fontWeight: 500 }}>
-          <span style={{ color: '#4B5563' }}>Mini ERP</span>
+          <span style={{ color: '#4B5563' }}>Rapid Enterprise</span>
           <span style={{ color: '#9CA3AF', margin: '0 8px' }}>/</span>
           <span style={{ color: '#1F2937', fontWeight: 600 }}>{pageInfo.title}</span>
         </div>
