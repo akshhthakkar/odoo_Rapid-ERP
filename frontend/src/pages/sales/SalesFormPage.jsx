@@ -148,9 +148,18 @@ const SalesFormPage = () => {
   return (
     <div style={{ maxWidth: 840, margin: '0 auto' }} className="animate-fade-in">
       <div className="glass-card" style={{ padding: '32px' }}>
-        <div style={{ marginBottom: '28px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)' }}>Create Sales Order</h2>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>Draft a new sales quote for a customer. Stock will be reserved upon confirmation.</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px' }}>
+          <div>
+            <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Create Sales Order</h2>
+            <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px', marginBottom: 0 }}>Draft a new sales quote for a customer. Stock will be reserved upon confirmation.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/sales')}
+            style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-secondary)', borderRadius: '8px', padding: '7px 14px', cursor: 'pointer', fontSize: '13px', flexShrink: 0 }}
+          >
+            ← Back
+          </button>
         </div>
 
         {errorMessage && (

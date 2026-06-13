@@ -121,7 +121,7 @@ const PurchaseFormPage = () => {
                 ))}
               </select>
               {selectedVendor && (
-                <div style={{ marginTop: '8px', padding: '8px 12px', background: 'rgba(99,102,241,0.06)', borderRadius: '8px', fontSize: '12px', color: 'var(--text-muted)' }}>
+                <div style={{ marginTop: '8px', padding: '8px 12px', background: 'rgba(255, 84, 14, 0.06)', borderRadius: '8px', fontSize: '12px', color: 'var(--text-muted)' }}>
                   {selectedVendor.email && <div>✉ {selectedVendor.email}</div>}
                   {selectedVendor.phone && <div>📞 {selectedVendor.phone}</div>}
                 </div>
@@ -239,7 +239,7 @@ const PurchaseFormPage = () => {
               + Add Line
             </button>
             <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>
-              Grand Total: <span style={{ color: '#818CF8' }}>₹{grandTotal.toFixed(2)}</span>
+              Grand Total: <span style={{ color: 'var(--accent)' }}>₹{grandTotal.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -256,7 +256,6 @@ const PurchaseFormPage = () => {
           <Button
             type="submit"
             disabled={saveMutation.isPending}
-            style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
           >
             {saveMutation.isPending ? 'Saving…' : 'Save Draft'}
           </Button>

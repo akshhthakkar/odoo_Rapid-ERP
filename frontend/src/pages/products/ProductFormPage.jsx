@@ -178,13 +178,22 @@ const ProductFormPage = () => {
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }} className="animate-fade-in">
       <div className="glass-card" style={{ padding: '32px' }}>
-        <div style={{ marginBottom: '28px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)' }}>
-            {isEdit ? 'Edit Product Specification' : 'Add New Product'}
-          </h2>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
-            {isEdit ? 'Update prices, description, and procurement policies.' : 'Configure general details, supplier links, and stock rules.'}
-          </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px' }}>
+          <div>
+            <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+              {isEdit ? 'Edit Product Specification' : 'Add New Product'}
+            </h2>
+            <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px', marginBottom: 0 }}>
+              {isEdit ? 'Update prices, description, and procurement policies.' : 'Configure general details, supplier links, and stock rules.'}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/products')}
+            style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-secondary)', borderRadius: '8px', padding: '7px 14px', cursor: 'pointer', fontSize: '13px', flexShrink: 0 }}
+          >
+            ← Back
+          </button>
         </div>
 
         {error && (
