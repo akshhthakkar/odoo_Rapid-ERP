@@ -1,5 +1,66 @@
 /* ─── HomePage.css ─── */
 
+/* ── Progressive Blur Reveal Animation ── */
+
+/* Whole-element fade-up blur (badge, subtitle, CTA) */
+@keyframes blurReveal {
+  0% {
+    opacity: 0;
+    filter: blur(14px);
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0px);
+    transform: translateY(0px);
+  }
+}
+
+.blur-reveal {
+  opacity: 0;
+  animation: blurReveal 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--blur-delay, 0ms);
+}
+
+/* Word-level left-to-right blur reveal (h1 words) */
+@keyframes wordBlurReveal {
+  0% {
+    opacity: 0;
+    filter: blur(16px);
+    transform: translateX(-10px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0px);
+    transform: translateX(0px);
+  }
+}
+
+.word-blur-reveal {
+  display: inline;
+  opacity: 0;
+  animation: wordBlurReveal 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--word-delay, 0ms);
+}
+
+/* Simple slide-up entry (badge, button, subtext) */
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
+.slide-up {
+  opacity: 0;
+  animation: slideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--slide-delay, 0ms);
+}
+
 /* ── Container with glowing ambient top background ── */
 .landing-container {
   min-height: 100vh;

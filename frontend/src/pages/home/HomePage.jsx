@@ -4,6 +4,7 @@ import { Navbar } from '../../components/layout/Navbar';
 import dbHero from '../../assets/dbHero.png';
 
 import { Features } from '../../components/layout/Features';
+import HowItWorks from '../../components/layout/HowItWorks';
 import { CreditCard } from 'lucide-react';
 import './HomePage.css';
 
@@ -51,31 +52,66 @@ const HomePage = () => {
       <section className="hero-section">
         <div className="hero-content">
           {/* Trusted Badge */}
-          <div className="trusted-badge">
-            <span className="trusted-text">10+ companies registered</span>
+          <div className="slide-up" style={{ '--slide-delay': '0ms' }}>
+            <div className="trusted-badge">
+              <span className="trusted-text">10+ companies registered</span>
+            </div>
           </div>
 
-          {/* Heading */}
+          {/* Heading — word-by-word left-to-right blur reveal */}
           <h1 className="hero-title">
-            Boost Business Efficiency <br />
-            with our <span className="highlight-text">ERP solutions</span>
+            {['Boost', 'Business', 'Efficiency'].map((word, i) => (
+              <span
+                key={word}
+                className="word-blur-reveal"
+                style={{ '--word-delay': `${80 + i * 80}ms` }}
+              >
+                {word}{' '}
+              </span>
+            ))}
+            <br />
+            {['with', 'our'].map((word, i) => (
+              <span
+                key={word}
+                className="word-blur-reveal"
+                style={{ '--word-delay': `${320 + i * 80}ms` }}
+              >
+                {word}{' '}
+              </span>
+            ))}
+            <span
+              className="highlight-text word-blur-reveal"
+              style={{ '--word-delay': '480ms' }}
+            >
+              ERP{' '}
+            </span>
+            <span
+              className="highlight-text word-blur-reveal"
+              style={{ '--word-delay': '560ms' }}
+            >
+              solutions
+            </span>
           </h1>
 
           {/* Subtitle */}
-          <p className="hero-subtitle">
+          <p className="hero-subtitle blur-reveal" style={{ '--blur-delay': '680ms' }}>
             Monitor every movement across your business—<br />
             from purchase orders to product delivery.
           </p>
 
           {/* CTA Group */}
           <div className="hero-cta-group">
-            <button className="hero-cta-btn" onClick={() => navigate('/signup')}>
-              Get Started For Free
-            </button>
-            <span className="hero-subtext">
-              <CreditCard size={14} style={{ color: '#FF540E', strokeWidth: 2 }} />
-              No credit card required
-            </span>
+            <div className="slide-up" style={{ '--slide-delay': '820ms' }}>
+              <button className="hero-cta-btn" onClick={() => navigate('/signup')}>
+                Get Started For Free
+              </button>
+            </div>
+            <div className="slide-up" style={{ '--slide-delay': '940ms' }}>
+              <span className="hero-subtext">
+                <CreditCard size={14} style={{ color: '#FF540E', strokeWidth: 2 }} />
+                No credit card required
+              </span>
+            </div>
           </div>
         </div>
 
@@ -89,6 +125,9 @@ const HomePage = () => {
 
       {/* Unique Features Section */}
       <Features />
+      
+      {/* How It Works Section */}
+      <HowItWorks />
     </div>
   );
 };
