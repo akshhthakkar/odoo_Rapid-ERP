@@ -104,8 +104,9 @@ flowchart TD
 
 ## Features
 
-- **Role-Based Access Control (RBAC)** — Distinct roles for Admin, Sales, Purchase, Manufacturing, Inventory Management, and Business Owners.
-- **Product & Inventory Management** — Track stock levels, reserve components, and auto-trigger procurement based on demand.
+- **Multi-Tenancy Support** — Logically isolated environments allowing multiple companies/tenants to operate securely on a single platform instance.
+- **Role-Based Access Control (RBAC) & Invites** — Distinct roles for Admin, Sales, Purchase, Manufacturing, Inventory Management, and Business Owners, complete with a secure User Invite system.
+- **Product & Inventory Management** — Track stock levels, reserve components, and auto-trigger procurement based on demand with detailed replenishment tracking (`NOT_STARTED`, `TRIGGERED`, `IN_PROGRESS`, `COMPLETED`).
 - **Sales Flow** — Create Sales Orders, check stock availability, and automatically trigger procurement (Purchase or Manufacturing) if stock is insufficient.
 - **Purchase Flow** — Manage vendors, create Purchase Orders, and receive materials into inventory.
 - **Manufacturing Flow** — Manage Bill of Materials (BoM), Work Centers, Work Orders, and Manufacturing Orders. Tracks raw material consumption and finished goods production.
@@ -118,10 +119,12 @@ flowchart TD
 
 Key design decisions:
 
-- **Enums for Statuses** — Standardized statuses for Sales (`DRAFT`, `CONFIRMED`, `DELIVERED`, etc.), Purchase, and Manufacturing Orders.
+- **Multi-Tenant Architecture** — Almost every core model includes a `tenantId` (with composite unique constraints like `[tenantId, email]`, `[tenantId, sku]`) to enforce strict data isolation between different companies.
+- **Enums for Statuses** — Standardized statuses for Sales (`DRAFT`, `CONFIRMED`, `DELIVERED`, etc.), Purchase (`DRAFT`, `SENT`, `PARTIALLY_RECEIVED`, `RECEIVED`, `CANCELLED`), and Replenishment.
+- **Granular Stock Movements** — Explicit tracking using `StockMovementType` (e.g., `SALE_RESERVE`, `SALE_RELEASE`, `SALE_DELIVERY`, `PURCHASE_RECEIPT`, `MANUFACTURING_CONSUME`, `MANUFACTURING_PRODUCE`).
 - **Centralized Stock Engine** — Stock quantities (`onHandQty`, `reservedQty`) are maintained implicitly via Stock Ledger movements and should not be updated directly.
 - **Strict Cascading** — Managed relations via Prisma's `onDelete: Cascade` for lines inside Sales, Purchase, and Manufacturing Orders.
-- **Comprehensive Audit Trails** — The `AuditLog` model tracks changes across modules, linked to respective users, orders, and entities.
+- **Comprehensive Audit Trails** — The `AuditLog` model tracks changes across modules, logically separated per tenant, and linked to respective users, orders, and entities.
 
 ---
 
