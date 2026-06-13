@@ -1,8 +1,22 @@
 import React from 'react';
 import { useAuthStore } from '../../store/authStore';
+import ExecutiveDashboardPage from '../analytics/ExecutiveDashboardPage';
+import { Database, ShieldCheck, User, Activity } from 'lucide-react';
 
 const DashboardPage = () => {
   const { user } = useAuthStore();
+
+  // Redirect to Executive Command Center if the user has admin/owner privileges
+  if (user?.role === 'ADMIN' || user?.role === 'BUSINESS_OWNER') {
+    return <ExecutiveDashboardPage />;
+  }
+
+  const cards = [
+    { label: 'Database', status: 'Connected', color: 'var(--success)', icon: Database },
+    { label: 'Auth & RBAC', status: 'Active', color: 'var(--success)', icon: ShieldCheck },
+    { label: 'Your Role', status: user?.role?.replace(/_/g, ' ') || '—', color: 'var(--accent)', icon: User },
+    { label: 'API Status', status: 'Healthy', color: 'var(--success)', icon: Activity },
+  ];
 
   return (
     <div className="animate-fade-in">
@@ -32,7 +46,7 @@ const DashboardPage = () => {
             Welcome back
           </p>
           <h2 style={{ fontSize: '26px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>
-            {user?.name} 👋
+            {user?.name}
           </h2>
           <p style={{ fontSize: '14px', color: 'var(--text-secondary)', maxWidth: 500 }}>
             Your Rapid Enterprise system is up and running. Modules are being activated phase by phase.
@@ -42,22 +56,22 @@ const DashboardPage = () => {
 
       {/* Status cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '28px' }}>
-        {[
-          { label: 'Database', status: 'Connected', color: 'var(--success)', icon: '🗄️' },
-          { label: 'Auth & RBAC', status: 'Active', color: 'var(--success)', icon: '🔐' },
-          { label: 'Your Role', status: user?.role?.replace(/_/g, ' ') || '—', color: 'var(--accent)', icon: '👤' },
-          { label: 'API Status', status: 'Healthy', color: 'var(--success)', icon: '⚡' },
-        ].map((card) => (
-          <div key={card.label} className="glass-card" style={{ padding: '20px' }}>
-            <div style={{ fontSize: 24, marginBottom: '10px' }}>{card.icon}</div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 500, marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-              {card.label}
+        {cards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.label} className="glass-card" style={{ padding: '20px' }}>
+              <div style={{ marginBottom: '10px', color: card.color }}>
+                <Icon size={24} />
+              </div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 500, marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                {card.label}
+              </div>
+              <div style={{ fontSize: '15px', fontWeight: 700, color: card.color }}>
+                {card.status}
+              </div>
             </div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: card.color }}>
-              {card.status}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Phase completion tracker */}
@@ -97,6 +111,7 @@ const DashboardPage = () => {
                 justifyContent: 'center',
                 flexShrink: 0,
                 fontSize: 12,
+                color: '#FFFFFF'
               }}>
                 {item.done ? '✓' : ''}
               </div>

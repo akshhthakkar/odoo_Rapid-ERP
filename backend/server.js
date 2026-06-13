@@ -7,4 +7,6 @@ app.listen(PORT, () => {
   console.log(`\n🚀 Rapid Enterprise API running on http://localhost:${PORT}`);
   console.log(`   Health: http://localhost:${PORT}/api/health`);
   console.log(`   Env: ${process.env.NODE_ENV || 'development'}\n`);
+// Trigger restart after port termination
 });
+

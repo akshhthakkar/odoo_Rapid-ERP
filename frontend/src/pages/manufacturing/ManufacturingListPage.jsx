@@ -505,7 +505,7 @@ const ManufacturingListPage = () => {
                 </label>
                 {bomsLoading ? (
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#6B7280", fontSize: "13px" }}>
-                    <Loader size={16} padding="0" style={{ display: "inline-flex", width: "auto" }} /> Loading recipes...
+                    <Loader size={16} padding="0" style={{ display: "inline-flex", width: "auto" }} />
                   </div>
                 ) : boms.length === 0 ? (
                   <div style={{ color: "#B91C1C", fontSize: "13px", fontWeight: 500 }}>
