@@ -22,7 +22,7 @@ const SalesListPage = () => {
   const getStatusBadge = (status) => {
     const statusMap = {
       DRAFT: { label: 'Draft', class: 'badge-muted' },
-      CONFIRMED: { label: 'Confirmed', class: 'badge-warning', style: { background: 'rgba(59,130,246,0.1)', color: '#60A5FA', border: '1px solid rgba(59,130,246,0.25)' } },
+      CONFIRMED: { label: 'Confirmed', class: 'badge-accent', style: { border: '1px solid rgba(255, 84, 14, 0.25)' } },
       PARTIALLY_DELIVERED: { label: 'Partially Delivered', class: 'badge-warning' },
       FULLY_DELIVERED: { label: 'Fully Delivered', class: 'badge-success' },
       CANCELLED: { label: 'Cancelled', class: 'badge-danger', style: { opacity: 0.6 } }
