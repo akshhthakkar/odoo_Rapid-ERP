@@ -29,7 +29,6 @@ import ManufacturingDetailPage from "../pages/manufacturing/ManufacturingDetailP
 import InventoryHubPage from "../pages/inventory/InventoryHubPage";
 import InventoryProductDetailPage from "../pages/inventory/InventoryProductDetailPage";
 import InventoryLedgerPage from "../pages/inventory/InventoryLedgerPage";
-
 import AnalyticsDashboardPage from "../pages/analytics/AnalyticsDashboardPage";
 import SalesAnalyticsPage from "../pages/analytics/SalesAnalyticsPage";
 import PurchaseAnalyticsPage from "../pages/analytics/PurchaseAnalyticsPage";
