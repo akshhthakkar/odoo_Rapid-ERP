@@ -10,6 +10,7 @@ import bomRoutes from './modules/bom/bom.routes.js';
 import salesRoutes from './modules/sales/sales.routes.js';
 import companyRoutes from './modules/company/company.routes.js';
 import usersRoutes from './modules/users/users.routes.js';
+import purchaseRoutes from './modules/purchase/purchase.routes.js';
 
 const app = express();
 
@@ -41,9 +42,9 @@ app.use('/api/bom', bomRoutes);
 app.use('/api/sales', salesRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/users', usersRoutes);
+app.use('/api/purchase', purchaseRoutes);
 
 // Placeholder for future modules — will be wired in subsequent phases
-// app.use('/api/purchase', purchaseRoutes);
 // app.use('/api/manufacturing', manufacturingRoutes);
 // app.use('/api/inventory', inventoryRoutes);
 // app.use('/api/audit', auditRoutes);

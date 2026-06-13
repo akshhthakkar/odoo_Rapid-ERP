@@ -19,6 +19,9 @@ import WorkCenterFormPage from "../pages/workcenters/WorkCenterFormPage";
 import SalesListPage from "../pages/sales/SalesListPage";
 import SalesFormPage from "../pages/sales/SalesFormPage";
 import SalesDetailPage from "../pages/sales/SalesDetailPage";
+import PurchaseListPage from "../pages/purchase/PurchaseListPage";
+import PurchaseFormPage from "../pages/purchase/PurchaseFormPage";
+import PurchaseDetailPage from "../pages/purchase/PurchaseDetailPage";
 import ChangePasswordPage from "../pages/auth/ChangePasswordPage";
 import UsersPage from "../pages/settings/UsersPage";
 
@@ -230,12 +233,33 @@ const AppRoutes = () => {
         }
       />
 
+      {/* Phase 5: Purchase Module Routes */}
       <Route
         path="/purchase"
         element={
           <ProtectedRoute>
             <AppLayout>
-              <ComingSoon title="Purchase" />
+              <PurchaseListPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/purchase/new"
+        element={
+          <ProtectedRoute allowedRoles={["ADMIN", "PURCHASE_USER"]}>
+            <AppLayout>
+              <PurchaseFormPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/purchase/:id"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <PurchaseDetailPage />
             </AppLayout>
           </ProtectedRoute>
         }

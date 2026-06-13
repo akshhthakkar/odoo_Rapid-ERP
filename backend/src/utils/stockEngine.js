@@ -1,4 +1,4 @@
-﻿import prisma from "../config/prisma.js";
+import prisma from "../config/prisma.js";
 
 /**
  * Reserve stock for a product line on SO confirmation.
@@ -166,3 +166,45 @@ export const adjustStock = async (productId, qty, tenantId, reason = "Inventory 
 
   return adjustedProduct;
 };
+
+/**
+ * Receive stock from a Purchase Order receipt.
+ * Increments onHandQty, updates lastPurchaseCost, records PURCHASE_RECEIPT movement.
+ * @param {number} productId
+ * @param {number} qty - quantity received (positive)
+ * @param {number} unitCost - cost per unit from the PO line
+ * @param {number} referenceId - PurchaseOrder ID
+ * @param {number} tenantId
+ * @param {object} tx - Prisma transaction client
+ */
+export const receiveStock = async (productId, qty, unitCost, referenceId, tenantId, tx = prisma) => {
+  const updatedProduct = await tx.product.update({
+    where: { id: productId },
+    data: {
+      onHandQty: { increment: qty },
+      lastPurchaseCost: unitCost,
+    },
+  });
+
+  let orderRef = `PO #${referenceId}`;
+  const order = await tx.purchaseOrder.findFirst({
+    where: { id: referenceId, tenantId },
+    select: { orderRef: true },
+  });
+  if (order) orderRef = order.orderRef;
+
+  await tx.stockMovement.create({
+    data: {
+      productId,
+      tenantId,
+      movementType: "PURCHASE_RECEIPT",
+      qty,
+      referenceType: "PURCHASE",
+      referenceId,
+      reason: `${orderRef} Goods Receipt`,
+    },
+  });
+
+  return updatedProduct;
+};
+
