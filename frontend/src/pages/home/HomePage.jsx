@@ -143,14 +143,14 @@ const HomePage = () => {
 
           {/* Heading */}
           <h1 className="hero-title">
-            Turn Scattered Data <br />
-            Into <span className="highlight-text">Smart Decisions</span>
+            Boost Business Efficiency <br />
+            with our <span className="highlight-text">ERP solutions</span>
           </h1>
 
           {/* Subtitle */}
           <p className="hero-subtitle">
-            One simple dashboard to track your SaaS growth,<br />
-            MRR, churn and user behavior—without the chaos.
+            Monitor every movement across your business—<br />
+            from purchase orders to product delivery.
           </p>
 
           {/* CTA Group */}

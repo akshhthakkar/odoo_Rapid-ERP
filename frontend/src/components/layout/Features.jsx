@@ -9,9 +9,12 @@ export const Features = () => {
     <section className="features-section">
       <div className="features-header">
         <span className="features-badge">Unique Features</span>
-        <h2 className="features-title">Make Your Platform Work Harder For You</h2>
+        <h2 className="features-title">
+          One Platform. Total Control. <br />
+          Built For Operational Excellence
+        </h2>
         <p className="features-subtitle">
-          Streamline your business with unified metrics and AI-powered analytics—all in one place.
+          Everything your business needs to plan, track, and scale operations efficiently.
         </p>
       </div>
 
