@@ -13,7 +13,7 @@ import Button from '../../components/ui/Button';
 // ─── STATUS CONFIG ────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
   DRAFT:              { label: 'Draft',              bg: 'rgba(148,163,184,0.15)', color: '#94A3B8', border: 'rgba(148,163,184,0.3)' },
-  SENT:               { label: 'Confirmed',          bg: 'rgba(59,130,246,0.12)',  color: '#60A5FA', border: 'rgba(59,130,246,0.3)' },
+  SENT:               { label: 'Confirmed',          bg: 'rgba(255,84,14,0.08)',   color: '#FF8A58', border: 'rgba(255,84,14,0.25)' },
   PARTIALLY_RECEIVED: { label: 'Partially Received', bg: 'rgba(251,146,60,0.12)', color: '#FB923C', border: 'rgba(251,146,60,0.3)' },
   RECEIVED:           { label: 'Fully Received',     bg: 'rgba(34,197,94,0.12)',  color: '#4ADE80', border: 'rgba(34,197,94,0.3)' },
   CANCELLED:          { label: 'Cancelled',          bg: 'rgba(239,68,68,0.1)',   color: '#F87171', border: 'rgba(239,68,68,0.2)' },
