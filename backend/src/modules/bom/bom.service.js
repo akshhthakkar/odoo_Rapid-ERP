@@ -95,9 +95,6 @@ export const updateBom = async (id, data, userId, tenantId) => {
   const existingBom = await prisma.boM.findFirst({ where: { id, tenantId } });
   if (!existingBom) throw { status: 404, message: "Bill of Materials not found" };
 
-  const activeMoCount = await prisma.manufacturingOrder.count({ where: { bomId: id, tenantId, status: { in: ["CONFIRMED", "IN_PROGRESS"] } } });
-  if (activeMoCount > 0) throw { status: 400, message: "Cannot edit this Bill of Materials because it is currently referenced by active/confirmed Manufacturing Orders." };
-
   const productId = data.productId !== undefined ? Number(data.productId) : existingBom.productId;
   const components = data.components || [];
   const operations = data.operations || [];

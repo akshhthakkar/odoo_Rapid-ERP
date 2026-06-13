@@ -133,11 +133,6 @@ const HomePage = () => {
         <div className="hero-content">
           {/* Trusted Badge */}
           <div className="trusted-badge">
-            <div className="avatar-group">
-              <div className="avatar avatar-1"></div>
-              <div className="avatar avatar-2"></div>
-              <div className="avatar avatar-3"></div>
-            </div>
             <span className="trusted-text">10+ companies registered</span>
           </div>
 

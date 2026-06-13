@@ -35,6 +35,14 @@ export const registerTenantService = async ({ companyName, adminName, email, pas
         mustChangePassword: false,
       },
     });
+    await tx.warehouse.create({
+      data: {
+        tenantId: tenant.id,
+        code: 'MAIN',
+        name: 'Main Warehouse',
+        isActive: true,
+      },
+    });
     return { tenant, user };
   });
 

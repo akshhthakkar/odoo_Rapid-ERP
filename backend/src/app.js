@@ -11,6 +11,8 @@ import salesRoutes from './modules/sales/sales.routes.js';
 import companyRoutes from './modules/company/company.routes.js';
 import usersRoutes from './modules/users/users.routes.js';
 import purchaseRoutes from './modules/purchase/purchase.routes.js';
+import manufacturingRoutes from './modules/manufacturing/manufacturing.routes.js';
+import inventoryRoutes from './modules/inventory/inventory.routes.js';
 
 const app = express();
 
@@ -43,10 +45,8 @@ app.use('/api/sales', salesRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/purchase', purchaseRoutes);
-
-// Placeholder for future modules — will be wired in subsequent phases
-// app.use('/api/manufacturing', manufacturingRoutes);
-// app.use('/api/inventory', inventoryRoutes);
+app.use('/api/manufacturing', manufacturingRoutes);
+app.use('/api/inventory', inventoryRoutes);
 // app.use('/api/audit', auditRoutes);
 // app.use('/api/dashboard', dashboardRoutes);
 
