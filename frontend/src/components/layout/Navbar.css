@@ -50,7 +50,20 @@
   padding: 4px 16px;
   margin-right: 8px;
   flex-shrink: 0;
+  overflow: hidden; /* keep container size fixed */
 }
+
+/* Zoom effect for logo image */
+.navbar-logo img {
+  height: 30px; /* maintain original size */
+  transition: transform 0.3s ease;
+  object-fit: contain;
+}
+
+.navbar-logo img:hover {
+  transform: scale(1.2); /* zoom on hover */
+}
+
 
 .navbar-logo-text {
   font-family: 'Bricolage Grotesque', sans-serif;
