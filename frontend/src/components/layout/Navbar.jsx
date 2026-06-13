@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import './Navbar.css';
+import rapidLogo from '../../assets/rapid-logo.png';
 
 export function Navbar() {
   const user = useAuthStore((state) => state.user);
@@ -24,8 +25,7 @@ export function Navbar() {
       <div className="navbar">
 
         <div className="navbar-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <img src="/logo.png" alt="Rapid Logo" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
-          <span className="navbar-logo-text">Rapid</span>
+          <img src={rapidLogo} alt="RAPID" style={{ height: '36px', objectFit: 'contain' }} />
         </div>
 
         <ul className="navbar-links">

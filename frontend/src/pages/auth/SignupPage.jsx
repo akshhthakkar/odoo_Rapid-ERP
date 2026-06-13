@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { register } from '../../api/auth.api';
+import rapidLogo from '../../assets/rapid-logo.png';
 
 const ROLE_HOME = {
   ADMIN:               '/dashboard',
@@ -222,9 +223,8 @@ const SignupPage = () => {
             <div className="grid-plus grid-plus-tl">+</div>
             <div className="grid-plus grid-plus-tr">+</div>
 
-             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-               <img src="/logo.png" alt="Rapid Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
-               <span style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.03em' }}>Rapid</span>
+             <div style={{ display: 'flex', alignItems: 'center' }}>
+               <img src={rapidLogo} alt="RAPID" style={{ height: '130px', objectFit: 'contain' }} />
              </div>
 
             <div className="grid-h-line" style={{ bottom: 0 }} />
