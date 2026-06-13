@@ -26,8 +26,6 @@ import ChangePasswordPage from "../pages/auth/ChangePasswordPage";
 import UsersPage from "../pages/settings/UsersPage";
 import ManufacturingListPage from "../pages/manufacturing/ManufacturingListPage";
 import ManufacturingDetailPage from "../pages/manufacturing/ManufacturingDetailPage";
-import InventoryHubPage from "../pages/inventory/InventoryHubPage";
-import InventoryProductDetailPage from "../pages/inventory/InventoryProductDetailPage";
 
 
 // Role redirect helper
@@ -326,17 +324,7 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <AppLayout>
-              <InventoryHubPage />
-            </AppLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/inventory/product/:id"
-        element={
-          <ProtectedRoute>
-            <AppLayout>
-              <InventoryProductDetailPage />
+              <ComingSoon title="Inventory" />
             </AppLayout>
           </ProtectedRoute>
         }
