@@ -25,6 +25,7 @@
 .navbar {
   pointer-events: all;
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 0;
   background: rgba(244, 245, 248, 0.92);
@@ -32,7 +33,7 @@
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 9999px;
-  padding: 0.45rem;
+  padding: 4px 4px;
   box-shadow:
     0 10px 30px rgba(15, 23, 42, 0.08),
     0 1px 0px rgba(255, 255, 255, 0.8) inset;
@@ -46,8 +47,8 @@
   background: rgba(0, 0, 0, 0.03);
   border: 1px solid rgba(0, 0, 0, 0.04);
   border-radius: 9999px;
-  padding: 0.45rem 1.1rem;
-  margin-right: 1.5rem;
+  padding: 4px 16px;
+  margin-right: 8px;
   flex-shrink: 0;
 }
 
@@ -79,6 +80,11 @@
   padding: 0;
 }
 
+.navbar-links li {
+  display: flex;
+  align-items: center;
+}
+
 .navbar-link {
   font-family: 'Bricolage Grotesque', sans-serif;
   font-size: 0.8rem;
@@ -90,8 +96,8 @@
   border-radius: 9999px;
   transition: background 0.2s ease;
   display: inline-block;
-  height: 2rem;
-  line-height: 2rem;
+  height: 1.75rem;
+  line-height: 1.75rem;
   overflow: hidden;
   position: relative;
 }
@@ -106,19 +112,19 @@
 }
 
 .navbar-link:hover .navbar-link-inner {
-  transform: translateY(-2rem);
+  transform: translateY(-1.75rem);
 }
 
 .navbar-link-top {
   display: block;
-  height: 2rem;
+  height: 1.75rem;
   color: rgba(10, 15, 30, 0.5);
   white-space: nowrap;
 }
 
 .navbar-link-bottom {
   display: block;
-  height: 2rem;
+  height: 1.75rem;
   color: #FF540E;
   white-space: nowrap;
 }
@@ -126,7 +132,10 @@
 /* ── CTA link wrapper ── */
 .navbar-cta-link {
   text-decoration: none;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 /* ── CTA button ── */
@@ -134,8 +143,8 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  margin-left: 1.25rem;
-  padding: 0.55rem 1.25rem;
+  margin-left: 0.5rem;
+  padding: 0.45rem 1rem;
   border-radius: 9999px;
   border: none;
   cursor: pointer;
