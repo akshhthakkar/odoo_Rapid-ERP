@@ -3,7 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import './Navbar.css';
-import rapidLogo from '../../assets/rapid-logo.png';
+import rapidLogo from '../../assets/new-rapid-logo.png';
 
 export function Navbar() {
   const user = useAuthStore((state) => state.user);
