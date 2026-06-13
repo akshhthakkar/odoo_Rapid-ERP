@@ -254,6 +254,7 @@ const ProductListPage = () => {
                     <th>Reserved</th>
                     <th>Free to Use</th>
                     <th>Source</th>
+                    <th>Status</th>
                     {(canManageProducts || canDeleteProduct) && <th style={{ textAlign: 'right' }}>Actions</th>}
                   </tr>
                 </thead>
@@ -277,6 +278,11 @@ const ProductListPage = () => {
                       <td>
                         <span className="badge badge-muted" style={{ fontSize: '10px' }}>
                           {p.procurementType} {p.procureOnDemand ? '(MTO)' : '(MTS)'}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`badge ${p.isActive !== false ? 'badge-success' : 'badge-danger'}`} style={{ fontSize: '10px' }}>
+                          {p.isActive !== false ? 'Active' : 'Archived'}
                         </span>
                       </td>
                       {(canManageProducts || canDeleteProduct) && (

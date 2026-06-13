@@ -1,4 +1,4 @@
-# Mini-ERP
+# Rapid Enterprise
 
 > A full-stack Enterprise Resource Planning (ERP) platform for managing core business operations including Sales, Purchasing, Manufacturing, and Inventory.
 ---

@@ -1,7 +1,7 @@
 {
   "name": "erp-backend",
   "version": "1.0.0",
-  "description": "Mini ERP Backend — Node.js + Express + Prisma + PostgreSQL",
+  "description": "Rapid Enterprise Backend — Node.js + Express + Prisma + PostgreSQL",
   "type": "module",
   "main": "server.js",
   "scripts": {

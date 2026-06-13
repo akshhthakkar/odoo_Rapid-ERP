@@ -20,6 +20,7 @@ const ProductFormPage = () => {
     costPrice: '',
     procureOnDemand: false,
     procurementType: 'PURCHASE',
+    isActive: true, // Default to active
     vendors: [] // Array of { vendorId, name, unitPrice }
   });
 
@@ -52,6 +53,7 @@ const ProductFormPage = () => {
         costPrice: initialProduct.costPrice,
         procureOnDemand: initialProduct.procureOnDemand,
         procurementType: initialProduct.procurementType,
+        isActive: initialProduct.isActive !== false,
         vendors: initialProduct.vendors || []
       });
     }
@@ -155,6 +157,7 @@ const ProductFormPage = () => {
       costPrice: Number(form.costPrice),
       procureOnDemand: form.procureOnDemand,
       procurementType: form.procurementType,
+      isActive: form.isActive,
       vendors: form.vendors.map(v => ({
         vendorId: v.vendorId,
         unitPrice: v.unitPrice
@@ -284,6 +287,44 @@ const ProductFormPage = () => {
             <h4 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-primary)' }}>
               Procurement & Inventory Rules
             </h4>
+
+            {/* Active Status Toggle */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: '12px' }}>
+              <div>
+                <span style={{ fontSize: '13.5px', fontWeight: 600, display: 'block', color: 'var(--text-primary)' }}>
+                  Active Status
+                </span>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                  Archived products cannot be selected for new Sales Orders.
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setForm(p => ({ ...p, isActive: !p.isActive }))}
+                style={{
+                  width: '52px',
+                  height: '28px',
+                  borderRadius: '9999px',
+                  background: form.isActive ? '#FF540E' : 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  position: 'relative',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s',
+                }}
+              >
+                <div style={{
+                  position: 'absolute',
+                  top: '3px',
+                  left: form.isActive ? '27px' : '3px',
+                  width: '22px',
+                  height: '22px',
+                  borderRadius: '50%',
+                  background: '#FFFFFF',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                  transition: 'left 0.2s',
+                }} />
+              </button>
+            </div>
 
             {/* Procure On Demand */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>

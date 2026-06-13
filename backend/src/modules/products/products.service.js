@@ -56,7 +56,7 @@ export const getProductById = async (id) => {
 };
 
 export const createProduct = async (data, userId) => {
-  const { name, sku, description, salesPrice, costPrice, procureOnDemand, procurementType, vendors } = data;
+  const { name, sku, description, salesPrice, costPrice, procureOnDemand, procurementType, isActive, vendors } = data;
 
   // Input validation
   if (!name || !sku) {
@@ -90,6 +90,7 @@ export const createProduct = async (data, userId) => {
         costPrice: Number(costPrice),
         procureOnDemand: !!procureOnDemand,
         procurementType: procurementType || 'PURCHASE',
+        isActive: isActive !== undefined ? !!isActive : true,
         vendors: vendors && vendors.length > 0 ? {
           create: vendors.map(v => ({
             vendorId: Number(v.vendorId),
@@ -122,7 +123,7 @@ export const createProduct = async (data, userId) => {
 };
 
 export const updateProduct = async (id, data, userId) => {
-  const { name, sku, description, salesPrice, costPrice, procureOnDemand, procurementType, vendors } = data;
+  const { name, sku, description, salesPrice, costPrice, procureOnDemand, procurementType, isActive, vendors } = data;
 
   // Validate existence
   const existingProduct = await prisma.product.findUnique({ where: { id } });
@@ -156,6 +157,29 @@ export const updateProduct = async (id, data, userId) => {
     throw { status: 400, message: 'Invalid procurement type' };
   }
 
+  // Deactivation validations
+  if (isActive === false) {
+    if (Number(existingProduct.reservedQty) > 0) {
+      throw { status: 400, message: 'Cannot deactivate product while there is reserved stock (reservedQty > 0).' };
+    }
+
+    // Check active BoM (as finished good)
+    const activeBomCount = await prisma.boM.count({
+      where: { productId: id, isActive: true }
+    });
+    if (activeBomCount > 0) {
+      throw { status: 400, message: 'Cannot deactivate product because it is the finished product of an active Bill of Materials.' };
+    }
+
+    // Check active BoM (as component)
+    const activeComponentCount = await prisma.boMComponent.count({
+      where: { productId: id, bom: { isActive: true } }
+    });
+    if (activeComponentCount > 0) {
+      throw { status: 400, message: 'Cannot deactivate product because it is a component in an active Bill of Materials.' };
+    }
+  }
+
   const updatedProduct = await prisma.$transaction(async (tx) => {
     // If vendors are supplied, replace all vendor mappings for this product
     if (vendors !== undefined) {
@@ -172,6 +196,7 @@ export const updateProduct = async (id, data, userId) => {
         costPrice: costPrice !== undefined ? Number(costPrice) : undefined,
         procureOnDemand: procureOnDemand !== undefined ? !!procureOnDemand : undefined,
         procurementType: procurementType !== undefined ? procurementType : undefined,
+        isActive: isActive !== undefined ? !!isActive : undefined,
         vendors: vendors && vendors.length > 0 ? {
           create: vendors.map(v => ({
             vendorId: Number(v.vendorId),
@@ -207,6 +232,27 @@ export const deleteProduct = async (id, userId) => {
   const product = await prisma.product.findUnique({ where: { id } });
   if (!product) {
     throw { status: 404, message: 'Product not found' };
+  }
+
+  // Check reserved stock
+  if (Number(product.reservedQty) > 0) {
+    throw { status: 400, message: 'Cannot delete product while there is reserved stock (reservedQty > 0).' };
+  }
+
+  // Check active BoM (as finished good)
+  const activeBomCount = await prisma.boM.count({
+    where: { productId: id, isActive: true }
+  });
+  if (activeBomCount > 0) {
+    throw { status: 400, message: 'Cannot delete product because it is the finished product of an active Bill of Materials.' };
+  }
+
+  // Check active BoM (as component)
+  const activeComponentCount = await prisma.boMComponent.count({
+    where: { productId: id, bom: { isActive: true } }
+  });
+  if (activeComponentCount > 0) {
+    throw { status: 400, message: 'Cannot delete product because it is a component in an active Bill of Materials.' };
   }
 
   // Check dependencies

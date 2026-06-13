@@ -7,6 +7,7 @@ import customerRoutes from './modules/customers/customers.routes.js';
 import vendorRoutes from './modules/vendors/vendors.routes.js';
 import workCenterRoutes from './modules/workcenters/workcenters.routes.js';
 import bomRoutes from './modules/bom/bom.routes.js';
+import salesRoutes from './modules/sales/sales.routes.js';
 
 const app = express();
 
@@ -25,7 +26,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    service: 'Mini ERP API',
+    service: 'Rapid Enterprise API',
   });
 });
 
@@ -35,9 +36,9 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/workcenters', workCenterRoutes);
 app.use('/api/bom', bomRoutes);
+app.use('/api/sales', salesRoutes);
 
 // Placeholder for future modules — will be wired in subsequent phases
-// app.use('/api/sales', salesRoutes);
 // app.use('/api/purchase', purchaseRoutes);
 // app.use('/api/manufacturing', manufacturingRoutes);
 // app.use('/api/inventory', inventoryRoutes);
