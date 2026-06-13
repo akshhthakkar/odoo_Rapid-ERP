@@ -5,35 +5,35 @@
 /* ─── CSS CUSTOM PROPERTIES (Design Tokens) ─────────────────────────────────── */
 :root {
   /* Backgrounds */
-  --bg-primary:    #0A0F1E;
-  --bg-secondary:  #0D1117;
-  --bg-card:       rgba(255, 255, 255, 0.04);
-  --bg-card-hover: rgba(255, 255, 255, 0.07);
+  --bg-primary:    #F4F5F7;
+  --bg-secondary:  #FFFFFF;
+  --bg-card:       #FFFFFF;
+  --bg-card-hover: #F9FAFB;
 
   /* Accent */
   --accent:        #FF540E;
   --accent-hover:  #E04300;
-  --accent-light:  rgba(255, 84, 14, 0.15);
-  --accent-glow:   rgba(255, 84, 14, 0.4);
+  --accent-light:  rgba(255, 84, 14, 0.08);
+  --accent-glow:   rgba(255, 84, 14, 0.2);
 
   /* Text */
-  --text-primary:  #F9FAFB;
-  --text-secondary: #9CA3AF;
+  --text-primary:  #1F2937;
+  --text-secondary: #4B5563;
   --text-muted:    #6B7280;
 
   /* Borders */
-  --border:        rgba(255, 255, 255, 0.08);
+  --border:        #E5E7EB;
   --border-focus:  rgba(255, 84, 14, 0.6);
 
   /* Status */
   --success:       #10B981;
-  --success-light: rgba(16, 185, 129, 0.15);
-  --warning:       #F59E0B;
-  --warning-light: rgba(245, 158, 11, 0.15);
-  --danger:        #EF4444;
-  --danger-light:  rgba(239, 68, 68, 0.15);
-  --info:          #3B82F6;
-  --info-light:    rgba(59, 130, 246, 0.15);
+  --success-light: rgba(16, 185, 129, 0.1);
+  --warning:       #D97706;
+  --warning-light: rgba(217, 119, 6, 0.1);
+  --danger:        #DC2626;
+  --danger-light:  rgba(220, 38, 38, 0.1);
+  --info:          #2563EB;
+  --info-light:    rgba(37, 99, 235, 0.1);
 
   /* Sidebar */
   --sidebar-width: 260px;
@@ -127,6 +127,7 @@ body {
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border);
   border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 /* ─── STATUS BADGES ───────────────────────────────────────────────────────── */
@@ -146,8 +147,8 @@ body {
 .badge-warning  { background: var(--warning-light);  color: var(--warning);  }
 .badge-danger   { background: var(--danger-light);   color: var(--danger);   }
 .badge-info     { background: var(--info-light);     color: var(--info);     }
-.badge-accent   { background: var(--accent-light);   color: #FF8A58;         }
-.badge-muted    { background: rgba(255,255,255,0.08); color: var(--text-muted); }
+.badge-accent   { background: var(--accent-light);   color: var(--accent);   }
+.badge-muted    { background: rgba(0, 0, 0, 0.05);   color: var(--text-secondary); }
 
 /* ─── TABLE ───────────────────────────────────────────────────────────────── */
 .erp-table {
@@ -181,7 +182,7 @@ body {
 /* ─── INPUT ───────────────────────────────────────────────────────────────── */
 .erp-input {
   width: 100%;
-  background: rgba(255,255,255,0.05);
+  background: #FFFFFF;
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 11px 14px;
@@ -198,12 +199,12 @@ body {
 
 .erp-input:focus {
   border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
-  background: rgba(255,255,255,0.07);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+  background: #FFFFFF;
 }
 
 .erp-input:hover:not(:focus) {
-  border-color: rgba(255,255,255,0.15);
+  border-color: #D1D5DB;
 }
 
 .erp-input-error {
@@ -251,13 +252,13 @@ body {
 }
 
 .btn-secondary {
-  background: rgba(255,255,255,0.07);
+  background: rgba(0, 0, 0, 0.04);
   color: var(--text-primary);
   border: 1px solid var(--border);
 }
 .btn-secondary:hover:not(:disabled) {
-  background: rgba(255,255,255,0.12);
-  border-color: rgba(255,255,255,0.2);
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.12);
 }
 
 .btn-danger {

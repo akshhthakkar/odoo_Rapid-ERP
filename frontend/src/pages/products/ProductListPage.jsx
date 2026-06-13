@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProducts, deleteProduct } from '../../api/products.api';
-import { getCustomers, createCustomer } from '../../api/customers.api';
-import { getVendors, createVendor } from '../../api/vendors.api';
-import { getWorkCenters, createWorkCenter } from '../../api/workcenters.api';
+import { getCustomers } from '../../api/customers.api';
+import { getVendors } from '../../api/vendors.api';
+import { getWorkCenters } from '../../api/workcenters.api';
 import { useAuthStore } from '../../store/authStore';
 import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
 
 const ProductListPage = () => {
   const navigate = useNavigate();
@@ -15,11 +14,10 @@ const ProductListPage = () => {
   const user = useAuthStore((s) => s.user);
   const userRole = user?.role;
 
-  const [activeTab, setActiveTab] = useState('products');
-  const [showModal, setShowModal] = useState(null); // 'customer' | 'vendor' | 'workcenter' | null
-  const [modalForm, setModalForm] = useState({ name: '', email: '', phone: '', address: '', description: '' });
-  const [modalError, setModalError] = useState('');
-  const [modalSuccess, setModalSuccess] = useState('');
+  const [activeTab, setActiveTab] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('tab') || 'products';
+  });
   const [deleteError, setDeleteError] = useState('');
 
   // ─── QUERY CALLS ────────────────────────────────────────────────────────────
@@ -59,85 +57,10 @@ const ProductListPage = () => {
     },
   });
 
-  const createCustomerMutation = useMutation({
-    mutationFn: createCustomer,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['customers'] });
-      setModalSuccess(`Customer "${data.customer.name}" created successfully.`);
-      setModalForm({ name: '', email: '', phone: '', address: '', description: '' });
-    },
-    onError: (err) => {
-      setModalError(err.response?.data?.message || 'Failed to create customer.');
-    },
-  });
-
-  const createVendorMutation = useMutation({
-    mutationFn: createVendor,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['vendors'] });
-      setModalSuccess(`Vendor "${data.vendor.name}" created successfully.`);
-      setModalForm({ name: '', email: '', phone: '', address: '', description: '' });
-    },
-    onError: (err) => {
-      setModalError(err.response?.data?.message || 'Failed to create vendor.');
-    },
-  });
-
-  const createWcMutation = useMutation({
-    mutationFn: createWorkCenter,
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['workcenters'] });
-      setModalSuccess(`Work Center "${data.workCenter.name}" created successfully.`);
-      setModalForm({ name: '', email: '', phone: '', address: '', description: '' });
-    },
-    onError: (err) => {
-      setModalError(err.response?.data?.message || 'Failed to create work center.');
-    },
-  });
-
   // ─── HANDLERS ───────────────────────────────────────────────────────────────
   const handleDeleteProduct = (id, name) => {
     if (window.confirm(`Are you sure you want to delete product "${name}"?`)) {
       deleteProdMutation.mutate(id);
-    }
-  };
-
-  const handleOpenModal = (type) => {
-    setShowModal(type);
-    setModalForm({ name: '', email: '', phone: '', address: '', description: '' });
-    setModalError('');
-    setModalSuccess('');
-  };
-
-  const handleModalSubmit = (e) => {
-    e.preventDefault();
-    setModalError('');
-    setModalSuccess('');
-
-    if (!modalForm.name.trim()) {
-      setModalError('Name is required.');
-      return;
-    }
-
-    if (showModal === 'customer') {
-      createCustomerMutation.mutate({
-        name: modalForm.name,
-        email: modalForm.email || undefined,
-        phone: modalForm.phone || undefined,
-        address: modalForm.address || undefined
-      });
-    } else if (showModal === 'vendor') {
-      createVendorMutation.mutate({
-        name: modalForm.name,
-        email: modalForm.email || undefined,
-        phone: modalForm.phone || undefined,
-        address: modalForm.address || undefined
-      });
-    } else if (showModal === 'workcenter') {
-      createWcMutation.mutate({
-        name: modalForm.name,
-        description: modalForm.description || undefined
-      });
     }
   };
 
@@ -176,13 +99,16 @@ const ProductListPage = () => {
             onClick={() => {
               setActiveTab(tab.id);
               setDeleteError('');
+              const url = new URL(window.location);
+              url.searchParams.set('tab', tab.id);
+              window.history.pushState({}, '', url);
             }}
             style={{
               padding: '12px 4px',
               background: 'transparent',
               border: 'none',
               borderBottom: activeTab === tab.id ? '2px solid #FF540E' : '2px solid transparent',
-              color: activeTab === tab.id ? '#FF8A58' : 'var(--text-secondary)',
+              color: activeTab === tab.id ? '#FF540E' : 'var(--text-secondary)',
               fontSize: '14px',
               fontWeight: activeTab === tab.id ? 600 : 400,
               cursor: 'pointer',
@@ -260,7 +186,7 @@ const ProductListPage = () => {
                 <tbody>
                   {products.map((p) => (
                     <tr key={p.id}>
-                      <td style={{ fontWeight: 600, color: '#FF8A58' }}>{p.sku}</td>
+                      <td style={{ fontWeight: 600, color: '#FF540E' }}>{p.sku}</td>
                       <td>
                         <div style={{ fontWeight: 500 }}>{p.name}</div>
                         {p.description && <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>{p.description}</div>}
@@ -293,7 +219,7 @@ const ProductListPage = () => {
                                   fontSize: '13px',
                                   padding: '4px 8px',
                                 }}
-                                onMouseEnter={(e) => e.target.style.color = '#FF8A58'}
+                                onMouseEnter={(e) => e.target.style.color = '#FF540E'}
                                 onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
                               >
                                 Edit
@@ -339,7 +265,7 @@ const ProductListPage = () => {
             {canManageCustomers && (
               <Button
                 id="btn-create-customer"
-                onClick={() => handleOpenModal('customer')}
+                onClick={() => navigate('/customers/new')}
                 style={{ background: '#FF540E' }}
               >
                 + Add Customer
@@ -392,7 +318,7 @@ const ProductListPage = () => {
             {canManageVendors && (
               <Button
                 id="btn-create-vendor"
-                onClick={() => handleOpenModal('vendor')}
+                onClick={() => navigate('/vendors/new')}
                 style={{ background: '#FF540E' }}
               >
                 + Add Vendor
@@ -445,7 +371,7 @@ const ProductListPage = () => {
             {canManageWc && (
               <Button
                 id="btn-create-wc"
-                onClick={() => handleOpenModal('workcenter')}
+                onClick={() => navigate('/workcenters/new')}
                 style={{ background: '#FF540E' }}
               >
                 + Add Work Center
@@ -480,142 +406,6 @@ const ProductListPage = () => {
               </table>
             </div>
           )}
-        </div>
-      )}
-
-      {/* ─── CREATION MODALS (Customer, Vendor, Work Center) ───────────────── */}
-      {showModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(5, 7, 12, 0.75)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-        }}
-        onClick={() => setShowModal(null)}
-        >
-          <div className="glass-card animate-fade-in" style={{
-            width: '480px',
-            padding: '28px',
-            position: 'relative',
-            maxHeight: '90vh',
-            overflowY: 'auto'
-          }}
-          onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--text-primary)' }}>
-                Create New {showModal.charAt(0).toUpperCase() + showModal.slice(1)}
-              </h3>
-            </div>
-
-            {modalError && (
-              <div className="animate-shake" style={{
-                background: 'rgba(239,68,68,0.08)',
-                border: '1px solid rgba(239,68,68,0.25)',
-                borderRadius: '8px',
-                padding: '10px 12px',
-                marginBottom: '16px',
-                color: 'var(--danger)',
-                fontSize: '12.5px'
-              }}>
-                ⚠️ {modalError}
-              </div>
-            )}
-
-            {modalSuccess && (
-              <div style={{
-                background: 'rgba(16,185,129,0.08)',
-                border: '1px solid rgba(16,185,129,0.25)',
-                borderRadius: '8px',
-                padding: '10px 12px',
-                marginBottom: '16px',
-                color: 'var(--success)',
-                fontSize: '12.5px'
-              }}>
-                ✅ {modalSuccess}
-              </div>
-            )}
-
-            <form onSubmit={handleModalSubmit}>
-              <Input
-                id="modal-name"
-                label="Name"
-                type="text"
-                placeholder={showModal === 'workcenter' ? 'Assembly Line 1' : 'Acme Corporation'}
-                value={modalForm.name}
-                onChange={(e) => setModalForm(prev => ({ ...prev, name: e.target.value }))}
-                required
-              />
-
-              {showModal !== 'workcenter' ? (
-                <>
-                  <Input
-                    id="modal-email"
-                    label="Email Address"
-                    type="email"
-                    placeholder="contact@company.com"
-                    value={modalForm.email}
-                    onChange={(e) => setModalForm(prev => ({ ...prev, email: e.target.value }))}
-                  />
-                  <Input
-                    id="modal-phone"
-                    label="Phone"
-                    type="text"
-                    placeholder="+1 (555) 019-2834"
-                    value={modalForm.phone}
-                    onChange={(e) => setModalForm(prev => ({ ...prev, phone: e.target.value }))}
-                  />
-                  <Input
-                    id="modal-address"
-                    label="Address"
-                    type="text"
-                    placeholder="123 Industrial Rd, Austin TX"
-                    value={modalForm.address}
-                    onChange={(e) => setModalForm(prev => ({ ...prev, address: e.target.value }))}
-                  />
-                </>
-              ) : (
-                <div style={{ marginBottom: '16px' }}>
-                  <label className="form-label">Description</label>
-                  <textarea
-                    id="modal-description"
-                    className="erp-input"
-                    placeholder="Primary work center for assembling component components."
-                    rows="3"
-                    value={modalForm.description}
-                    onChange={(e) => setModalForm(prev => ({ ...prev, description: e.target.value }))}
-                    style={{ resize: 'none' }}
-                  />
-                </div>
-              )}
-
-              <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-                <Button
-                  id="btn-modal-submit"
-                  type="submit"
-                  style={{ flex: 1, background: '#FF540E' }}
-                  loading={createCustomerMutation.isPending || createVendorMutation.isPending || createWcMutation.isPending}
-                >
-                  Create
-                </Button>
-                <Button
-                  id="btn-modal-cancel"
-                  type="button"
-                  variant="secondary"
-                  onClick={() => setShowModal(null)}
-                >
-                  Close
-                </Button>
-              </div>
-            </form>
-          </div>
         </div>
       )}
     </div>
