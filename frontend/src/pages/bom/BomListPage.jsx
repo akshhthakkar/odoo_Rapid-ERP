@@ -40,10 +40,10 @@ const BomListPage = () => {
   // ─── ROLE GUARDS ───────────────────────────────────────────────────────────
   const canManageBom = ['ADMIN', 'MANUFACTURING_USER'].includes(userRole);
 
+  const [bomToDeactivate, setBomToDeactivate] = useState(null);
+
   const handleDelete = (id, productName) => {
-    if (window.confirm(`Are you sure you want to deactivate the Bill of Materials for "${productName}"? This will disable it for future Manufacturing Orders.`)) {
-      deleteMutation.mutate(id);
-    }
+    setBomToDeactivate({ id, productName });
   };
 
   const formatDuration = (mins) => {
@@ -220,6 +220,72 @@ const BomListPage = () => {
           </div>
         )}
       </div>
+
+      {/* ─── DEACTIVATE CONFIRMATION MODAL ────────────────────────────────────── */}
+      {bomToDeactivate && (
+        <div 
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.75)',
+            backdropFilter: 'blur(4px)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px',
+          }}
+          onClick={(e) => e.target === e.currentTarget && setBomToDeactivate(null)}
+        >
+          <div 
+            style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: '16px',
+              width: '100%',
+              maxWidth: '440px',
+              padding: '28px',
+              boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
+              fontFamily: 'var(--font-family)',
+              textAlign: 'center',
+            }}
+          >
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
+            <h3 style={{ margin: '0 0 12px 0', fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)' }}>
+              Deactivate Bill of Materials
+            </h3>
+            <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', lineHeight: 1.5, margin: '0 0 24px 0' }}>
+              Are you sure you want to deactivate the Bill of Materials for <strong>{bomToDeactivate.productName}</strong>? 
+              This will disable it for future Manufacturing Orders.
+            </p>
+
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <Button
+                id="btn-confirm-deactivate"
+                variant="danger"
+                onClick={() => {
+                  deleteMutation.mutate(bomToDeactivate.id, {
+                    onSuccess: () => {
+                      setBomToDeactivate(null);
+                    }
+                  });
+                }}
+                loading={deleteMutation.isPending}
+              >
+                Yes, Deactivate
+              </Button>
+              <Button
+                id="btn-cancel-deactivate"
+                variant="secondary"
+                onClick={() => setBomToDeactivate(null)}
+                disabled={deleteMutation.isPending}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

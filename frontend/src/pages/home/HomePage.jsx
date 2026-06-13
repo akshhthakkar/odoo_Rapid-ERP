@@ -101,7 +101,7 @@ const HomePage = () => {
       {/* Hero Section */}
       <section className="hero-section">
         {/* Floating Partner/Brand Logos (randomized and interactive parallax) */}
-        <div className="floating-logos-container">
+        <div className="floating-logos-container" style={{ display: 'none' }}>
           {logoItems.map((logo) => (
             <div
               key={logo.id}

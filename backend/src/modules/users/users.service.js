@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import prisma from '../../config/prisma.js';
-import { sendWelcomeEmail } from '../../utils/emailService.js';
+import { sendUserInvitationEmail } from '../../utils/emailService.js';
 
 const generateTempPassword = () => {
   const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#!';
@@ -59,19 +59,23 @@ export const inviteUserService = async ({ name, email, role }, invitedBy) => {
   });
 
   // Non-blocking email — failure is logged but never crashes the endpoint
+  let emailSent = false;
   try {
-    await sendWelcomeEmail({
-      toEmail: user.email,
-      toName: user.name,
+    emailSent = await sendUserInvitationEmail({
       tenantName: tenant.name,
-      tempPassword,
+      userName: user.name,
+      email: user.email,
+      role,
+      temporaryPassword: tempPassword,
+      tenantId: invitedBy.tenantId,
     });
   } catch (err) {
-    console.error('Email send failed (non-blocking):', err.message);
+    console.error('[EMAIL] Invite email failed - Error:', err.message || err);
   }
 
   return {
-    message: `Invitation sent to ${user.email}`,
+    message: 'User invited successfully',
+    emailSent,
     user: { id: user.id, name: user.name, email: user.email, role: user.role },
   };
 };
