@@ -265,7 +265,7 @@ export const startManufacturingOrder = async (id, userId, tenantId) => {
   const updatedMo = await prisma.$transaction(async (tx) => {
     // A. Consume components stock
     for (const comp of mo.components) {
-      await consumeStock(comp.productId, Number(comp.qtyRequired), mo.id, tenantId, tx);
+      await consumeStock(comp.productId, Number(comp.qtyRequired), mo.id, tenantId, null, tx);
       await tx.manufacturingComponent.update({
         where: { id: comp.id },
         data: { qtyConsumed: comp.qtyRequired },
@@ -432,7 +432,7 @@ export const completeManufacturingOrder = async (id, userId, tenantId) => {
 
   const completedMo = await prisma.$transaction(async (tx) => {
     // 1. Produce finished goods stock
-    await produceStock(mo.productId, Number(mo.qty), mo.id, tenantId, tx);
+    await produceStock(mo.productId, Number(mo.qty), mo.id, tenantId, null, tx);
 
     // 2. Handle linked MTO Sales Order line replenishment resolution
     if (mo.salesOrderId) {
