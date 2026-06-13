@@ -192,7 +192,7 @@ export const getExecutiveDashboard = async (tenantId, query = {}, user = {}) => 
       where: { tenantId, isActive: true }
     }),
     prisma.inventoryBalance.findMany({
-      where: { tenantId, warehouse: { isActive: true } },
+      where: { tenantId, Warehouse: { isActive: true } },
       include: { warehouse: true }
     }),
 
