@@ -23,8 +23,9 @@ export function Navbar() {
     <nav className={`navbar-wrapper ${hidden ? 'navbar-wrapper--hidden' : ''}`}>
       <div className="navbar">
 
-        <div className="navbar-logo">
-          <span className="navbar-logo-text">Coveer</span>
+        <div className="navbar-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <img src="/logo.png" alt="Rapid Logo" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
+          <span className="navbar-logo-text">Rapid</span>
         </div>
 
         <ul className="navbar-links">

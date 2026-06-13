@@ -220,13 +220,10 @@ const LoginPage = () => {
             <div className="grid-plus grid-plus-tl">+</div>
             <div className="grid-plus grid-plus-tr">+</div>
 
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '8px' }}>
-                <path d="M12 2C11.38 3.4 9.8 4.72 8.3 6.13C6.72 7.62 5 9.69 5 12.5C5 16.09 7.91 19 11.5 19C11.83 19 12.15 18.97 12.47 18.92C11.58 17.96 11 16.54 11 15C11 12.18 13.5 10.5 13.5 7.5C13.5 7.22 13.43 6.95 13.3 6.7C15.53 7.82 17 10.22 17 13C17 14.15 16.68 15.22 16.13 16.14C17.84 14.89 19 12.83 19 10.5C19 6.5 15.5 4.5 12 2Z" fill="#FF540E" />
-                <path d="M12.5 11.5C12.5 9.8 13.5 9 13.5 7.5C13.5 10.5 11 12.18 11 15C11 16.54 11.58 17.96 12.47 18.92C14.58 18.6 16 16.72 16 14.5C16 13.12 15.27 11.9 14.18 11.23C13.62 12.22 12.5 12 12.5 11.5Z" fill="#FF8A00" />
-              </svg>
-              <span style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.03em' }}>Coveer</span>
-            </div>
+             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+               <img src="/logo.png" alt="Rapid Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
+               <span style={{ fontSize: '24px', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.03em' }}>Rapid</span>
+             </div>
 
             <div className="grid-h-line" style={{ bottom: 0 }} />
             <div className="grid-plus grid-plus-bl">+</div>

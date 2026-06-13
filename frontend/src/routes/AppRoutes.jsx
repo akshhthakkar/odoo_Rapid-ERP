@@ -9,6 +9,8 @@ import SignupPage from '../pages/auth/SignupPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import DashboardPage from '../pages/dashboard/DashboardPage';
 import HomePage from '../pages/home/HomePage';
+import ProductListPage from '../pages/products/ProductListPage';
+import ProductFormPage from '../pages/products/ProductFormPage';
 
 // Role redirect helper
 import { useAuthStore } from '../store/authStore';
@@ -54,6 +56,13 @@ const AppRoutes = () => {
         </div>
       } />
 
+      {/* Protected routes */}
+      <Route path="/" element={
+        <ProtectedRoute>
+          <RoleRedirect />
+        </ProtectedRoute>
+      } />
+
       <Route path="/dashboard" element={
         <ProtectedRoute>
           <AppLayout><DashboardPage /></AppLayout>
@@ -67,8 +76,12 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
 
+      {/* Phase 2: Products Module Routes */}
+      <Route path="/products"          element={<ProtectedRoute><AppLayout><ProductListPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/products/new"      element={<ProtectedRoute allowedRoles={['ADMIN', 'BUSINESS_OWNER']}><AppLayout><ProductFormPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/products/edit/:id" element={<ProtectedRoute allowedRoles={['ADMIN', 'BUSINESS_OWNER']}><AppLayout><ProductFormPage /></AppLayout></ProtectedRoute>} />
+
       {/* Placeholder routes — will be filled in subsequent phases */}
-      <Route path="/products"      element={<ProtectedRoute><AppLayout><ComingSoon title="Products" /></AppLayout></ProtectedRoute>} />
       <Route path="/sales"         element={<ProtectedRoute><AppLayout><ComingSoon title="Sales" /></AppLayout></ProtectedRoute>} />
       <Route path="/purchase"      element={<ProtectedRoute><AppLayout><ComingSoon title="Purchase" /></AppLayout></ProtectedRoute>} />
       <Route path="/manufacturing" element={<ProtectedRoute><AppLayout><ComingSoon title="Manufacturing" /></AppLayout></ProtectedRoute>} />

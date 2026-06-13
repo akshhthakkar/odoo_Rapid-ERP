@@ -2,6 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
 import authRoutes from './modules/auth/auth.routes.js';
+import productRoutes from './modules/products/products.routes.js';
+import customerRoutes from './modules/customers/customers.routes.js';
+import vendorRoutes from './modules/vendors/vendors.routes.js';
+import workCenterRoutes from './modules/workcenters/workcenters.routes.js';
 
 const app = express();
 
@@ -25,17 +29,17 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/vendors', vendorRoutes);
+app.use('/api/workcenters', workCenterRoutes);
 
 // Placeholder for future modules — will be wired in subsequent phases
-// app.use('/api/products', productRoutes);
-// app.use('/api/customers', customerRoutes);
-// app.use('/api/vendors', vendorRoutes);
 // app.use('/api/sales', salesRoutes);
 // app.use('/api/purchase', purchaseRoutes);
 // app.use('/api/bom', bomRoutes);
 // app.use('/api/manufacturing', manufacturingRoutes);
 // app.use('/api/inventory', inventoryRoutes);
-// app.use('/api/workcenters', workcenterRoutes);
 // app.use('/api/audit', auditRoutes);
 // app.use('/api/dashboard', dashboardRoutes);
 
