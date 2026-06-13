@@ -87,22 +87,8 @@ const Sidebar = () => {
         borderBottom: '1px solid #E5E7EB',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{
-            width: 32,
-            height: 32,
-            background: 'rgba(255, 84, 14, 0.08)',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: '1px solid rgba(255, 84, 14, 0.12)',
-          }}>
-            <Package size={16} color="#FF540E" strokeWidth={2.2} />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'baseline' }}>
-            <span style={{ fontSize: '15px', fontWeight: 800, color: '#1F2937' }}>Mini</span>
-            <span style={{ fontSize: '15px', fontWeight: 400, fontStyle: 'italic', color: '#4B5563', marginLeft: '3px', fontFamily: 'Georgia, serif' }}>ERP</span>
-          </div>
+          <img src="/logo.png" alt="Rapid Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
+          <span style={{ fontSize: '16px', fontWeight: 800, color: '#1F2937' }}>Rapid</span>
         </div>
       </div>
 

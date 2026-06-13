@@ -11,6 +11,8 @@ import DashboardPage from '../pages/dashboard/DashboardPage';
 import HomePage from '../pages/home/HomePage';
 import ProductListPage from '../pages/products/ProductListPage';
 import ProductFormPage from '../pages/products/ProductFormPage';
+import BomListPage from '../pages/bom/BomListPage';
+import BomFormPage from '../pages/bom/BomFormPage';
 
 // Role redirect helper
 import { useAuthStore } from '../store/authStore';
@@ -85,7 +87,12 @@ const AppRoutes = () => {
       <Route path="/sales"         element={<ProtectedRoute><AppLayout><ComingSoon title="Sales" /></AppLayout></ProtectedRoute>} />
       <Route path="/purchase"      element={<ProtectedRoute><AppLayout><ComingSoon title="Purchase" /></AppLayout></ProtectedRoute>} />
       <Route path="/manufacturing" element={<ProtectedRoute><AppLayout><ComingSoon title="Manufacturing" /></AppLayout></ProtectedRoute>} />
-      <Route path="/bom"           element={<ProtectedRoute><AppLayout><ComingSoon title="Bill of Materials" /></AppLayout></ProtectedRoute>} />
+      
+      {/* Phase 3: Bill of Materials Module Routes */}
+      <Route path="/bom"           element={<ProtectedRoute><AppLayout><BomListPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/bom/new"      element={<ProtectedRoute allowedRoles={['ADMIN', 'MANUFACTURING_USER']}><AppLayout><BomFormPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/bom/edit/:id" element={<ProtectedRoute allowedRoles={['ADMIN', 'MANUFACTURING_USER']}><AppLayout><BomFormPage /></AppLayout></ProtectedRoute>} />
+
       <Route path="/inventory"     element={<ProtectedRoute><AppLayout><ComingSoon title="Inventory" /></AppLayout></ProtectedRoute>} />
       <Route path="/audit"         element={<ProtectedRoute><AppLayout><ComingSoon title="Audit Log" /></AppLayout></ProtectedRoute>} />
 
