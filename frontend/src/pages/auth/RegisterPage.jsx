@@ -132,7 +132,7 @@ const RegisterPage = () => {
                   style={{
                     padding: '10px 12px',
                     borderRadius: '10px',
-                    border: `1px solid ${form.role === r.value ? 'rgba(124,58,237,0.5)' : 'var(--border)'}`,
+                    border: `1px solid ${form.role === r.value ? 'rgba(255,84,14,0.5)' : 'var(--border)'}`,
                     background: form.role === r.value ? 'var(--accent-light)' : 'var(--bg-card)',
                     cursor: 'pointer',
                     textAlign: 'left',
@@ -142,7 +142,7 @@ const RegisterPage = () => {
                   <div style={{
                     fontSize: '13px',
                     fontWeight: 600,
-                    color: form.role === r.value ? '#A78BFA' : 'var(--text-primary)',
+                    color: form.role === r.value ? '#FF8A58' : 'var(--text-primary)',
                     marginBottom: '2px',
                   }}>
                     {r.label}

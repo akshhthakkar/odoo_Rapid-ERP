@@ -5,8 +5,10 @@ import AppLayout from '../components/layout/AppLayout';
 
 // Pages
 import LoginPage from '../pages/auth/LoginPage';
+import SignupPage from '../pages/auth/SignupPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import DashboardPage from '../pages/dashboard/DashboardPage';
+import HomePage from '../pages/home/HomePage';
 
 // Role redirect helper
 import { useAuthStore } from '../store/authStore';
@@ -30,7 +32,9 @@ const AppRoutes = () => {
   return (
     <Routes>
       {/* Public routes */}
+      <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
 
       {/* Unauthorized page */}
       <Route path="/unauthorized" element={
@@ -46,15 +50,8 @@ const AppRoutes = () => {
           <div style={{ fontSize: 64, marginBottom: 16 }}>🚫</div>
           <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Access Denied</h1>
           <p style={{ color: 'var(--text-muted)', marginBottom: 24 }}>You don't have permission to view this page.</p>
-          <a href="/" style={{ color: '#A78BFA', textDecoration: 'none', fontSize: 14 }}>← Go back home</a>
+          <a href="/" style={{ color: '#FF540E', textDecoration: 'none', fontSize: 14 }}>← Go back home</a>
         </div>
-      } />
-
-      {/* Protected routes */}
-      <Route path="/" element={
-        <ProtectedRoute>
-          <RoleRedirect />
-        </ProtectedRoute>
       } />
 
       <Route path="/dashboard" element={

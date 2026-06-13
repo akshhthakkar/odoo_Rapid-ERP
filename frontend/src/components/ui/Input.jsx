@@ -24,7 +24,7 @@ const Input = forwardRef(({
         id={id}
         type={type}
         placeholder={placeholder}
-        className={`erp-input ${error ? 'border-red-500' : ''} ${className}`}
+        className={`erp-input ${error ? 'erp-input-error' : ''} ${className}`}
         style={error ? { borderColor: 'var(--danger)', boxShadow: '0 0 0 3px rgba(239,68,68,0.1)' } : {}}
         {...props}
       />

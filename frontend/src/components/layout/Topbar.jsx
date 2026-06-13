@@ -64,7 +64,7 @@ const Topbar = () => {
         <div style={{
           width: 36,
           height: 36,
-          background: 'linear-gradient(135deg, #7C3AED, #5B21B6)',
+          background: 'linear-gradient(135deg, #FF540E, #CC3300)',
           borderRadius: '50%',
           display: 'flex',
           alignItems: 'center',
@@ -73,7 +73,7 @@ const Topbar = () => {
           fontWeight: 700,
           color: 'white',
           cursor: 'default',
-          boxShadow: '0 2px 8px rgba(124,58,237,0.3)',
+          boxShadow: '0 2px 8px rgba(255,84,14,0.3)',
         }}
         title={user?.name}
         >

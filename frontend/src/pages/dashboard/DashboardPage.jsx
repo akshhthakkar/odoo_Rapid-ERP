@@ -10,8 +10,8 @@ const DashboardPage = () => {
       <div className="glass-card" style={{
         padding: '28px 32px',
         marginBottom: '28px',
-        background: 'linear-gradient(135deg, rgba(124,58,237,0.15) 0%, rgba(91,33,182,0.08) 100%)',
-        border: '1px solid rgba(124,58,237,0.2)',
+        background: 'linear-gradient(135deg, rgba(255,84,14,0.15) 0%, rgba(204,51,0,0.08) 100%)',
+        border: '1px solid rgba(255,84,14,0.2)',
         position: 'relative',
         overflow: 'hidden',
       }}>
@@ -21,14 +21,14 @@ const DashboardPage = () => {
           width: 300,
           height: 300,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(124,58,237,0.2) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(255,84,14,0.2) 0%, transparent 70%)',
           top: -100,
           right: -50,
           pointerEvents: 'none',
         }} />
 
         <div style={{ position: 'relative' }}>
-          <p style={{ fontSize: '13px', color: '#A78BFA', fontWeight: 600, marginBottom: '6px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+          <p style={{ fontSize: '13px', color: '#FF8A58', fontWeight: 600, marginBottom: '6px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
             Welcome back
           </p>
           <h2 style={{ fontSize: '26px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>
@@ -45,7 +45,7 @@ const DashboardPage = () => {
         {[
           { label: 'Database', status: 'Connected', color: 'var(--success)', icon: '🗄️' },
           { label: 'Auth & RBAC', status: 'Active', color: 'var(--success)', icon: '🔐' },
-          { label: 'Your Role', status: user?.role?.replace(/_/g, ' ') || '—', color: '#A78BFA', icon: '👤' },
+          { label: 'Your Role', status: user?.role?.replace(/_/g, ' ') || '—', color: '#FF8A58', icon: '👤' },
           { label: 'API Status', status: 'Healthy', color: 'var(--success)', icon: '⚡' },
         ].map((card) => (
           <div key={card.label} className="glass-card" style={{ padding: '20px' }}>

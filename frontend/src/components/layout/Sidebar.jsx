@@ -71,12 +71,12 @@ const Sidebar = () => {
           <div style={{
             width: 36,
             height: 36,
-            background: 'linear-gradient(135deg, #7C3AED, #5B21B6)',
+            background: 'linear-gradient(135deg, #FF540E, #CC3300)',
             borderRadius: '10px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 15px rgba(124,58,237,0.4)',
+            boxShadow: '0 4px 15px rgba(255,84,14,0.4)',
           }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
               <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
@@ -106,15 +106,15 @@ const Sidebar = () => {
               textDecoration: 'none',
               fontSize: '13.5px',
               fontWeight: isActive ? 600 : 400,
-              color: isActive ? '#A78BFA' : 'var(--text-secondary)',
-              background: isActive ? 'rgba(124,58,237,0.12)' : 'transparent',
-              border: isActive ? '1px solid rgba(124,58,237,0.2)' : '1px solid transparent',
+              color: isActive ? '#FF8A58' : 'var(--text-secondary)',
+              background: isActive ? 'rgba(255,84,14,0.12)' : 'transparent',
+              border: isActive ? '1px solid rgba(255,84,14,0.2)' : '1px solid transparent',
               transition: 'all 0.15s',
             })}
           >
             {({ isActive }) => (
               <>
-                <span style={{ color: isActive ? '#A78BFA' : 'var(--text-muted)', flexShrink: 0 }}>
+                <span style={{ color: isActive ? '#FF8A58' : 'var(--text-muted)', flexShrink: 0 }}>
                   <Icon d={ICONS[item.icon]} />
                 </span>
                 {item.label}

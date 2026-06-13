@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
-import { login } from '../../api/auth.api';
+import { register } from '../../api/auth.api';
 
 const ROLE_HOME = {
   ADMIN:               '/dashboard',
@@ -12,9 +12,9 @@ const ROLE_HOME = {
   MANUFACTURING_USER:  '/manufacturing',
 };
 
-const LoginPage = () => {
+const SignupPage = () => {
   const navigate = useNavigate();
-  const { setAuth, token } = useAuthStore();
+  const { token } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -39,19 +39,21 @@ const LoginPage = () => {
 
     setLoading(true);
     try {
-      const { token: jwt, user } = await login({ email: email.trim(), password });
-      setAuth(user, jwt);
-      navigate(ROLE_HOME[user.role] || '/dashboard', { replace: true });
+      const name = email.split('@')[0];
+      await register({ name, email: email.trim(), password, role: 'SALES_USER' });
+      setSuccess('Account created successfully! Redirecting to Log In...');
+      setTimeout(() => {
+        navigate('/login', { replace: true });
+      }, 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed.');
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setError('Public registration is restricted on this ERP. Please contact your system Administrator.');
+      } else {
+        setError(err.response?.data?.message || 'Registration failed.');
+      }
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleDemoCredentials = (dEmail, dPass) => {
-    setEmail(dEmail);
-    setPassword(dPass);
   };
 
   return (
@@ -235,7 +237,7 @@ const LoginPage = () => {
 
           {/* Row 2: Title Header */}
           <div className="auth-row" style={{ padding: '24px 40px', textAlign: 'center' }}>
-            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 700, color: '#0F172A' }}>Log In</h2>
+            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 700, color: '#0F172A' }}>Sign Up</h2>
             <div className="grid-h-line" style={{ bottom: 0 }} />
             <div className="grid-plus grid-plus-bl">+</div>
             <div className="grid-plus grid-plus-br">+</div>
@@ -300,7 +302,7 @@ const LoginPage = () => {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="current-password"
+                  autoComplete="new-password"
                 />
               </div>
 
@@ -310,7 +312,7 @@ const LoginPage = () => {
                 className="auth-button-submit"
                 disabled={loading}
               >
-                {loading ? 'Processing...' : 'Log In'}
+                {loading ? 'Processing...' : 'Create Account'}
               </button>
             </form>
 
@@ -322,12 +324,12 @@ const LoginPage = () => {
           {/* Row 4: Redirect Option */}
           <div className="auth-row" style={{ padding: '24px 40px', textAlign: 'center' }}>
             <div style={{ fontSize: '14px', color: '#64748B' }}>
-              Don't have an account?{' '}
+              Already have an account?{' '}
               <a
-                href="/signup"
+                href="/login"
                 onClick={(e) => {
                   e.preventDefault();
-                  navigate('/signup');
+                  navigate('/login');
                 }}
                 style={{
                   color: '#FF540E',
@@ -338,7 +340,7 @@ const LoginPage = () => {
                 onMouseEnter={(e) => e.target.style.color = '#E04300'}
                 onMouseLeave={(e) => e.target.style.color = '#FF540E'}
               >
-                Sign Up
+                Log In
               </a>
             </div>
 
@@ -347,58 +349,10 @@ const LoginPage = () => {
             <div className="grid-plus grid-plus-br">+</div>
           </div>
 
-          {/* Row 5: Footer & Credentials Demo */}
-          <div className="auth-row" style={{ padding: '24px 40px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Row 5: Footer */}
+          <div className="auth-row" style={{ padding: '20px 40px' }}>
             <div className="auth-footnote">
-              By logging in, you agree to our <a href="#terms">Terms of Service</a> and <a href="#privacy">Privacy Policy</a>.
-            </div>
-
-            {/* Quick Demo Credentials */}
-            <div style={{
-              padding: '12px',
-              background: '#F1F5F9',
-              borderRadius: '8px',
-              border: '1px solid #E2E8F0',
-            }}>
-              <p style={{ fontSize: '10.5px', fontWeight: 700, color: '#475569', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.4px', textAlign: 'center' }}>
-                Demo Credentials
-              </p>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <button
-                  type="button"
-                  onClick={() => handleDemoCredentials('admin@erp.com', 'Admin@123')}
-                  style={{
-                    flex: 1,
-                    padding: '6px',
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    color: '#FF540E',
-                    background: '#FFFFFF',
-                    border: '1px solid #E2E8F0',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Admin Demo
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDemoCredentials('sarah@erp.com', 'Pass@123')}
-                  style={{
-                    flex: 1,
-                    padding: '6px',
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    color: '#64748B',
-                    background: '#FFFFFF',
-                    border: '1px solid #E2E8F0',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Sales Demo
-                </button>
-              </div>
+              By signing up, you agree to our <a href="#terms">Terms of Service</a> and <a href="#privacy">Privacy Policy</a>.
             </div>
 
             <div className="grid-h-line" style={{ bottom: 0 }} />
@@ -411,4 +365,5 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default SignupPage;
+
