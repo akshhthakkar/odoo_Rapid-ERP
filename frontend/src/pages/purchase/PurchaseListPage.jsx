@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getPurchaseOrders } from '../../api/purchase.api';
 import { useAuthStore } from '../../store/authStore';
 import Button from '../../components/ui/Button';
+import { LayoutList, FileText, CheckCircle2, Truck, XCircle, Zap, User, Layers, Package } from 'lucide-react';
 
 const STATUS_CONFIG = {
   DRAFT: { label: 'Draft', bg: 'rgba(148,163,184,0.15)', color: '#94A3B8', border: 'rgba(148,163,184,0.25)' },
@@ -50,16 +51,24 @@ const PurchaseListPage = () => {
     }),
   });
 
-  const filterSelectStyle = {
-    background: 'var(--surface)',
-    border: '1px solid var(--border)',
-    color: 'var(--text-primary)',
-    borderRadius: '8px',
-    padding: '6px 12px',
-    fontSize: '13px',
+  const chipStyle = (active, color) => ({
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    padding: '5px 12px',
+    borderRadius: '9999px',
+    border: active ? `1.5px solid ${color}` : '1.5px solid rgba(0,0,0,0.08)',
+    background: active ? `${color}18` : 'rgba(0,0,0,0.03)',
+    color: active ? color : 'var(--text-secondary)',
+    fontSize: '12.5px',
+    fontWeight: active ? 600 : 500,
     cursor: 'pointer',
-    outline: 'none',
-  };
+    transition: 'all 0.18s ease',
+    userSelect: 'none',
+    whiteSpace: 'nowrap',
+  });
+
+  const hasActiveFilters = statusFilter !== '' || autoFilter !== '';
 
   return (
     <div className="animate-fade-in" style={{ fontFamily: 'var(--font-family)' }}>
@@ -84,40 +93,114 @@ const PurchaseListPage = () => {
         )}
       </div>
 
-      {/* Filters */}
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={filterSelectStyle}>
-          <option value="">All Statuses</option>
-          <option value="DRAFT">Draft</option>
-          <option value="SENT">Confirmed</option>
-          <option value="PARTIALLY_RECEIVED">Partially Received</option>
-          <option value="RECEIVED">Fully Received</option>
-          <option value="CANCELLED">Cancelled</option>
-        </select>
-        <select value={autoFilter} onChange={(e) => setAutoFilter(e.target.value)} style={filterSelectStyle}>
-          <option value="">All Origins</option>
-          <option value="true">Auto-Generated (MTO)</option>
-          <option value="false">Manual</option>
-        </select>
-      </div>
-
-      {/* Table */}
+      {/* Main List Table & Filters */}
       <div className="glass-card" style={{ padding: '24px' }}>
+        {/* ── Filter Chips ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--border)' }}>
+          {/* Status Filters */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: '8px', minWidth: '60px' }}>Status</span>
+
+            <button style={chipStyle(statusFilter === '', '#6B7280')} onClick={() => setStatusFilter('')}>
+              <LayoutList size={13} strokeWidth={2.5} />
+              All
+            </button>
+            <button style={chipStyle(statusFilter === 'DRAFT', '#94A3B8')} onClick={() => setStatusFilter('DRAFT')}>
+              <FileText size={13} strokeWidth={2.5} />
+              Draft
+            </button>
+            <button style={chipStyle(statusFilter === 'SENT', '#3B82F6')} onClick={() => setStatusFilter('SENT')}>
+              <CheckCircle2 size={13} strokeWidth={2.5} />
+              Confirmed
+            </button>
+            <button style={chipStyle(statusFilter === 'PARTIALLY_RECEIVED', '#F59E0B')} onClick={() => setStatusFilter('PARTIALLY_RECEIVED')}>
+              <Truck size={13} strokeWidth={2.5} style={{ transform: 'scaleX(-1)' }} />
+              Partially Received
+            </button>
+            <button style={chipStyle(statusFilter === 'RECEIVED', '#10B981')} onClick={() => setStatusFilter('RECEIVED')}>
+              <CheckCircle2 size={13} strokeWidth={2.5} />
+              Fully Received
+            </button>
+            <button style={chipStyle(statusFilter === 'CANCELLED', '#EF4444')} onClick={() => setStatusFilter('CANCELLED')}>
+              <XCircle size={13} strokeWidth={2.5} />
+              Cancelled
+            </button>
+          </div>
+
+          {/* Origin Filters */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: '8px', minWidth: '60px' }}>Origin</span>
+
+            <button style={chipStyle(autoFilter === '', '#6B7280')} onClick={() => setAutoFilter('')}>
+              <Layers size={13} strokeWidth={2.5} />
+              All Origins
+            </button>
+            <button style={chipStyle(autoFilter === 'true', '#818CF8')} onClick={() => setAutoFilter('true')}>
+              <Zap size={13} strokeWidth={2.5} />
+              Auto-Generated (MTO)
+            </button>
+            <button style={chipStyle(autoFilter === 'false', '#94A3B8')} onClick={() => setAutoFilter('false')}>
+              <User size={13} strokeWidth={2.5} />
+              Manual
+            </button>
+
+            {/* Clear filters */}
+            {hasActiveFilters && (
+              <button
+                onClick={() => {
+                  setStatusFilter('');
+                  setAutoFilter('');
+                }}
+                style={{
+                  marginLeft: 'auto',
+                  fontSize: '12px',
+                  color: '#EF4444',
+                  background: 'rgba(239,68,68,0.07)',
+                  border: '1.5px solid rgba(239,68,68,0.25)',
+                  borderRadius: '9999px',
+                  padding: '5px 12px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px'
+                }}
+              >
+                ✕ Clear filters
+              </button>
+            )}
+          </div>
+        </div>
+
         {isLoading ? (
           <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
             Loading Purchase Orders…
           </div>
         ) : orders.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 40px', color: 'var(--text-muted)' }}>
-            <span style={{ fontSize: '32px' }}>📦</span>
-            <p style={{ marginTop: '12px', fontSize: '14px' }}>No purchase orders found.</p>
-            {canCreate && (
+            <Package size={40} strokeWidth={1.5} style={{ color: 'var(--text-muted)', marginBottom: '12px', display: 'inline-block' }} />
+            <p style={{ marginTop: '12px', fontSize: '14px' }}>
+              {hasActiveFilters ? 'No purchase orders match the selected filters.' : 'No purchase orders found.'}
+            </p>
+            {hasActiveFilters ? (
               <button
-                onClick={() => navigate('/purchase/new')}
+                onClick={() => {
+                  setStatusFilter('');
+                  setAutoFilter('');
+                }}
                 style={{ marginTop: '12px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-secondary)', borderRadius: '8px', padding: '8px 18px', cursor: 'pointer', fontSize: '13px' }}
               >
-                Create your first Purchase Order
+                Clear Filters
               </button>
+            ) : (
+              canCreate && (
+                <button
+                  onClick={() => navigate('/purchase/new')}
+                  style={{ marginTop: '12px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-secondary)', borderRadius: '8px', padding: '8px 18px', cursor: 'pointer', fontSize: '13px' }}
+                >
+                  Create your first Purchase Order
+                </button>
+              )
             )}
           </div>
         ) : (
@@ -148,7 +231,7 @@ const PurchaseListPage = () => {
                           border: '1px solid rgba(99,102,241,0.2)',
                           borderRadius: '20px', padding: '2px 8px', fontSize: '11px', fontWeight: 600,
                         }}>
-                          ⚡ MTO
+                          <Zap size={11} strokeWidth={2.5} /> MTO
                         </span>
                       ) : (
                         <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>Manual</span>
@@ -180,6 +263,11 @@ const PurchaseListPage = () => {
                 ))}
               </tbody>
             </table>
+            {orders.length > 0 && (
+              <div style={{ paddingTop: '12px', fontSize: '12px', color: 'var(--text-muted)' }}>
+                Showing {orders.length} purchase order{orders.length !== 1 ? 's' : ''}
+              </div>
+            )}
           </div>
         )}
       </div>

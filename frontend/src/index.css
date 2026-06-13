@@ -70,8 +70,6 @@ html.lenis {
 .lenis.lenis-scrolling iframe {
   pointer-events: none;
 }
-  scroll-behavior: smooth;
-}
 
 body {
   font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
