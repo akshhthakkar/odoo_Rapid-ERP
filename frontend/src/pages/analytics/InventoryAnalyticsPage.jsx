@@ -59,11 +59,11 @@ const InventoryAnalyticsPage = () => {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px", marginBottom: "28px" }}>
         {[
           { label: "Grand Inventory Value", value: formatCurrency(kpis.totalValue), icon: DollarSign, color: "var(--success)" },
-          { label: "Total Hand Qty", value: `${kpis.totalUnits} Units`, icon: Layers, color: "var(--text-primary)" },
-          { label: "Reserved Stock", value: `${kpis.reservedStock} Units`, icon: HelpCircle, color: "var(--accent)" },
-          { label: "Available Stock", value: `${kpis.availableStock} Units`, icon: Layers, color: "#10B981" },
-          { label: "Low Stock Products", value: `${kpis.lowStockProductsCount} items`, icon: AlertTriangle, color: "#F59E0B" },
-          { label: "Out of Stock Products", value: `${kpis.outOfStockProductsCount} items`, icon: AlertTriangle, color: "var(--danger)" },
+          { label: "Total Hand Qty", value: `${Math.round(kpis.totalUnits)} Units`, icon: Layers, color: "var(--text-primary)" },
+          { label: "Reserved Stock", value: `${Math.round(kpis.reservedStock)} Units`, icon: HelpCircle, color: "var(--accent)" },
+          { label: "Available Stock", value: `${Math.round(kpis.availableStock)} Units`, icon: Layers, color: "#10B981" },
+          { label: "Low Stock Products", value: `${Math.round(kpis.lowStockProductsCount)} items`, icon: AlertTriangle, color: "#F59E0B" },
+          { label: "Out of Stock Products", value: `${Math.round(kpis.outOfStockProductsCount)} items`, icon: AlertTriangle, color: "var(--danger)" },
         ].map((kpi, idx) => {
           const Icon = kpi.icon;
           return (

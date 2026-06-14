@@ -5,8 +5,8 @@ export const inviteUser = async (data) => {
   return response.data;
 };
 
-export const getCompanyUsers = async () => {
-  const { data } = await api.get('/users');
+export const getCompanyUsers = async (params = {}) => {
+  const { data } = await api.get('/users', { params });
   return data;
 };
 

@@ -62,9 +62,9 @@ const InventoryProductDetailPage = () => {
       {/* Dynamic Summary Cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px", marginBottom: "20px" }}>
         {[
-          { title: "Current Stock", value: `${details.onHand} Units`, color: "var(--text-primary)", icon: Layers },
-          { title: "Reserved Stock", value: `${details.reserved} Units`, color: "var(--accent)", icon: CheckCircle },
-          { title: "Free To Use", value: `${details.freeToUse} Units`, color: "#10B981", icon: CheckCircle },
+          { title: "Current Stock", value: `${Math.round(details.onHand || 0)} Units`, color: "var(--text-primary)", icon: Layers },
+          { title: "Reserved Stock", value: `${Math.round(details.reserved || 0)} Units`, color: "var(--accent)", icon: CheckCircle },
+          { title: "Free To Use", value: `${Math.round(details.freeToUse || 0)} Units`, color: "#10B981", icon: CheckCircle },
           { title: "Total Valuation", value: formatCurrency(details.valuation), color: "#FF540E", icon: TrendingUp },
         ].map((card, idx) => {
           const Icon = card.icon;

@@ -2,7 +2,7 @@ import * as customerService from "./customers.service.js";
 
 export const listCustomers = async (req, res, next) => {
   try {
-    const customers = await customerService.getCustomers(req.user.tenantId);
+    const customers = await customerService.getCustomers(req.user.tenantId, req.query);
     res.status(200).json(customers);
   } catch (err) {
     next(err);

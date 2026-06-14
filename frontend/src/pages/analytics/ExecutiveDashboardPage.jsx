@@ -291,22 +291,33 @@ const ExecutiveDashboardPage = () => {
             style={{
               padding: "10px 16px",
               borderRadius: "10px",
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.14)",
-              color: "#fff",
+              background: "#ffffff",
+              border: "1px solid #ffffff",
+              color: "#FF540E",
               fontSize: "12px",
-              fontWeight: 600,
+              fontWeight: 700,
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               gap: "6px",
               fontFamily: "inherit",
-              transition: "all 0.2s",
+              transition: "all 0.2s ease",
               position: "relative",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.14)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.14)"; }}
+            onMouseEnter={(e) => { 
+              e.currentTarget.style.background = "#ffebe3"; 
+              e.currentTarget.style.borderColor = "#ffebe3";
+              e.currentTarget.style.transform = "translateY(-1px)";
+              e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.12)";
+            }}
+            onMouseLeave={(e) => { 
+              e.currentTarget.style.background = "#ffffff"; 
+              e.currentTarget.style.borderColor = "#ffffff";
+              e.currentTarget.style.transform = "none";
+              e.currentTarget.style.boxShadow = "0 2px 6px rgba(0,0,0,0.06)";
+            }}
           >
             Review System Audit Trail <ArrowRight size={13} />
           </button>

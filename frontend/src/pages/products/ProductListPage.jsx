@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProducts, deleteProduct } from '../../api/products.api';
 import { getCustomers } from '../../api/customers.api';
@@ -9,6 +9,7 @@ import { useAuthStore } from '../../store/authStore';
 import Button from '../../components/ui/Button';
 import { SquarePen, Trash2, CheckCircle2, Archive, Zap, Package, LayoutList, User, Building2, Settings } from 'lucide-react';
 import Loader from '../../components/ui/Loader';
+import Pagination from '../../components/ui/Pagination';
 
 const ProductListPage = () => {
   const navigate = useNavigate();
@@ -16,38 +17,70 @@ const ProductListPage = () => {
   const user = useAuthStore((s) => s.user);
   const userRole = user?.role;
 
-  const [activeTab, setActiveTab] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('tab') || 'products';
-  });
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'products';
+  
+  // Page states synced with URL search params
+  const productsPage = parseInt(searchParams.get('productsPage') || '1', 10);
+  const customersPage = parseInt(searchParams.get('customersPage') || '1', 10);
+  const vendorsPage = parseInt(searchParams.get('vendorsPage') || '1', 10);
+  const workcentersPage = parseInt(searchParams.get('workcentersPage') || '1', 10);
+
   const [deleteError, setDeleteError] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');   // 'all' | 'active' | 'archived'
   const [sourceFilter, setSourceFilter] = useState('all');   // 'all' | 'mto' | 'mts'
+  const [searchQuery, setSearchQuery] = useState('');
 
   // ─── QUERY CALLS ────────────────────────────────────────────────────────────
-  const { data: products = [], isLoading: isLoadingProd } = useQuery({
-    queryKey: ['products'],
-    queryFn: getProducts,
+  const { data: productsData, isLoading: isLoadingProd } = useQuery({
+    queryKey: ['products', productsPage, statusFilter, sourceFilter, searchQuery],
+    queryFn: () => getProducts({
+      page: productsPage,
+      limit: 10,
+      status: statusFilter,
+      source: sourceFilter,
+      search: searchQuery,
+    }),
     enabled: activeTab === 'products',
   });
+  const products = productsData?.data || [];
+  const productsPagination = productsData?.pagination;
 
-  const { data: customers = [], isLoading: isLoadingCust } = useQuery({
-    queryKey: ['customers'],
-    queryFn: getCustomers,
+  const { data: customersData, isLoading: isLoadingCust } = useQuery({
+    queryKey: ['customers', customersPage, searchQuery],
+    queryFn: () => getCustomers({
+      page: customersPage,
+      limit: 10,
+      search: searchQuery,
+    }),
     enabled: activeTab === 'customers',
   });
+  const customers = customersData?.data || [];
+  const customersPagination = customersData?.pagination;
 
-  const { data: vendors = [], isLoading: isLoadingVend } = useQuery({
-    queryKey: ['vendors'],
-    queryFn: getVendors,
+  const { data: vendorsData, isLoading: isLoadingVend } = useQuery({
+    queryKey: ['vendors', vendorsPage, searchQuery],
+    queryFn: () => getVendors({
+      page: vendorsPage,
+      limit: 10,
+      search: searchQuery,
+    }),
     enabled: activeTab === 'vendors',
   });
+  const vendors = vendorsData?.data || [];
+  const vendorsPagination = vendorsData?.pagination;
 
-  const { data: workcenters = [], isLoading: isLoadingWc } = useQuery({
-    queryKey: ['workcenters'],
-    queryFn: getWorkCenters,
+  const { data: workcentersData, isLoading: isLoadingWc } = useQuery({
+    queryKey: ['workcenters', workcentersPage, searchQuery],
+    queryFn: () => getWorkCenters({
+      page: workcentersPage,
+      limit: 10,
+      search: searchQuery,
+    }),
     enabled: activeTab === 'workcenters',
   });
+  const workcenters = workcentersData?.data || [];
+  const workcentersPagination = workcentersData?.pagination;
 
   // ─── MUTATIONS ──────────────────────────────────────────────────────────────
   const deleteProdMutation = useMutation({
@@ -68,6 +101,33 @@ const ProductListPage = () => {
     }
   };
 
+  const handlePageChange = (newPage) => {
+    const params = new URLSearchParams(window.location.search);
+    if (activeTab === 'products') params.set('productsPage', newPage);
+    else if (activeTab === 'customers') params.set('customersPage', newPage);
+    else if (activeTab === 'vendors') params.set('vendorsPage', newPage);
+    else if (activeTab === 'workcenters') params.set('workcentersPage', newPage);
+    setSearchParams(params);
+  };
+
+  const handleTabChange = (tabId) => {
+    const params = new URLSearchParams();
+    params.set('tab', tabId);
+    setSearchParams(params);
+    setSearchQuery(''); // Clear search on tab switch
+  };
+
+  const handleSearchChange = (val) => {
+    setSearchQuery(val);
+    // Reset the active tab page parameter back to 1 on a new search query
+    const params = new URLSearchParams(window.location.search);
+    if (activeTab === 'products') params.set('productsPage', '1');
+    else if (activeTab === 'customers') params.set('customersPage', '1');
+    else if (activeTab === 'vendors') params.set('vendorsPage', '1');
+    else if (activeTab === 'workcenters') params.set('workcentersPage', '1');
+    setSearchParams(params);
+  };
+
   // ─── ROLE GUARDS ───
   const canManageProducts = ['ADMIN', 'BUSINESS_OWNER'].includes(userRole);
   const canDeleteProduct = userRole === 'ADMIN';
@@ -81,17 +141,6 @@ const ProductListPage = () => {
     if (qty <= 50) return 'badge-warning';
     return 'badge-success';
   };
-
-  // ─── FILTERED PRODUCTS ──────────────────────────────────────────────────────
-  const filteredProducts = products.filter((p) => {
-    const isActive = p.isActive !== false;
-    if (statusFilter === 'active' && !isActive) return false;
-    if (statusFilter === 'archived' && isActive) return false;
-    const isMTO = p.procureOnDemand === true;
-    if (sourceFilter === 'mto' && !isMTO) return false;
-    if (sourceFilter === 'mts' && isMTO) return false;
-    return true;
-  });
 
   // ─── CHIP STYLE HELPER ──────────────────────────────────────────────────────
   const chipStyle = (active, color) => ({
@@ -111,14 +160,6 @@ const ProductListPage = () => {
     whiteSpace: 'nowrap',
   });
 
-  const dotStyle = (color) => ({
-    width: '7px',
-    height: '7px',
-    borderRadius: '50%',
-    background: color,
-    flexShrink: 0,
-  });
-
   return (
     <div className="animate-fade-in" style={{ fontFamily: 'var(--font-family)' }}>
       {/* Tab Menu Header */}
@@ -130,20 +171,14 @@ const ProductListPage = () => {
         overflowX: 'auto',
       }}>
         {[
-          { id: 'products', label: 'Products', count: products.length, visible: true },
-          { id: 'customers', label: 'Customers', count: customers.length, visible: true },
-          { id: 'vendors', label: 'Vendors', count: vendors.length, visible: true },
-          { id: 'workcenters', label: 'Work Centers', count: workcenters.length, visible: true },
+          { id: 'products', label: 'Products', count: productsPagination?.totalItems ?? 0, visible: true },
+          { id: 'customers', label: 'Customers', count: customersPagination?.totalItems ?? 0, visible: true },
+          { id: 'vendors', label: 'Vendors', count: vendorsPagination?.totalItems ?? 0, visible: true },
+          { id: 'workcenters', label: 'Work Centers', count: workcentersPagination?.totalItems ?? 0, visible: true },
         ].map((tab) => (
           <button
             key={tab.id}
-            onClick={() => {
-              setActiveTab(tab.id);
-              setDeleteError('');
-              const url = new URL(window.location);
-              url.searchParams.set('tab', tab.id);
-              window.history.pushState({}, '', url);
-            }}
+            onClick={() => handleTabChange(tab.id)}
             style={{
               padding: '12px 4px',
               background: 'transparent',
@@ -160,6 +195,18 @@ const ProductListPage = () => {
             }}
           >
             {tab.label}
+            {tab.count > 0 && (
+              <span style={{
+                fontSize: '11px',
+                padding: '1px 6px',
+                borderRadius: '9999px',
+                background: activeTab === tab.id ? '#FF540E20' : 'rgba(0,0,0,0.06)',
+                color: activeTab === tab.id ? '#FF540E' : 'var(--text-muted)',
+                fontWeight: 600
+              }}>
+                {tab.count}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -181,6 +228,51 @@ const ProductListPage = () => {
           <span>{deleteError}</span>
         </div>
       )}
+
+      {/* Search Input Bar (Shown for all tabs) */}
+      <div style={{ marginBottom: '20px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <input
+          type="text"
+          placeholder={`Search ${activeTab === 'products' ? 'by name or SKU' : activeTab === 'workcenters' ? 'by name or description' : 'by name, email, or phone'}...`}
+          value={searchQuery}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          style={{
+            width: '100%',
+            maxWidth: '400px',
+            padding: '10px 14px',
+            borderRadius: '8px',
+            border: '1px solid var(--border)',
+            background: 'var(--bg-card)',
+            color: 'var(--text-primary)',
+            fontSize: '13.5px',
+            outline: 'none',
+            transition: 'all 0.15s ease',
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = '#FF540E';
+            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255,84,14,0.12)';
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = 'var(--border)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+        />
+        {searchQuery && (
+          <button
+            onClick={() => handleSearchChange('')}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: '#EF4444',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Clear Search
+          </button>
+        )}
+      </div>
 
       {/* ─── TAB 1: PRODUCTS ────────────────────────────────────────────────── */}
       {activeTab === 'products' && (
@@ -207,15 +299,15 @@ const ProductListPage = () => {
             {/* Status chips */}
             <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: '2px' }}>Status</span>
 
-            <button style={chipStyle(statusFilter === 'all', '#6B7280')} onClick={() => setStatusFilter('all')}>
+            <button style={chipStyle(statusFilter === 'all', '#6B7280')} onClick={() => { setStatusFilter('all'); handleSearchChange(searchQuery); }}>
               <LayoutList size={13} strokeWidth={2.5} />
               All
             </button>
-            <button style={chipStyle(statusFilter === 'active', '#10B981')} onClick={() => setStatusFilter('active')}>
+            <button style={chipStyle(statusFilter === 'active', '#10B981')} onClick={() => { setStatusFilter('active'); handleSearchChange(searchQuery); }}>
               <CheckCircle2 size={13} strokeWidth={2.5} />
               Active
             </button>
-            <button style={chipStyle(statusFilter === 'archived', '#EF4444')} onClick={() => setStatusFilter('archived')}>
+            <button style={chipStyle(statusFilter === 'archived', '#EF4444')} onClick={() => { setStatusFilter('archived'); handleSearchChange(searchQuery); }}>
               <Archive size={13} strokeWidth={2.5} />
               Archived
             </button>
@@ -226,15 +318,15 @@ const ProductListPage = () => {
             {/* Source chips */}
             <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: '2px' }}>Source</span>
 
-            <button style={chipStyle(sourceFilter === 'all', '#6B7280')} onClick={() => setSourceFilter('all')}>
+            <button style={chipStyle(sourceFilter === 'all', '#6B7280')} onClick={() => { setSourceFilter('all'); handleSearchChange(searchQuery); }}>
               <LayoutList size={13} strokeWidth={2.5} />
               All
             </button>
-            <button style={chipStyle(sourceFilter === 'mto', '#3B82F6')} onClick={() => setSourceFilter('mto')}>
+            <button style={chipStyle(sourceFilter === 'mto', '#3B82F6')} onClick={() => { setSourceFilter('mto'); handleSearchChange(searchQuery); }}>
               <Zap size={13} strokeWidth={2.5} />
               Make to Order
             </button>
-            <button style={chipStyle(sourceFilter === 'mts', '#8B5CF6')} onClick={() => setSourceFilter('mts')}>
+            <button style={chipStyle(sourceFilter === 'mts', '#8B5CF6')} onClick={() => { setSourceFilter('mts'); handleSearchChange(searchQuery); }}>
               <Package size={13} strokeWidth={2.5} />
               Make to Stock
             </button>
@@ -242,7 +334,7 @@ const ProductListPage = () => {
             {/* Clear filters */}
             {(statusFilter !== 'all' || sourceFilter !== 'all') && (
               <button
-                onClick={() => { setStatusFilter('all'); setSourceFilter('all'); }}
+                onClick={() => { setStatusFilter('all'); setSourceFilter('all'); handleSearchChange(searchQuery); }}
                 style={{ marginLeft: 'auto', fontSize: '13px', color: '#EF4444', background: 'rgba(239,68,68,0.07)', border: '1.5px solid rgba(239,68,68,0.25)', borderRadius: '9999px', padding: '6px 14px', cursor: 'pointer', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}
               >
                 ✕ Clear filters
@@ -255,7 +347,7 @@ const ProductListPage = () => {
           ) : products.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px 40px', color: 'var(--text-muted)' }}>
               <Package size={32} style={{ margin: '0 auto 10px', color: 'var(--text-muted)' }} />
-              <p style={{ marginTop: '10px', fontSize: '14px' }}>No products found. Click "Add Product" to create one.</p>
+              <p style={{ marginTop: '10px', fontSize: '14px' }}>No products found.</p>
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
@@ -275,13 +367,7 @@ const ProductListPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredProducts.length === 0 ? (
-                    <tr>
-                      <td colSpan={10} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)', fontSize: '13.5px' }}>
-                        No products match the selected filters.
-                      </td>
-                    </tr>
-                  ) : filteredProducts.map((p) => (
+                  {products.map((p) => (
                     <tr key={p.id}>
                       <td style={{ fontWeight: 600, color: '#FF540E' }}>{p.sku}</td>
                       <td>
@@ -310,7 +396,7 @@ const ProductListPage = () => {
                       {(canManageProducts || canDeleteProduct) && (
                         <td style={{ textAlign: 'right' }}>
                           <div style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}>
-                            {canManageProducts && (
+                             {canManageProducts && (
                               <button
                                 onClick={() => navigate(`/products/edit/${p.id}`)}
                                 title="Edit product"
@@ -385,10 +471,14 @@ const ProductListPage = () => {
                   ))}
                 </tbody>
               </table>
-              {filteredProducts.length > 0 && (
-                <div style={{ paddingTop: '12px', fontSize: '12px', color: 'var(--text-muted)' }}>
-                  Showing {filteredProducts.length} of {products.length} product{products.length !== 1 ? 's' : ''}
-                </div>
+              {productsPagination && (
+                <Pagination
+                  currentPage={productsPagination.currentPage}
+                  totalPages={productsPagination.totalPages}
+                  totalItems={productsPagination.totalItems}
+                  limit={productsPagination.limit}
+                  onPageChange={handlePageChange}
+                />
               )}
             </div>
           )}
@@ -443,6 +533,15 @@ const ProductListPage = () => {
                   ))}
                 </tbody>
               </table>
+              {customersPagination && (
+                <Pagination
+                  currentPage={customersPagination.currentPage}
+                  totalPages={customersPagination.totalPages}
+                  totalItems={customersPagination.totalItems}
+                  limit={customersPagination.limit}
+                  onPageChange={handlePageChange}
+                />
+              )}
             </div>
           )}
         </div>
@@ -496,6 +595,15 @@ const ProductListPage = () => {
                   ))}
                 </tbody>
               </table>
+              {vendorsPagination && (
+                <Pagination
+                  currentPage={vendorsPagination.currentPage}
+                  totalPages={vendorsPagination.totalPages}
+                  totalItems={vendorsPagination.totalItems}
+                  limit={vendorsPagination.limit}
+                  onPageChange={handlePageChange}
+                />
+              )}
             </div>
           )}
         </div>
@@ -545,6 +653,15 @@ const ProductListPage = () => {
                   ))}
                 </tbody>
               </table>
+              {workcentersPagination && (
+                <Pagination
+                  currentPage={workcentersPagination.currentPage}
+                  totalPages={workcentersPagination.totalPages}
+                  totalItems={workcentersPagination.totalItems}
+                  limit={workcentersPagination.limit}
+                  onPageChange={handlePageChange}
+                />
+              )}
             </div>
           )}
         </div>

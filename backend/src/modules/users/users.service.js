@@ -103,9 +103,56 @@ export const inviteUserService = async ({ name, email, role }, invitedBy) => {
 
 // ─── GET COMPANY USERS ────────────────────────────────────────────────────────
 
-export const getCompanyUsersService = async (tenantId) => {
+export const getCompanyUsersService = async (tenantId, query = {}) => {
+  const page = query.page ? parseInt(query.page, 10) : null;
+  const limit = query.limit ? parseInt(query.limit, 10) : null;
+  const search = query.search || "";
+
+  const where = {
+    tenantId,
+    ...(search && {
+      OR: [
+        { name: { contains: search, mode: "insensitive" } },
+        { email: { contains: search, mode: "insensitive" } },
+      ],
+    }),
+  };
+
+  const totalItems = await prisma.user.count({ where });
+
+  let users;
+  if (page && limit) {
+    const skip = (page - 1) * limit;
+    users = await prisma.user.findMany({
+      where,
+      select: {
+        id: true,
+        uid: true,
+        name: true,
+        email: true,
+        role: true,
+        isActive: true,
+        mustChangePassword: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'asc' },
+      skip,
+      take: limit,
+    });
+
+    return {
+      data: users,
+      pagination: {
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+        currentPage: page,
+        limit,
+      },
+    };
+  }
+
   return prisma.user.findMany({
-    where: { tenantId },
+    where,
     select: {
       id: true,
       uid: true,

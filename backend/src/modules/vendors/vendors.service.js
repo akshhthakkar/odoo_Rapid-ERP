@@ -1,9 +1,47 @@
 import prisma from "../../config/prisma.js";
 import { logAudit, getDiff } from "../../utils/auditLogger.js";
 
-export const getVendors = async (tenantId) => {
+export const getVendors = async (tenantId, query = {}) => {
+  const page = query.page ? parseInt(query.page, 10) : null;
+  const limit = query.limit ? parseInt(query.limit, 10) : null;
+  const search = query.search || "";
+
+  const where = {
+    tenantId,
+    ...(search && {
+      OR: [
+        { name: { contains: search, mode: "insensitive" } },
+        { email: { contains: search, mode: "insensitive" } },
+        { phone: { contains: search, mode: "insensitive" } },
+      ],
+    }),
+  };
+
+  const totalItems = await prisma.vendor.count({ where });
+
+  let vendors;
+  if (page && limit) {
+    const skip = (page - 1) * limit;
+    vendors = await prisma.vendor.findMany({
+      where,
+      orderBy: { name: "asc" },
+      skip,
+      take: limit,
+    });
+
+    return {
+      data: vendors,
+      pagination: {
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+        currentPage: page,
+        limit,
+      },
+    };
+  }
+
   return prisma.vendor.findMany({
-    where: { tenantId },
+    where,
     orderBy: { name: "asc" },
   });
 };

@@ -1,24 +1,37 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getSalesOrders } from '../../api/sales.api';
 import { useAuthStore } from '../../store/authStore';
 import Button from '../../components/ui/Button';
 import { LayoutList, FileText, CheckCircle2, Truck, XCircle, TrendingUp } from 'lucide-react';
 import Loader from '../../components/ui/Loader';
+import Pagination from '../../components/ui/Pagination';
 
 const SalesListPage = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const userRole = user?.role;
 
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = parseInt(searchParams.get('page') || '1', 10);
+  const statusFilter = searchParams.get('status') || 'all';
+
+  const [searchQuery, setSearchQuery] = useState('');
 
   // ─── QUERY: GET SALES ORDERS ──────────────────────────────────────────────
-  const { data: orders = [], isLoading } = useQuery({
-    queryKey: ['salesOrders'],
-    queryFn: getSalesOrders
+  const { data: responseData, isLoading } = useQuery({
+    queryKey: ['salesOrders', page, statusFilter, searchQuery],
+    queryFn: () => getSalesOrders({
+      page,
+      limit: 10,
+      status: statusFilter,
+      search: searchQuery,
+    })
   });
+
+  const orders = responseData?.data || [];
+  const pagination = responseData?.pagination;
 
   // ─── CHIP STYLE HELPER ──────────────────────────────────────────────────────
   const chipStyle = (active, color) => ({
@@ -41,11 +54,25 @@ const SalesListPage = () => {
   // ─── ACCESS CONTROL ────────────────────────────────────────────────────────
   const canCreateSales = ['ADMIN', 'SALES_USER'].includes(userRole);
 
-  // ─── FILTERED ORDERS ────────────────────────────────────────────────────────
-  const filteredOrders = orders.filter((o) => {
-    if (statusFilter !== 'all' && o.status !== statusFilter) return false;
-    return true;
-  });
+  const handlePageChange = (newPage) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set('page', newPage);
+    setSearchParams(params);
+  };
+
+  const handleStatusFilterChange = (newStatus) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set('status', newStatus);
+    params.set('page', '1'); // reset page on filter change
+    setSearchParams(params);
+  };
+
+  const handleSearchChange = (val) => {
+    setSearchQuery(val);
+    const params = new URLSearchParams(window.location.search);
+    params.set('page', '1'); // reset page on search
+    setSearchParams(params);
+  };
 
   const getStatusBadge = (status) => {
     const statusMap = {
@@ -86,31 +113,76 @@ const SalesListPage = () => {
 
       {/* Main List Table */}
       <div className="glass-card" style={{ padding: '24px' }}>
+        {/* Search Input Bar */}
+        <div style={{ marginBottom: '20px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <input
+            type="text"
+            placeholder="Search by order reference or customer name..."
+            value={searchQuery}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            style={{
+              width: '100%',
+              maxWidth: '400px',
+              padding: '10px 14px',
+              borderRadius: '8px',
+              border: '1px solid var(--border)',
+              background: 'var(--bg-card)',
+              color: 'var(--text-primary)',
+              fontSize: '13.5px',
+              outline: 'none',
+              transition: 'all 0.15s ease',
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = '#FF540E';
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255,84,14,0.12)';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = 'var(--border)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => handleSearchChange('')}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#EF4444',
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Clear Search
+            </button>
+          )}
+        </div>
+
         {/* ── Filter Chips ── */}
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--border)' }}>
           <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: '2px' }}>Status</span>
 
-          <button style={chipStyle(statusFilter === 'all', '#6B7280')} onClick={() => setStatusFilter('all')}>
+          <button style={chipStyle(statusFilter === 'all', '#6B7280')} onClick={() => handleStatusFilterChange('all')}>
             <LayoutList size={13} strokeWidth={2.5} />
             All
           </button>
-          <button style={chipStyle(statusFilter === 'DRAFT', '#94A3B8')} onClick={() => setStatusFilter('DRAFT')}>
+          <button style={chipStyle(statusFilter === 'DRAFT', '#94A3B8')} onClick={() => handleStatusFilterChange('DRAFT')}>
             <FileText size={13} strokeWidth={2.5} />
             Draft
           </button>
-          <button style={chipStyle(statusFilter === 'CONFIRMED', '#3B82F6')} onClick={() => setStatusFilter('CONFIRMED')}>
+          <button style={chipStyle(statusFilter === 'CONFIRMED', '#3B82F6')} onClick={() => handleStatusFilterChange('CONFIRMED')}>
             <CheckCircle2 size={13} strokeWidth={2.5} />
             Confirmed
           </button>
-          <button style={chipStyle(statusFilter === 'PARTIALLY_DELIVERED', '#F59E0B')} onClick={() => setStatusFilter('PARTIALLY_DELIVERED')}>
+          <button style={chipStyle(statusFilter === 'PARTIALLY_DELIVERED', '#F59E0B')} onClick={() => handleStatusFilterChange('PARTIALLY_DELIVERED')}>
             <Truck size={13} strokeWidth={2.5} style={{ transform: 'scaleX(-1)' }} />
             Partially Delivered
           </button>
-          <button style={chipStyle(statusFilter === 'FULLY_DELIVERED', '#10B981')} onClick={() => setStatusFilter('FULLY_DELIVERED')}>
+          <button style={chipStyle(statusFilter === 'FULLY_DELIVERED', '#10B981')} onClick={() => handleStatusFilterChange('FULLY_DELIVERED')}>
             <CheckCircle2 size={13} strokeWidth={2.5} />
             Fully Delivered
           </button>
-          <button style={chipStyle(statusFilter === 'CANCELLED', '#EF4444')} onClick={() => setStatusFilter('CANCELLED')}>
+          <button style={chipStyle(statusFilter === 'CANCELLED', '#EF4444')} onClick={() => handleStatusFilterChange('CANCELLED')}>
             <XCircle size={13} strokeWidth={2.5} />
             Cancelled
           </button>
@@ -118,7 +190,7 @@ const SalesListPage = () => {
           {/* Clear filters */}
           {statusFilter !== 'all' && (
             <button
-              onClick={() => setStatusFilter('all')}
+              onClick={() => handleStatusFilterChange('all')}
               style={{ marginLeft: 'auto', fontSize: '13px', color: '#EF4444', background: 'rgba(239,68,68,0.07)', border: '1.5px solid rgba(239,68,68,0.25)', borderRadius: '9999px', padding: '6px 14px', cursor: 'pointer', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '5px' }}
             >
               ✕ Clear filters
@@ -150,13 +222,7 @@ const SalesListPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredOrders.length === 0 ? (
-                  <tr>
-                    <td colSpan={9} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)', fontSize: '13.5px' }}>
-                      No sales orders match the selected filters.
-                    </td>
-                  </tr>
-                ) : filteredOrders.map((o) => (
+                {orders.map((o) => (
                   <tr key={o.id}>
                     <td style={{ fontWeight: 600, color: '#FF8A58' }}>{o.orderRef}</td>
                     <td>{o.customerName}</td>
@@ -187,10 +253,14 @@ const SalesListPage = () => {
                 ))}
               </tbody>
             </table>
-            {filteredOrders.length > 0 && (
-              <div style={{ paddingTop: '12px', fontSize: '12px', color: 'var(--text-muted)' }}>
-                Showing {filteredOrders.length} of {orders.length} sales order{orders.length !== 1 ? 's' : ''}
-              </div>
+            {pagination && (
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                totalItems={pagination.totalItems}
+                limit={pagination.limit}
+                onPageChange={handlePageChange}
+              />
             )}
           </div>
         )}

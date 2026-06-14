@@ -1,8 +1,8 @@
-﻿import * as workCenterService from "./workcenters.service.js";
+import * as workCenterService from "./workcenters.service.js";
 
 export const listWorkCenters = async (req, res, next) => {
   try {
-    const workCenters = await workCenterService.getWorkCenters(req.user.tenantId);
+    const workCenters = await workCenterService.getWorkCenters(req.user.tenantId, req.query);
     res.status(200).json(workCenters);
   } catch (err) {
     next(err);

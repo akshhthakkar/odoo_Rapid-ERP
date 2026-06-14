@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getCompanyUsers, inviteUser } from '../../api/users.api';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import { AlertTriangle, CheckCircle2, Users } from 'lucide-react';
 import Loader from '../../components/ui/Loader';
+import Pagination from '../../components/ui/Pagination';
 
 const ROLES = [
   { value: 'SALES_USER',          label: 'Sales User',          desc: 'Create & manage sales orders' },
@@ -16,6 +18,9 @@ const ROLES = [
 
 const UsersPage = () => {
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = parseInt(searchParams.get('page') || '1', 10);
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('SALES_USER');
@@ -23,11 +28,20 @@ const UsersPage = () => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Get all company users
-  const { data: users = [], isLoading } = useQuery({
-    queryKey: ['company-users'],
-    queryFn: getCompanyUsers,
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Get paginated company users
+  const { data: responseData, isLoading } = useQuery({
+    queryKey: ['company-users', page, searchQuery],
+    queryFn: () => getCompanyUsers({
+      page,
+      limit: 10,
+      search: searchQuery,
+    }),
   });
+
+  const users = responseData?.data || [];
+  const pagination = responseData?.pagination;
 
   const inviteMutation = useMutation({
     mutationFn: inviteUser,
@@ -59,6 +73,19 @@ const UsersPage = () => {
     inviteMutation.mutate({ name, email, role }, {
       onSettled: () => setLoading(false),
     });
+  };
+
+  const handlePageChange = (newPage) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set('page', newPage);
+    setSearchParams(params);
+  };
+
+  const handleSearchChange = (val) => {
+    setSearchQuery(val);
+    const params = new URLSearchParams(window.location.search);
+    params.set('page', '1');
+    setSearchParams(params);
   };
 
   const getRoleLabel = (r) => {
@@ -180,9 +207,55 @@ const UsersPage = () => {
 
       {/* Column 2: Users Table */}
       <div className="glass-card" style={{ padding: '24px' }}>
-        <div style={{ marginBottom: '20px' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 700 }}>Team Directory</h3>
-          <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Users registered in this tenant.</p>
+        <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <h3 style={{ fontSize: '16px', fontWeight: 700 }}>Team Directory</h3>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Users registered in this tenant.</p>
+          </div>
+        </div>
+
+        {/* Search Bar */}
+        <div style={{ marginBottom: '20px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <input
+            type="text"
+            placeholder="Search by name or email..."
+            value={searchQuery}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '10px 14px',
+              borderRadius: '8px',
+              border: '1px solid var(--border)',
+              background: 'var(--bg-card)',
+              color: 'var(--text-primary)',
+              fontSize: '13.5px',
+              outline: 'none',
+              transition: 'all 0.15s ease',
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = '#FF540E';
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255,84,14,0.12)';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = 'var(--border)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => handleSearchChange('')}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#EF4444',
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Clear
+            </button>
+          )}
         </div>
 
         {isLoading ? (
@@ -230,6 +303,15 @@ const UsersPage = () => {
                 ))}
               </tbody>
             </table>
+            {pagination && (
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                totalItems={pagination.totalItems}
+                limit={pagination.limit}
+                onPageChange={handlePageChange}
+              />
+            )}
           </div>
         )}
       </div>

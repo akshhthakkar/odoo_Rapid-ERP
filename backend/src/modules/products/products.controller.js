@@ -1,8 +1,8 @@
-﻿import * as productService from "./products.service.js";
+import * as productService from "./products.service.js";
 
 export const listProducts = async (req, res, next) => {
   try {
-    const products = await productService.getProducts(req.user.tenantId);
+    const products = await productService.getProducts(req.user.tenantId, req.query);
     res.status(200).json(products);
   } catch (err) {
     next(err);

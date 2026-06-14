@@ -312,11 +312,11 @@ const InventoryHubPage = () => {
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", marginBottom: "24px" }}>
                 {[
                   { title: "Inventory Value", value: formatCurrency(dashboardData?.metrics?.totalValue || 0), color: "#FF540E", icon: TrendingUp },
-                  { title: "Low Stock Items", value: `${dashboardData?.metrics?.lowStockCount || 0} Products`, color: "var(--warning)", icon: AlertTriangle },
-                  { title: "Out Of Stock", value: `${dashboardData?.metrics?.outOfStockCount || 0} Products`, color: "var(--danger)", icon: AlertTriangle },
-                  { title: "Reserved Stock", value: `${dashboardData?.metrics?.reservedStock || 0} Units`, color: "var(--accent)", icon: CheckCircle },
-                  { title: "Open Manufacturing Demand", value: `${dashboardData?.metrics?.openMoDemand || 0} Units`, color: "#10B981", icon: Layers },
-                  { title: "Open PO Replenishments", value: `${dashboardData?.metrics?.openPoDemand || 0} Units`, color: "#8B5CF6", icon: ArrowLeftRight },
+                  { title: "Low Stock Items", value: `${Math.round(dashboardData?.metrics?.lowStockCount || 0)} Products`, color: "var(--warning)", icon: AlertTriangle },
+                  { title: "Out Of Stock", value: `${Math.round(dashboardData?.metrics?.outOfStockCount || 0)} Products`, color: "var(--danger)", icon: AlertTriangle },
+                  { title: "Reserved Stock", value: `${Math.round(dashboardData?.metrics?.reservedStock || 0)} Units`, color: "var(--accent)", icon: CheckCircle },
+                  { title: "Open Manufacturing Demand", value: `${Math.round(dashboardData?.metrics?.openMoDemand || 0)} Units`, color: "#10B981", icon: Layers },
+                  { title: "Open PO Replenishments", value: `${Math.round(dashboardData?.metrics?.openPoDemand || 0)} Units`, color: "#8B5CF6", icon: ArrowLeftRight },
                 ].map((w, i) => {
                   const Icon = w.icon;
                   return (

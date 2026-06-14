@@ -23,13 +23,62 @@ const formatProduct = (product) => {
   };
 };
 
-export const getProducts = async (tenantId) => {
-  const products = await prisma.product.findMany({
-    where: { tenantId },
-    include: { vendors: { include: { vendor: true } } },
-    orderBy: { createdAt: "desc" },
-  });
-  return products.map(formatProduct);
+export const getProducts = async (tenantId, query = {}) => {
+  const page = query.page ? parseInt(query.page, 10) : null;
+  const limit = query.limit ? parseInt(query.limit, 10) : null;
+  const search = query.search || "";
+  const status = query.status; // 'active' | 'archived' | 'all'
+  const source = query.source; // 'mto' | 'mts' | 'all'
+
+  const where = {
+    tenantId,
+    ...(search && {
+      OR: [
+        { name: { contains: search, mode: "insensitive" } },
+        { sku: { contains: search, mode: "insensitive" } },
+      ],
+    }),
+    ...(status === "active" && { isActive: true }),
+    ...(status === "archived" && { isActive: false }),
+    ...(source === "mto" && { procureOnDemand: true }),
+    ...(source === "mts" && { procureOnDemand: false }),
+  };
+
+  const totalItems = await prisma.product.count({ where });
+
+  let products;
+  if (page && limit) {
+    const skip = (page - 1) * limit;
+    products = await prisma.product.findMany({
+      where,
+      include: { vendors: { include: { vendor: true } } },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    });
+  } else {
+    products = await prisma.product.findMany({
+      where,
+      include: { vendors: { include: { vendor: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  const formattedProducts = products.map(formatProduct);
+
+  if (page && limit) {
+    return {
+      data: formattedProducts,
+      pagination: {
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+        currentPage: page,
+        limit,
+      },
+    };
+  }
+
+  return formattedProducts;
 };
 
 export const getProductById = async (id, tenantId) => {

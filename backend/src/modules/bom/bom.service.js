@@ -28,13 +28,57 @@ const formatBom = (bom) => {
 };
 
 export const getBoms = async (query = {}, tenantId) => {
+  const page = query.page ? parseInt(query.page, 10) : null;
+  const limit = query.limit ? parseInt(query.limit, 10) : null;
+  const search = query.search || "";
   const includeInactive = query.includeInactive === "true" || query.includeInactive === true;
-  const boms = await prisma.boM.findMany({
-    where: includeInactive ? { tenantId } : { tenantId, isActive: true },
-    include: { product: true, components: true, operations: true },
-    orderBy: { updatedAt: "desc" },
-  });
-  return boms.map(formatBom);
+
+  const where = {
+    tenantId,
+    ...(!includeInactive && { isActive: true }),
+    ...(search && {
+      OR: [
+        { product: { name: { contains: search, mode: "insensitive" } } },
+        { product: { sku: { contains: search, mode: "insensitive" } } },
+      ],
+    }),
+  };
+
+  const totalItems = await prisma.boM.count({ where });
+
+  let boms;
+  if (page && limit) {
+    const skip = (page - 1) * limit;
+    boms = await prisma.boM.findMany({
+      where,
+      include: { product: true, components: true, operations: true },
+      orderBy: { updatedAt: "desc" },
+      skip,
+      take: limit,
+    });
+  } else {
+    boms = await prisma.boM.findMany({
+      where,
+      include: { product: true, components: true, operations: true },
+      orderBy: { updatedAt: "desc" },
+    });
+  }
+
+  const formatted = boms.map(formatBom);
+
+  if (page && limit) {
+    return {
+      data: formatted,
+      pagination: {
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+        currentPage: page,
+        limit,
+      },
+    };
+  }
+
+  return formatted;
 };
 
 export const getBomById = async (id, tenantId) => {

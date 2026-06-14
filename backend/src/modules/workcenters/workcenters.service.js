@@ -1,9 +1,46 @@
-﻿import prisma from "../../config/prisma.js";
+import prisma from "../../config/prisma.js";
 import { logAudit } from "../../utils/auditLogger.js";
 
-export const getWorkCenters = async (tenantId) => {
+export const getWorkCenters = async (tenantId, query = {}) => {
+  const page = query.page ? parseInt(query.page, 10) : null;
+  const limit = query.limit ? parseInt(query.limit, 10) : null;
+  const search = query.search || "";
+
+  const where = {
+    tenantId,
+    ...(search && {
+      OR: [
+        { name: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+      ],
+    }),
+  };
+
+  const totalItems = await prisma.workCenter.count({ where });
+
+  let workCenters;
+  if (page && limit) {
+    const skip = (page - 1) * limit;
+    workCenters = await prisma.workCenter.findMany({
+      where,
+      orderBy: { name: "asc" },
+      skip,
+      take: limit,
+    });
+
+    return {
+      data: workCenters,
+      pagination: {
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+        currentPage: page,
+        limit,
+      },
+    };
+  }
+
   return prisma.workCenter.findMany({
-    where: { tenantId },
+    where,
     orderBy: { name: "asc" },
   });
 };

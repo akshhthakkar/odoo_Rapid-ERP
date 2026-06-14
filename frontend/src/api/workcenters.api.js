@@ -1,7 +1,7 @@
 import api from './axios';
 
-export const getWorkCenters = async () => {
-  const { data } = await api.get('/workcenters');
+export const getWorkCenters = async (params = {}) => {
+  const { data } = await api.get('/workcenters', { params });
   return data;
 };
 

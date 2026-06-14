@@ -93,7 +93,7 @@ const Sidebar = () => {
         padding: '0 16px',
         borderBottom: '1px solid #E5E7EB',
       }}>
-        <Link to="/dashboard" style={{ display: 'block', width: '100%', outline: 'none' }}>
+        <Link to="/" style={{ display: 'block', width: '100%', outline: 'none' }}>
           <img src={rapidLogo} alt="RAPID" style={{ width: '100%', maxHeight: '90px', objectFit: 'contain', objectPosition: 'left center', cursor: 'pointer' }} />
         </Link>
       </div>

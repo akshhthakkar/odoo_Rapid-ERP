@@ -17,7 +17,7 @@ export const inviteUser = async (req, res, next) => {
 
 export const getCompanyUsers = async (req, res, next) => {
   try {
-    const users = await getCompanyUsersService(req.user.tenantId);
+    const users = await getCompanyUsersService(req.user.tenantId, req.query);
     res.json(users);
   } catch (err) {
     next(err);
