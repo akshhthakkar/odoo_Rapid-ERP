@@ -11,6 +11,8 @@ const InventoryAnalyticsPage = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ["inventoryAnalytics"],
     queryFn: getInventoryAnalytics,
+    refetchInterval: 60000,
+    refetchOnWindowFocus: true,
   });
 
   const formatCurrency = (val) => {
