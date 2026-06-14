@@ -74,7 +74,7 @@ const Sidebar = () => {
   return (
     <aside style={{
       width: 'var(--sidebar-width)',
-      minHeight: '100vh',
+      height: '100vh',
       background: '#FFFFFF',
       borderRight: '1px solid #E5E7EB',
       display: 'flex',
@@ -84,6 +84,7 @@ const Sidebar = () => {
       left: 0,
       bottom: 0,
       zIndex: 100,
+      overflow: 'hidden',
     }}>
       {/* Logo */}
       <div style={{

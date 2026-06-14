@@ -173,7 +173,7 @@ const PurchaseFormPage = () => {
                 {lines.map((line, i) => {
                   const selProd = products.find((p) => p.id === Number(line.productId));
                   return (
-                    <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                    <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
                       <td style={{ padding: '8px 6px' }}>
                         <select
                           value={line.productId}

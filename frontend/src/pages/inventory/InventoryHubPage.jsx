@@ -235,13 +235,13 @@ const InventoryHubPage = () => {
         <div style={{ display: "flex", gap: "8px" }}>
           {canManageInventory && (
             <>
-              <Button onClick={() => setShowWhModal(true)} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-primary)" }}>
+              <Button onClick={() => { setErrorMessage(""); setShowWhModal(true); }} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-primary)" }}>
                 + Add Warehouse
               </Button>
-              <Button onClick={() => setShowTransferModal(true)} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-primary)" }}>
+              <Button onClick={() => { setErrorMessage(""); setShowTransferModal(true); }} style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-primary)" }}>
                 ⇄ Transfer Stock
               </Button>
-              <Button onClick={() => setShowAdjustmentModal(true)} style={{ background: "#FF540E" }}>
+              <Button onClick={() => { setErrorMessage(""); setShowAdjustmentModal(true); }} style={{ background: "#FF540E" }}>
                 ⚙️ Adjust Stock
               </Button>
             </>

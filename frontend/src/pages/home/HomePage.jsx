@@ -1,10 +1,11 @@
 import React, { useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Navbar } from '../../components/layout/Navbar';
 import dbHero from '../../assets/dbHero.png';
 import { Features } from '../../components/layout/Features';
 import HowItWorks from '../../components/layout/HowItWorks';
 import FAQ from '../../components/layout/FAQ';
+import { Footer } from '../../components/layout/Footer';
 import { CreditCard } from 'lucide-react';
 import './HomePage.css';
 
@@ -12,7 +13,25 @@ import './HomePage.css';
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const imageContainerRef = useRef(null);
+
+  useEffect(() => {
+    const scrollToId = searchParams.get('scrollTo');
+    if (scrollToId) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById(scrollToId);
+        if (element) {
+          if (window.lenis) {
+            window.lenis.scrollTo(element);
+          } else {
+            element.scrollIntoView({ behavior: 'smooth' });
+          }
+        }
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams]);
 
 
   useEffect(() => {
@@ -136,6 +155,9 @@ const HomePage = () => {
 
       {/* FAQ Section */}
       <FAQ />
+
+      {/* Footer Section */}
+      <Footer />
     </div>
   );
 };

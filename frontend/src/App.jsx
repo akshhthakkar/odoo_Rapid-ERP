@@ -32,6 +32,8 @@ const App = () => {
       smoothTouch: false,
     });
 
+    window.lenis = lenis;
+
     function raf(time) {
       lenis.raf(time);
       requestAnimationFrame(raf);
@@ -41,6 +43,7 @@ const App = () => {
 
     return () => {
       lenis.destroy();
+      window.lenis = null;
     };
   }, []);
 

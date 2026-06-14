@@ -28,6 +28,7 @@ export const Features = () => {
   return (
     <section
       ref={sectionRef}
+      id="features"
       className={`features-section${inView ? ' is-visible' : ''}`}
     >
       <div className="features-header">

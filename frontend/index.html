@@ -13,5 +13,20 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <!-- ChatFrame Widget -->
+<script>
+  window.ChatFrameConfig = {
+    widgetKey: "cfwk_8575610b041b43b79721",
+    primaryColor: "#ff5d05",
+    position: "bottom-right"
+  };
+  (function(d,s,id){
+    var js,fjs=d.getElementsByTagName(s)[0];
+    if(d.getElementById(id))return;
+    js=d.createElement(s);js.id=id;
+    js.src="https://chatframe-y2j7.onrender.com/api/widget/widget.js";
+    fjs.parentNode.insertBefore(js,fjs);
+  }(document,'script','chatframe-sdk'));
+</script>
   </body>
 </html>

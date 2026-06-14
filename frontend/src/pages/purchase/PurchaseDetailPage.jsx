@@ -148,7 +148,7 @@ const ReceiveModal = ({ po, onClose, onSubmit, isLoading }) => {
           </thead>
           <tbody>
             {receiptLines.map((r, idx) => (
-              <tr key={r.lineId} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+              <tr key={r.lineId} style={{ borderBottom: '1px solid var(--border)' }}>
                 <td style={{ padding: '8px 4px' }}>
                   <div style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{r.productName}</div>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{r.sku}</div>
@@ -363,7 +363,7 @@ const PurchaseDetailPage = () => {
                 </thead>
                 <tbody>
                   {(po.lines || []).map((line) => (
-                    <tr key={line.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                    <tr key={line.id} style={{ borderBottom: '1px solid var(--border)' }}>
                       <td style={{ padding: '10px 6px' }}>
                         <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{line.name}</div>
                         <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{line.sku}</div>
