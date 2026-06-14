@@ -6,7 +6,7 @@ let brevoClient = null;
 const getBrevoClient = () => {
   if (!brevoClient) {
     const apiKey = process.env.BREVO_API_KEY;
-    if (apiKey && apiKey !== 'your_key_here' && !apiKey.startsWith('xsmtpsib-')) {
+    if (apiKey && apiKey !== 'your_key_here') {
       brevoClient = new BrevoClient({ apiKey });
     }
   }
@@ -225,42 +225,7 @@ export const sendUserInvitationEmail = async ({
 </body>
 </html>`;
 
-  // 1. Detect if key is for SMTP
-  if (apiKey.startsWith('xsmtpsib-')) {
-    console.log(`${logPrefix} - Using SMTP Relay route`);
-    const smtpUser = process.env.BREVO_SMTP_USER;
-    if (!smtpUser) {
-      console.error(`${logPrefix} - Invite email failed: BREVO_SMTP_USER is not configured in .env`);
-      return false;
-    }
-
-    try {
-      const transporter = nodemailer.createTransport({
-        host: 'smtp-relay.brevo.com',
-        port: 587,
-        secure: false, // TLS
-        auth: {
-          user: smtpUser,
-          pass: apiKey
-        }
-      });
-
-      const info = await transporter.sendMail({
-        from: `"Rapid ERP" <${emailFrom}>`,
-        to: email,
-        subject: 'Welcome to Rapid ERP',
-        html: htmlBody
-      });
-
-      console.log(`${logPrefix} - Invite email sent via SMTP - MessageId:`, info.messageId || 'unknown');
-      return true;
-    } catch (error) {
-      console.error(`${logPrefix} - Invite email failed via SMTP - Error:`, error.message || error);
-      return false;
-    }
-  }
-
-  // 2. Use REST API (for xkeysib- keys)
+  // Use REST API
   console.log(`${logPrefix} - Using REST API route`);
   const client = getBrevoClient();
   if (!client) {
