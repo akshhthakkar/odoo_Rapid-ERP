@@ -245,30 +245,53 @@ All API endpoints return standard JSON response envelopes:
 
 ### Prerequisites
 - Node.js (v18+)
-- PostgreSQL Database (Neon or Local instance)
+- PostgreSQL Database (Neon or local instance)
 
-### 1. Database Configuration
+### 1. Environment Configurations
+
+#### Backend Configuration
 In the `backend/` folder, create a `.env` file containing:
 ```env
+# PostgreSQL connection url (Neon-compatible)
 DATABASE_URL="postgresql://username:password@host:port/dbname?sslmode=require"
-JWT_SECRET="your-super-jwt-secret-key"
-JWT_EXPIRES_IN="24h"
+
+# JWT configuration
+JWT_SECRET="generate-a-long-random-hex-string"
+JWT_EXPIRES_IN="30m"
+
+# Server Port
 PORT=3000
+
+# CORS frontend URL
 FRONTEND_URL="http://localhost:5173"
-RESEND_API_KEY="your-resend-api-key"
+
+# Brevo SMTP configuration
+BREVO_API_KEY="your-brevo-api-key"
+BREVO_SMTP_USER="your-brevo-smtp-username"
+EMAIL_FROM="your-verified-sender-email@domain.com"
 ```
 
-### 2. Run Database Migrations & Seed
-Navigate into the backend and setup Prisma:
+#### Frontend Configuration
+In the `frontend/` folder, create a `.env` file containing:
+```env
+# Deployed API endpoint (defaults to proxying to localhost in dev)
+VITE_API_URL="http://localhost:3000/api"
+```
+
+### 2. Run Database Setup & Seeding
+Navigate into the backend, install dependencies, run schema migrations, and load the 12-month demo dataset:
 ```bash
 cd backend
 npm install
 
-# Run database migrations
-npm run db:migrate
+# Run schema migrations to database
+npx prisma migrate dev
 
-# Seed demo database values (Products, Vendors, Customers, Work Centers, BoMs)
-npm run db:seed
+# Seed a complete multi-tenant demo environment (3 tenants, 12 months, 1,500+ records)
+node demo/seedDemoData.js
+
+# Seed active stock movements for "today" (so the morning brief is populated)
+node demo/seedTodayMovements.js
 ```
 
 ### 3. Launch Development Servers
@@ -288,7 +311,24 @@ npm install
 npm run dev
 # Frontend runs on http://localhost:5173
 ```
-*Note: Vite is configured to proxy all `/api` requests to `http://localhost:3000` automatically.*
+*Note: In development, Vite automatically proxies all relative `/api` requests to `http://localhost:3000`.*
+
+---
+
+## Deployment & Routing Setup
+
+### 📦 Vercel (Frontend)
+The frontend uses React Router for client-side routing. To prevent `404 Not Found` errors when hard-refreshing pages (e.g. `/dashboard` or `/login`), a `vercel.json` rewrite file is included in the project root:
+```json
+{
+  "rewrites": [
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
+}
+```
+
+### ⚙️ Render (Backend & Frontend Blueprint)
+A `render.yaml` infrastructure-as-code file is included in the root directory. It automatically configures the Node.js backend Web Service and provides the necessary rewrite rules for a static frontend site if you choose to host both on Render.
 
 ---
 
