@@ -71,17 +71,19 @@ const DashboardKPI = ({ financials }) => {
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(5, 1fr)",
+        gridTemplateColumns: "repeat(6, 1fr)",
         gap: "16px",
         width: "100%",
       }}
     >
       {kpis.map((kpi, idx) => {
         const Icon = kpi.icon;
+        const gridColumn = idx < 3 ? "span 2" : "span 3";
         return (
           <div
             key={idx}
             style={{
+              gridColumn,
               borderRadius: "14px",
               background: "#FFFFFF",
               border: "1px solid rgba(255,84,14,0.12)",
