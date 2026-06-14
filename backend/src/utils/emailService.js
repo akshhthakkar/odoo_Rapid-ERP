@@ -225,6 +225,38 @@ export const sendUserInvitationEmail = async ({
 </body>
 </html>`;
 
+  // Check if the key is an SMTP key (starts with xsmtpsib-) and send via Nodemailer
+  const smtpUser = process.env.BREVO_SMTP_USER;
+  const smtpPass = process.env.BREVO_API_KEY;
+
+  if (smtpUser && smtpPass && (smtpPass.startsWith('xsmtpsib-') || !apiKey.startsWith('xkeysib-'))) {
+    console.log(`${logPrefix} - Using SMTP relay route`);
+    try {
+      const transporter = nodemailer.createTransport({
+        host: 'smtp-relay.brevo.com',
+        port: 587,
+        secure: false, // false for 587
+        auth: {
+          user: smtpUser,
+          pass: smtpPass,
+        },
+      });
+
+      const info = await transporter.sendMail({
+        from: `"Rapid ERP" <${emailFrom}>`,
+        to: email,
+        subject: 'Welcome to Rapid ERP',
+        html: htmlBody,
+      });
+
+      console.log(`${logPrefix} - Invite email sent via SMTP - MessageId:`, info.messageId || 'unknown');
+      return true;
+    } catch (smtpError) {
+      console.error(`${logPrefix} - Invite email failed via SMTP - Error:`, smtpError.message || smtpError);
+      // Fall through to REST API if SMTP failed
+    }
+  }
+
   // Use REST API
   console.log(`${logPrefix} - Using REST API route`);
   const client = getBrevoClient();
