@@ -141,6 +141,12 @@ body {
 .animate-shake      { animation: shake 0.4s ease; }
 .animate-spin       { animation: spin 1s linear infinite; }
 
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.7); }
+}
+.pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
 /* ─── GLASS CARD ──────────────────────────────────────────────────────────── */
 .glass-card {
   background: var(--bg-card);

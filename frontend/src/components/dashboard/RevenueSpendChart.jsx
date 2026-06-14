@@ -1,155 +1,230 @@
-import React from "react";
-import { ArrowUpRight, ArrowDownRight, DollarSign } from "lucide-react";
+import React, { useState } from "react";
+import { TrendingUp } from "lucide-react";
 
 const RevenueSpendChart = ({ trend = [] }) => {
-  const formatCurrency = (val) => {
-    return new Intl.NumberFormat("en-IN", { 
-      style: "currency", 
-      currency: "INR",
-      maximumFractionDigits: 0 
-    }).format(val || 0);
-  };
+  const [hovered, setHovered] = useState(null);
 
-  // Compute maximum value for scaling
-  const maxVal = trend.reduce((acc, t) => {
-    return Math.max(acc, Number(t.revenue || 0), Number(t.spend || 0));
-  }, 0) || 1;
+  const formatCurrency = (val) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(val || 0);
+
+  const maxVal = trend.reduce((acc, t) => Math.max(acc, Number(t.revenue || 0), Number(t.spend || 0)), 0) || 1;
 
   return (
-    <div className="glass-card" style={{ padding: "24px", display: "flex", flexDirection: "column", height: "100%" }}>
-      {/* Header & Legend */}
-      <div style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: "20px"
-      }}>
-        <h3 style={{
-          fontSize: "14.5px",
-          fontWeight: 700,
-          color: "var(--text-primary)",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px"
-        }}>
-          <DollarSign size={16} style={{ color: "var(--accent)" }} />
-          Money In vs. Money Out (Revenue & Spend Trend)
-        </h3>
+    <div className="glass-card" style={{ padding: "24px", display: "flex", flexDirection: "column" }}>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div
+            style={{
+              width: "32px",
+              height: "32px",
+              borderRadius: "9px",
+              background: "rgba(255,84,14,0.1)",
+              border: "1px solid rgba(255,84,14,0.18)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <TrendingUp size={15} style={{ color: "var(--accent)" }} />
+          </div>
+          <div>
+            <h3 style={{ fontSize: "13.5px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
+              Revenue vs. Spend
+            </h3>
+            <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: 0 }}>
+              Monthly money-in vs. money-out trend
+            </p>
+          </div>
+        </div>
 
         {/* Legend */}
-        <div style={{ display: "flex", gap: "16px", fontSize: "11px", fontWeight: 600 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <div style={{ width: "8px", height: "8px", borderRadius: "2px", background: "var(--success)" }} />
+        <div style={{ display: "flex", gap: "14px", fontSize: "11px", fontWeight: 600, alignSelf: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+            <div style={{ width: "10px", height: "10px", borderRadius: "3px", background: "#10B981" }} />
             <span style={{ color: "var(--text-muted)" }}>Revenue</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <div style={{ width: "8px", height: "8px", borderRadius: "2px", background: "var(--danger)" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+            <div style={{ width: "10px", height: "10px", borderRadius: "3px", background: "#EF4444" }} />
             <span style={{ color: "var(--text-muted)" }}>Spend</span>
           </div>
         </div>
       </div>
 
-      {/* Chart visualization */}
       {trend.length === 0 ? (
-        <div style={{
-          flex: 1,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "200px",
-          color: "var(--text-muted)",
-          fontSize: "13px"
-        }}>
-          No transaction history recorded in this period.
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "220px",
+            color: "var(--text-muted)",
+            fontSize: "13px",
+          }}
+        >
+          No transaction history in this period.
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-          {/* Main Bar Columns Area */}
-          <div style={{
-            display: "flex",
-            alignItems: "flex-end",
-            height: "220px",
-            gap: "20px",
-            paddingBottom: "12px",
-            borderBottom: "1px solid var(--border)",
-            justifyContent: "space-around"
-          }}>
-            {trend.map((t, idx) => {
-              const revPercent = (Number(t.revenue || 0) / maxVal) * 100;
-              const spendPercent = (Number(t.spend || 0) / maxVal) * 100;
+        <div style={{ flex: 1 }}>
+          {/* Y-axis labels + bars */}
+          <div style={{ display: "flex", height: "200px", gap: "0" }}>
+            {/* Y-axis */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                paddingRight: "8px",
+                paddingBottom: "20px",
+              }}
+            >
+              {[100, 75, 50, 25, 0].map((pct) => (
+                <span key={pct} style={{ fontSize: "9px", color: "var(--text-muted)", fontWeight: 600, textAlign: "right" }}>
+                  {pct === 0 ? "0" : `${Math.round((maxVal * pct) / 100 / 1000)}K`}
+                </span>
+              ))}
+            </div>
 
-              return (
-                <div key={idx} style={{
+            {/* Chart area */}
+            <div style={{ flex: 1, position: "relative" }}>
+              {/* Horizontal grid lines */}
+              {[0, 25, 50, 75, 100].map((pct) => (
+                <div
+                  key={pct}
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    bottom: `calc(20px + ${pct}% * 0.82)`,
+                    height: "1px",
+                    background: "var(--border)",
+                    opacity: 0.6,
+                  }}
+                />
+              ))}
+
+              {/* Bars */}
+              <div
+                style={{
                   display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
+                  alignItems: "flex-end",
                   height: "100%",
-                  flex: 1,
-                  maxWidth: "80px"
-                }}>
-                  {/* Two adjacent bars */}
-                  <div style={{
-                    display: "flex",
-                    alignItems: "flex-end",
-                    gap: "4px",
-                    height: "100%",
-                    width: "100%",
-                    justifyContent: "center"
-                  }}>
-                    {/* Revenue Bar */}
-                    <div
-                      style={{
-                        width: "14px",
-                        height: `${Math.max(4, revPercent)}%`,
-                        background: "linear-gradient(to top, rgba(16,185,129,0.2) 0%, var(--success) 100%)",
-                        borderRadius: "2px 2px 0 0",
-                        transition: "all 0.3s ease",
-                        position: "relative"
-                      }}
-                      title={`Revenue: ${formatCurrency(t.revenue)}`}
-                    />
+                  paddingBottom: "20px",
+                  justifyContent: "space-around",
+                  gap: "4px",
+                  position: "relative",
+                  zIndex: 1,
+                }}
+              >
+                {trend.map((t, idx) => {
+                  const revPct = Math.max(3, (Number(t.revenue || 0) / maxVal) * 100);
+                  const spendPct = Math.max(3, (Number(t.spend || 0) / maxVal) * 100);
+                  const isHovered = hovered === idx;
 
-                    {/* Spend Bar */}
+                  return (
                     <div
+                      key={idx}
                       style={{
-                        width: "14px",
-                        height: `${Math.max(4, spendPercent)}%`,
-                        background: "linear-gradient(to top, rgba(239,68,68,0.2) 0%, var(--danger) 100%)",
-                        borderRadius: "2px 2px 0 0",
-                        transition: "all 0.3s ease",
-                        position: "relative"
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        height: "100%",
+                        flex: 1,
+                        maxWidth: "56px",
+                        cursor: "pointer",
                       }}
-                      title={`Spend: ${formatCurrency(t.spend)}`}
-                    />
-                  </div>
+                      onMouseEnter={() => setHovered(idx)}
+                      onMouseLeave={() => setHovered(null)}
+                    >
+                      {/* Tooltip */}
+                      {isHovered && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            bottom: "calc(100% + 4px)",
+                            left: "50%",
+                            transform: "translateX(-50%)",
+                            background: "#1F2937",
+                            color: "#fff",
+                            padding: "6px 10px",
+                            borderRadius: "8px",
+                            fontSize: "11px",
+                            fontWeight: 600,
+                            whiteSpace: "nowrap",
+                            zIndex: 10,
+                            pointerEvents: "none",
+                          }}
+                        >
+                          <div style={{ color: "#34D399" }}>Rev: {formatCurrency(t.revenue)}</div>
+                          <div style={{ color: "#F87171" }}>Spend: {formatCurrency(t.spend)}</div>
+                        </div>
+                      )}
 
-                  {/* Month Label */}
-                  <span style={{
-                    fontSize: "11px",
-                    color: "var(--text-muted)",
-                    marginTop: "8px",
-                    fontWeight: 600,
-                    whiteSpace: "nowrap"
-                  }}>
-                    {t.month}
-                  </span>
-                </div>
-              );
-            })}
+                      {/* Bars row */}
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "flex-end",
+                          gap: "3px",
+                          height: "100%",
+                          width: "100%",
+                          justifyContent: "center",
+                          position: "relative",
+                        }}
+                      >
+                        {/* Revenue bar */}
+                        <div
+                          style={{
+                            width: "14px",
+                            height: `${revPct}%`,
+                            background: isHovered
+                              ? "linear-gradient(to top, #059669, #34D399)"
+                              : "linear-gradient(to top, rgba(16,185,129,0.4), #10B981)",
+                            borderRadius: "3px 3px 0 0",
+                            transition: "all 0.25s ease",
+                          }}
+                        />
+                        {/* Spend bar */}
+                        <div
+                          style={{
+                            width: "14px",
+                            height: `${spendPct}%`,
+                            background: isHovered
+                              ? "linear-gradient(to top, #B91C1C, #F87171)"
+                              : "linear-gradient(to top, rgba(239,68,68,0.4), #EF4444)",
+                            borderRadius: "3px 3px 0 0",
+                            transition: "all 0.25s ease",
+                          }}
+                        />
+                      </div>
+
+                      {/* Label */}
+                      <span
+                        style={{
+                          fontSize: "10px",
+                          color: isHovered ? "var(--accent)" : "var(--text-muted)",
+                          fontWeight: 700,
+                          whiteSpace: "nowrap",
+                          transition: "color 0.2s",
+                        }}
+                      >
+                        {t.month}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
-          {/* Prompt/Info */}
-          <div style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginTop: "12px",
-            fontSize: "11px",
-            color: "var(--text-muted)"
-          }}>
-            <span>* Values represent delivered transactions in date range</span>
-            <span>Hover on bars to view details</span>
-          </div>
+          <p style={{ fontSize: "10.5px", color: "var(--text-muted)", marginTop: "10px" }}>
+            * Delivered transactions in selected date range. Hover bars for details.
+          </p>
         </div>
       )}
     </div>

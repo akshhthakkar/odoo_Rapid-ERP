@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import {
   LayoutDashboard,
@@ -93,7 +93,9 @@ const Sidebar = () => {
         padding: '0 16px',
         borderBottom: '1px solid #E5E7EB',
       }}>
-        <img src={rapidLogo} alt="RAPID" style={{ width: '100%', maxHeight: '90px', objectFit: 'contain', objectPosition: 'left center' }} />
+        <Link to="/dashboard" style={{ display: 'block', width: '100%', outline: 'none' }}>
+          <img src={rapidLogo} alt="RAPID" style={{ width: '100%', maxHeight: '90px', objectFit: 'contain', objectPosition: 'left center', cursor: 'pointer' }} />
+        </Link>
       </div>
 
       {/* Navigation */}

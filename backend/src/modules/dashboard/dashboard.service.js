@@ -27,6 +27,7 @@ export const getExecutiveDashboard = async (tenantId, query = {}, user = {}) => 
 
   // 2. Concurrently fetch data from Analytics service and operational databases
   const [
+    tenant,
     salesAnalytics,
     purchaseAnalytics,
     inventoryAnalytics,
@@ -53,6 +54,10 @@ export const getExecutiveDashboard = async (tenantId, query = {}, user = {}) => 
     salesToday,
     todayMovements
   ] = await Promise.all([
+    prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { name: true }
+    }),
     // Reuse analytics queries
     analyticsService.getSalesAnalytics(tenantId, query),
     analyticsService.getPurchaseAnalytics(tenantId, query),
@@ -441,6 +446,7 @@ export const getExecutiveDashboard = async (tenantId, query = {}, user = {}) => 
   const revenueSpendTrend = Object.values(combinedTrendMap);
 
   return {
+    companyName: tenant?.name || "Rapid Enterprise",
     financials: {
       revenue,
       purchaseSpend,

@@ -1,29 +1,30 @@
 import React from "react";
-import { 
-  DollarSign, 
-  ShoppingCart, 
-  Layers, 
-  TrendingUp, 
-  Activity, 
-  Heart, 
-  ArrowUpRight, 
-  ArrowDownRight 
+import {
+  DollarSign,
+  ShoppingCart,
+  Layers,
+  Activity,
+  Heart,
+  ArrowUpRight,
+  ArrowDownRight,
 } from "lucide-react";
 
-const DashboardKPI = ({ financials, morningBrief }) => {
-  const formatCurrency = (val) => {
-    return new Intl.NumberFormat("en-IN", { 
-      style: "currency", 
+const DashboardKPI = ({ financials }) => {
+  const formatCurrency = (val) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
       currency: "INR",
-      maximumFractionDigits: 0 
+      maximumFractionDigits: 0,
     }).format(val || 0);
-  };
 
   const getHealthColor = (score) => {
-    if (score >= 90) return "var(--success)";
-    if (score >= 70) return "#EAB308"; // Warning yellow
-    return "var(--danger)";
+    if (score >= 90) return "#10B981";
+    if (score >= 70) return "#F59E0B";
+    return "#EF4444";
   };
+
+  const healthScore = financials?.healthScore || 100;
+  const profitPositive = (financials?.profitEstimate || 0) >= 0;
 
   const kpis = [
     {
@@ -31,134 +32,191 @@ const DashboardKPI = ({ financials, morningBrief }) => {
       value: formatCurrency(financials?.revenue),
       subtext: "Delivered sales orders",
       icon: DollarSign,
-      color: "var(--success)",
-      bg: "rgba(16, 185, 129, 0.08)",
-      border: "rgba(16, 185, 129, 0.15)"
+      trend: null,
     },
     {
       title: "Purchase Spend",
       value: formatCurrency(financials?.purchaseSpend),
       subtext: "Received vendor orders",
       icon: ShoppingCart,
-      color: "var(--danger)",
-      bg: "rgba(239, 68, 68, 0.08)",
-      border: "rgba(239, 68, 68, 0.15)"
+      trend: null,
     },
     {
       title: "Profit Estimate",
       value: formatCurrency(financials?.profitEstimate),
       subtext: "Revenue minus Spend",
       icon: Activity,
-      color: "var(--accent)",
-      bg: "rgba(255, 84, 14, 0.08)",
-      border: "rgba(255, 84, 14, 0.15)",
-      isPositive: (financials?.profitEstimate || 0) >= 0
+      trend: profitPositive,
     },
     {
       title: "Inventory Value",
       value: formatCurrency(financials?.inventoryValue),
       subtext: "On-hand stock valuation",
       icon: Layers,
-      color: "#6366F1",
-      bg: "rgba(99, 102, 241, 0.08)",
-      border: "rgba(99, 102, 241, 0.15)"
+      trend: null,
     },
     {
-      title: "Business Health Score",
-      value: `${financials?.healthScore || 100}%`,
+      title: "Business Health",
+      value: `${healthScore}%`,
       subtext: "Deductions for delays & low stock",
       icon: Heart,
-      color: getHealthColor(financials?.healthScore || 100),
-      bg: `${getHealthColor(financials?.healthScore || 100)}15`,
-      border: `${getHealthColor(financials?.healthScore || 100)}30`
-    }
+      trend: null,
+      isHealth: true,
+      healthScore,
+      healthColor: getHealthColor(healthScore),
+    },
   ];
 
   return (
-    <div style={{
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-      gap: "20px",
-      width: "100%"
-    }}>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(5, 1fr)",
+        gap: "16px",
+        width: "100%",
+      }}
+    >
       {kpis.map((kpi, idx) => {
         const Icon = kpi.icon;
         return (
           <div
             key={idx}
-            className="glass-card"
             style={{
+              borderRadius: "14px",
+              background: "#FFFFFF",
+              border: "1px solid rgba(255,84,14,0.12)",
               padding: "20px",
               display: "flex",
               flexDirection: "column",
-              justifyContent: "space-between",
-              borderRadius: "12px",
-              border: `1px solid ${kpi.border}`,
-              background: "var(--bg-card)",
-              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+              gap: "12px",
+              position: "relative",
+              overflow: "hidden",
+              cursor: "default",
+              transition: "transform 0.22s ease, box-shadow 0.22s ease",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-4px)";
-              e.currentTarget.style.boxShadow = "var(--shadow-md)";
+              e.currentTarget.style.transform = "translateY(-3px)";
+              e.currentTarget.style.boxShadow = "0 10px 28px rgba(255,84,14,0.14)";
+              e.currentTarget.style.borderColor = "rgba(255,84,14,0.3)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = "translateY(0)";
               e.currentTarget.style.boxShadow = "none";
+              e.currentTarget.style.borderColor = "rgba(255,84,14,0.12)";
             }}
           >
-            <div>
-              <div style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "12px"
-              }}>
-                <span style={{
-                  fontSize: "12px",
+            {/* Top orange accent line */}
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: "18px",
+                right: "18px",
+                height: "2px",
+                background: "linear-gradient(to right, transparent, #FF540E, transparent)",
+                borderRadius: "0 0 2px 2px",
+              }}
+            />
+
+            {/* Subtle orange tint orb */}
+            <div
+              style={{
+                position: "absolute",
+                top: "-30px",
+                right: "-20px",
+                width: "80px",
+                height: "80px",
+                borderRadius: "50%",
+                background: "radial-gradient(circle, rgba(255,84,14,0.06) 0%, transparent 70%)",
+                pointerEvents: "none",
+              }}
+            />
+
+            {/* Header row */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <span
+                style={{
+                  fontSize: "10.5px",
                   fontWeight: 700,
                   color: "var(--text-muted)",
                   textTransform: "uppercase",
-                  letterSpacing: "0.5px"
-                }}>
-                  {kpi.title}
-                </span>
-                <div style={{
-                  width: "32px",
-                  height: "32px",
+                  letterSpacing: "0.7px",
+                  lineHeight: 1.3,
+                  maxWidth: "80px",
+                }}
+              >
+                {kpi.title}
+              </span>
+              <div
+                style={{
+                  width: "30px",
+                  height: "30px",
                   borderRadius: "8px",
-                  background: kpi.bg,
+                  background: "rgba(255,84,14,0.08)",
+                  border: "1px solid rgba(255,84,14,0.14)",
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center"
-                }}>
-                  <Icon size={16} style={{ color: kpi.color }} />
-                </div>
-              </div>
-
-              <div style={{
-                fontSize: "22px",
-                fontWeight: 800,
-                color: "var(--text-primary)",
-                lineHeight: 1.2
-              }}>
-                {kpi.value}
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <Icon size={14} style={{ color: "#FF540E" }} />
               </div>
             </div>
 
-            <div style={{
-              marginTop: "8px",
-              fontSize: "11px",
-              color: "var(--text-muted)",
-              fontWeight: 500,
-              display: "flex",
-              alignItems: "center",
-              gap: "4px"
-            }}>
-              {kpi.isPositive !== undefined && (
-                kpi.isPositive ? (
-                  <ArrowUpRight size={12} style={{ color: "var(--success)" }} />
+            {/* Value */}
+            <div>
+              <div
+                style={{
+                  fontSize: "21px",
+                  fontWeight: 900,
+                  color: "var(--text-primary)",
+                  letterSpacing: "-0.5px",
+                  lineHeight: 1.1,
+                }}
+              >
+                {kpi.value}
+              </div>
+
+              {/* Health score bar */}
+              {kpi.isHealth && (
+                <div
+                  style={{
+                    marginTop: "8px",
+                    height: "4px",
+                    background: "rgba(255,84,14,0.1)",
+                    borderRadius: "9999px",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${kpi.healthScore}%`,
+                      height: "100%",
+                      background: "linear-gradient(to right, #FF540E, #CC3300)",
+                      borderRadius: "9999px",
+                      transition: "width 0.6s ease-out",
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Subtext */}
+            <div
+              style={{
+                fontSize: "11px",
+                color: "var(--text-muted)",
+                display: "flex",
+                alignItems: "center",
+                gap: "3px",
+              }}
+            >
+              {kpi.trend !== null && kpi.trend !== undefined && (
+                kpi.trend ? (
+                  <ArrowUpRight size={11} style={{ color: "#FF540E" }} />
                 ) : (
-                  <ArrowDownRight size={12} style={{ color: "var(--danger)" }} />
+                  <ArrowDownRight size={11} style={{ color: "#FF540E" }} />
                 )
               )}
               {kpi.subtext}

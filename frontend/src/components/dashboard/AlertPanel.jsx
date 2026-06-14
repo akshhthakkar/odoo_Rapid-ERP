@@ -1,11 +1,12 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  BellRing, 
-  AlertOctagon, 
-  AlertTriangle, 
+import {
+  BellRing,
+  AlertOctagon,
+  AlertTriangle,
   Info,
-  ArrowRight
+  ArrowRight,
+  CheckCircle2,
 } from "lucide-react";
 
 const AlertPanel = ({ alerts = [] }) => {
@@ -14,86 +15,82 @@ const AlertPanel = ({ alerts = [] }) => {
   const getAlertConfig = (severity) => {
     switch (severity) {
       case "CRITICAL":
-        return {
-          color: "var(--danger)",
-          bg: "rgba(239, 68, 68, 0.08)",
-          icon: AlertOctagon
-        };
+        return { color: "#EF4444", bg: "rgba(239,68,68,0.06)", icon: AlertOctagon };
       case "HIGH":
-        return {
-          color: "#F97316", // Orange
-          bg: "rgba(249, 115, 22, 0.08)",
-          icon: AlertTriangle
-        };
+        return { color: "#F97316", bg: "rgba(249,115,22,0.06)", icon: AlertTriangle };
       default:
-        return {
-          color: "#EAB308", // Yellow
-          bg: "rgba(234, 179, 8, 0.08)",
-          icon: Info
-        };
+        return { color: "#F59E0B", bg: "rgba(245,158,11,0.06)", icon: Info };
     }
   };
 
   return (
-    <div className="glass-card" style={{ padding: "20px", display: "flex", flexDirection: "column", height: "100%" }}>
-      <div style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: "16px",
-        paddingBottom: "12px",
-        borderBottom: "1px solid var(--border)"
-      }}>
-        <h3 style={{
-          fontSize: "14px",
-          fontWeight: 700,
-          color: "var(--text-primary)",
+    <div className="glass-card" style={{ padding: "22px", display: "flex", flexDirection: "column" }}>
+      {/* Header */}
+      <div
+        style={{
           display: "flex",
+          justifyContent: "space-between",
           alignItems: "center",
-          gap: "8px"
-        }}>
-          <BellRing size={16} style={{ color: "var(--accent)" }} />
-          System Notifications & Alerts
-        </h3>
-        <span style={{
-          fontSize: "11px",
-          fontWeight: 600,
-          color: "var(--text-muted)",
-          background: "var(--bg-primary)",
-          padding: "2px 8px",
-          borderRadius: "4px"
-        }}>
+          marginBottom: "14px",
+          paddingBottom: "14px",
+          borderBottom: "1px solid var(--border)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <BellRing size={15} style={{ color: "var(--accent)" }} />
+          <h3 style={{ fontSize: "13.5px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
+            System Notifications
+          </h3>
+        </div>
+        <span
+          style={{
+            fontSize: "10.5px",
+            fontWeight: 700,
+            padding: "3px 10px",
+            borderRadius: "6px",
+            background: alerts.length > 0 ? "rgba(239,68,68,0.09)" : "rgba(16,185,129,0.09)",
+            color: alerts.length > 0 ? "#EF4444" : "#10B981",
+            border: `1px solid ${alerts.length > 0 ? "rgba(239,68,68,0.22)" : "rgba(16,185,129,0.22)"}`,
+          }}
+        >
           {alerts.length} Active
         </span>
       </div>
 
-      <div style={{
-        flex: 1,
-        overflowY: "auto",
-        maxHeight: "340px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "10px"
-      }}>
+      {/* List */}
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          maxHeight: "360px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "6px",
+          /* Thin scrollbar */
+          scrollbarWidth: "thin",
+        }}
+      >
         {alerts.length === 0 ? (
-          <div style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            flex: 1,
-            color: "var(--text-muted)",
-            fontSize: "13px",
-            padding: "40px 0"
-          }}>
-            <Info size={32} style={{ color: "var(--success)", marginBottom: "8px" }} />
-            No alerts generated. All operations stable.
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "44px 0",
+              gap: "10px",
+              color: "var(--text-muted)",
+              fontSize: "13px",
+            }}
+          >
+            <CheckCircle2 size={30} style={{ color: "#10B981" }} />
+            All operations stable. No alerts.
           </div>
         ) : (
           alerts.map((alert, idx) => {
             const config = getAlertConfig(alert.severity);
             const Icon = config.icon;
-            
+
             return (
               <div
                 key={idx}
@@ -101,68 +98,89 @@ const AlertPanel = ({ alerts = [] }) => {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "12px",
-                  borderRadius: "8px",
+                  gap: "10px",
+                  /* Left accent achieved via borderLeft — no position:absolute needed */
+                  borderLeft: `3px solid ${config.color}`,
+                  borderTop: "1px solid transparent",
+                  borderRight: "1px solid transparent",
+                  borderBottom: "1px solid transparent",
+                  borderRadius: "0 9px 9px 0",
+                  padding: "10px 12px 10px 10px",
                   background: config.bg,
-                  border: `1px solid ${config.color}20`,
                   cursor: alert.actionUrl ? "pointer" : "default",
-                  transition: "transform 0.15s ease"
+                  transition: "all 0.18s ease",
                 }}
                 onMouseEnter={(e) => {
                   if (alert.actionUrl) {
-                    e.currentTarget.style.transform = "translateX(2px)";
+                    e.currentTarget.style.paddingLeft = "13px";
+                    e.currentTarget.style.background = `${config.color}12`;
+                    e.currentTarget.style.borderTopColor = `${config.color}30`;
+                    e.currentTarget.style.borderRightColor = `${config.color}30`;
+                    e.currentTarget.style.borderBottomColor = `${config.color}30`;
                   }
                 }}
                 onMouseLeave={(e) => {
-                  if (alert.actionUrl) {
-                    e.currentTarget.style.transform = "translateX(0)";
-                  }
+                  e.currentTarget.style.paddingLeft = "10px";
+                  e.currentTarget.style.background = config.bg;
+                  e.currentTarget.style.borderTopColor = "transparent";
+                  e.currentTarget.style.borderRightColor = "transparent";
+                  e.currentTarget.style.borderBottomColor = "transparent";
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: 0 }}>
-                  <div style={{
+                {/* Icon chip */}
+                <div
+                  style={{
                     width: "28px",
                     height: "28px",
-                    borderRadius: "50%",
-                    background: "white",
+                    borderRadius: "7px",
+                    background: `${config.color}18`,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    flexShrink: 0
-                  }}>
-                    <Icon size={14} style={{ color: config.color }} />
-                  </div>
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{
+                    flexShrink: 0,
+                  }}
+                >
+                  <Icon size={13} style={{ color: config.color }} />
+                </div>
+
+                {/* Text */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
                       fontSize: "12.5px",
                       fontWeight: 600,
                       color: "var(--text-primary)",
-                      whiteSpace: "nowrap",
                       overflow: "hidden",
-                      textOverflow: "ellipsis"
-                    }}>
-                      {alert.message}
-                    </div>
-                    <div style={{
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    {alert.message}
+                  </div>
+                  <div
+                    style={{
                       fontSize: "10px",
-                      color: "var(--text-muted)",
-                      textTransform: "uppercase",
                       fontWeight: 700,
-                      marginTop: "2px",
+                      marginTop: "3px",
                       display: "flex",
                       alignItems: "center",
-                      gap: "4px"
-                    }}>
-                      <span style={{ color: config.color }}>{alert.severity}</span>
-                      <span>•</span>
-                      <span>{alert.type?.replace(/_/g, " ")}</span>
-                    </div>
+                      gap: "4px",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.3px",
+                    }}
+                  >
+                    <span style={{ color: config.color }}>{alert.severity}</span>
+                    <span style={{ color: "var(--text-muted)", opacity: 0.5 }}>·</span>
+                    <span style={{ color: "var(--text-muted)" }}>
+                      {alert.type?.replace(/_/g, " ")}
+                    </span>
                   </div>
                 </div>
 
+                {/* Arrow */}
                 {alert.actionUrl && (
-                  <ArrowRight size={14} style={{ color: "var(--text-muted)", marginLeft: "8px" }} />
+                  <ArrowRight size={13} style={{ color: "var(--text-muted)", flexShrink: 0, opacity: 0.7 }} />
                 )}
               </div>
             );

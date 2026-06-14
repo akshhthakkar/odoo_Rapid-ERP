@@ -15,7 +15,8 @@ import {
   History, 
   UserPlus, 
   Users,
-  CornerDownLeft
+  CornerDownLeft,
+  LogOut
 } from 'lucide-react';
 
 const PAGE_TITLES = {
@@ -601,16 +602,23 @@ const Topbar = () => {
           onMouseEnter={() => setLogoutHovered(true)}
           onMouseLeave={() => setLogoutHovered(false)}
           style={{
-            background: 'none',
-            border: 'none',
-            padding: 0,
+            background: logoutHovered ? 'rgba(255, 84, 14, 0.08)' : 'transparent',
+            border: '1px solid',
+            borderColor: logoutHovered ? '#FF540E' : '#D1D5DB',
+            borderRadius: '8px',
+            padding: '6px 14px',
             fontSize: '13px',
-            fontWeight: 500,
-            color: logoutHovered ? '#1F2937' : '#6B7280',
+            fontWeight: 600,
+            color: logoutHovered ? '#FF540E' : '#4B5563',
             cursor: 'pointer',
-            transition: 'color 0.15s ease',
+            transition: 'all 0.15s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            boxShadow: logoutHovered ? '0 2px 8px rgba(255, 84, 14, 0.05)' : 'none',
           }}
         >
+          <LogOut size={13} color={logoutHovered ? '#FF540E' : '#4B5563'} style={{ transition: 'color 0.15s ease' }} />
           Logout
         </button>
       </div>

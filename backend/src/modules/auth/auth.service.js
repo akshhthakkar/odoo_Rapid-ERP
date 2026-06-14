@@ -58,7 +58,10 @@ export const loginUser = async ({ email, password }) => {
     throw { status: 400, message: 'Email and password are required' };
   }
 
-  const users = await prisma.user.findMany({ where: { email: email.toLowerCase().trim() } });
+  const users = await prisma.user.findMany({
+    where: { email: email.toLowerCase().trim() },
+    include: { tenant: true }
+  });
 
   let matchedUser = null;
   for (const u of users) {
@@ -102,6 +105,7 @@ export const loginUser = async ({ email, password }) => {
     role: matchedUser.role,
     name: matchedUser.name,
     tenantId: matchedUser.tenantId,
+    tenantName: matchedUser.tenant?.name,
     mustChangePassword: matchedUser.mustChangePassword,
   };
 
@@ -132,9 +136,19 @@ export const getCurrentUser = async (userId) => {
     select: {
       id: true, uid: true, name: true, email: true, role: true,
       isActive: true, tenantId: true, mustChangePassword: true, createdAt: true,
+      tenant: {
+        select: {
+          name: true,
+        }
+      }
     },
   });
 
   if (!user) throw { status: 404, message: 'User not found' };
-  return user;
+  
+  const { tenant, ...rest } = user;
+  return {
+    ...rest,
+    tenantName: tenant?.name,
+  };
 };
