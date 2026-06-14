@@ -45,7 +45,7 @@ import { useAuthStore } from "../store/authStore";
 const ROLE_HOME = {
   ADMIN: "/dashboard",
   BUSINESS_OWNER: "/dashboard",
-  INVENTORY_MANAGER: "/dashboard",
+  INVENTORY_MANAGER: "/inventory",
   SALES_USER: "/sales",
   PURCHASE_USER: "/purchase",
   MANUFACTURING_USER: "/manufacturing",
@@ -280,7 +280,7 @@ const AppRoutes = () => {
       <Route
         path="/manufacturing"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["ADMIN", "BUSINESS_OWNER", "MANUFACTURING_USER"]}>
             <AppLayout>
               <ManufacturingListPage />
             </AppLayout>
@@ -302,7 +302,7 @@ const AppRoutes = () => {
       <Route
         path="/bom"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["ADMIN", "BUSINESS_OWNER", "MANUFACTURING_USER"]}>
             <AppLayout>
               <BomListPage />
             </AppLayout>
@@ -424,7 +424,7 @@ const AppRoutes = () => {
       <Route
         path="/audit"
         element={
-          <ProtectedRoute allowedRoles={["ADMIN", "BUSINESS_OWNER", "INVENTORY_MANAGER"]}>
+          <ProtectedRoute allowedRoles={["ADMIN", "BUSINESS_OWNER"]}>
             <AppLayout>
               <AuditLogPage />
             </AppLayout>

@@ -34,7 +34,7 @@ const SECTIONS = [
   {
     title: 'Overview',
     items: [
-      { path: '/dashboard', label: 'Dashboard', icon: 'dashboard', roles: ['ADMIN', 'BUSINESS_OWNER', 'INVENTORY_MANAGER'] },
+      { path: '/dashboard', label: 'Dashboard', icon: 'dashboard', roles: ['ADMIN', 'BUSINESS_OWNER'] },
     ]
   },
   {
@@ -43,8 +43,8 @@ const SECTIONS = [
       { path: '/products', label: 'Products', icon: 'products', roles: ['ADMIN', 'BUSINESS_OWNER', 'INVENTORY_MANAGER', 'SALES_USER', 'PURCHASE_USER', 'MANUFACTURING_USER'] },
       { path: '/sales', label: 'Sales', icon: 'sales', roles: ['ADMIN', 'BUSINESS_OWNER', 'SALES_USER', 'INVENTORY_MANAGER'] },
       { path: '/purchase', label: 'Purchase', icon: 'purchase', roles: ['ADMIN', 'BUSINESS_OWNER', 'PURCHASE_USER', 'INVENTORY_MANAGER'] },
-      { path: '/manufacturing', label: 'Manufacturing', icon: 'manufacturing', roles: ['ADMIN', 'BUSINESS_OWNER', 'MANUFACTURING_USER', 'INVENTORY_MANAGER'] },
-      { path: '/bom', label: 'Bill of Materials', icon: 'bom', roles: ['ADMIN', 'BUSINESS_OWNER', 'MANUFACTURING_USER', 'INVENTORY_MANAGER'] },
+      { path: '/manufacturing', label: 'Manufacturing', icon: 'manufacturing', roles: ['ADMIN', 'BUSINESS_OWNER', 'MANUFACTURING_USER'] },
+      { path: '/bom', label: 'Bill of Materials', icon: 'bom', roles: ['ADMIN', 'BUSINESS_OWNER', 'MANUFACTURING_USER'] },
       { path: '/inventory', label: 'Inventory', icon: 'inventory', roles: ['ADMIN', 'BUSINESS_OWNER', 'INVENTORY_MANAGER'] },
     ]
   },
@@ -53,7 +53,7 @@ const SECTIONS = [
     items: [
       { path: '/analytics', label: 'Analytics', icon: 'analytics', roles: ['ADMIN', 'BUSINESS_OWNER', 'SALES_USER', 'PURCHASE_USER', 'MANUFACTURING_USER', 'INVENTORY_MANAGER'] },
       { path: '/reports', label: 'Reports', icon: 'reports', roles: ['ADMIN', 'BUSINESS_OWNER', 'SALES_USER', 'PURCHASE_USER', 'MANUFACTURING_USER', 'INVENTORY_MANAGER'] },
-      { path: '/audit', label: 'Audit Log', icon: 'audit', roles: ['ADMIN', 'BUSINESS_OWNER', 'INVENTORY_MANAGER'] },
+      { path: '/audit', label: 'Audit Log', icon: 'audit', roles: ['ADMIN', 'BUSINESS_OWNER'] },
       { path: '/settings/users', label: 'Users', icon: 'users', roles: ['ADMIN'] },
     ]
   }

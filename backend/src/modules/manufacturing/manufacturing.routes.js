@@ -18,9 +18,9 @@ const router = Router();
 // All manufacturing execution routes require authentication
 router.use(verifyToken);
 
-// Read-only routes (accessible to any logged-in user)
-router.get("/", getMOs);
-router.get("/:id", getMOById);
+// Read-only routes (restricted to ADMIN, BUSINESS_OWNER, and MANUFACTURING_USER)
+router.get("/", requireRole("ADMIN", "BUSINESS_OWNER", "MANUFACTURING_USER"), getMOs);
+router.get("/:id", requireRole("ADMIN", "BUSINESS_OWNER", "MANUFACTURING_USER"), getMOById);
 
 // Execution / modification routes (restricted to ADMIN and MANUFACTURING_USER)
 router.post("/", requireRole("ADMIN", "MANUFACTURING_USER"), createMO);
