@@ -13,6 +13,8 @@ const SalesAnalyticsPage = () => {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["salesAnalytics", startDate, endDate],
     queryFn: () => getSalesAnalytics({ startDate, endDate }),
+    refetchInterval: 60000,
+    refetchOnWindowFocus: true,
   });
 
   const formatCurrency = (val) => {

@@ -54,11 +54,6 @@ const LoginPage = () => {
     }
   };
 
-  const handleDemoCredentials = (dEmail, dPass) => {
-    setEmail(dEmail);
-    setPassword(dPass);
-  };
-
   return (
     <>
       <style>{`
@@ -354,53 +349,7 @@ const LoginPage = () => {
               By logging in, you agree to our <a href="#terms">Terms of Service</a> and <a href="#privacy">Privacy Policy</a>.
             </div>
 
-            {/* Quick Demo Credentials */}
-            <div style={{
-              padding: '12px',
-              background: '#F1F5F9',
-              borderRadius: '8px',
-              border: '1px solid #E2E8F0',
-            }}>
-              <p style={{ fontSize: '10.5px', fontWeight: 700, color: '#475569', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.4px', textAlign: 'center' }}>
-                Demo Credentials
-              </p>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <button
-                  type="button"
-                  onClick={() => handleDemoCredentials('admin@erp.com', 'Admin@123')}
-                  style={{
-                    flex: 1,
-                    padding: '6px',
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    color: '#FF540E',
-                    background: '#FFFFFF',
-                    border: '1px solid #E2E8F0',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Admin Demo
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDemoCredentials('sarah@erp.com', 'Pass@123')}
-                  style={{
-                    flex: 1,
-                    padding: '6px',
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    color: '#64748B',
-                    background: '#FFFFFF',
-                    border: '1px solid #E2E8F0',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Sales Demo
-                </button>
-              </div>
-            </div>
+
 
             <div className="grid-h-line" style={{ bottom: 0 }} />
             <div className="grid-plus grid-plus-bl">+</div>
