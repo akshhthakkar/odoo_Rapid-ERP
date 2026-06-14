@@ -93,6 +93,7 @@ const Sidebar = () => {
         alignItems: 'center',
         padding: '0 16px',
         borderBottom: '1px solid #E5E7EB',
+        flexShrink: 0,
       }}>
         <Link to="/" style={{ display: 'block', width: '100%', outline: 'none' }}>
           <img src={rapidLogo} alt="RAPID" style={{ width: '100%', maxHeight: '90px', objectFit: 'contain', objectPosition: 'left center', cursor: 'pointer' }} />
@@ -100,7 +101,7 @@ const Sidebar = () => {
       </div>
 
       {/* Navigation */}
-      <nav style={{ flex: 1, padding: '16px 12px', overflowY: 'auto' }}>
+      <nav data-lenis-prevent style={{ flex: 1, padding: '16px 12px', overflowY: 'auto', minHeight: 0 }}>
         {SECTIONS.map((section) => {
           // Filter visible items in this section based on user role
           const visibleItems = section.items.filter((item) => item.roles.includes(role));
@@ -175,6 +176,7 @@ const Sidebar = () => {
       <div style={{
         padding: '16px 20px 24px',
         borderTop: '1px solid #E5E7EB',
+        flexShrink: 0,
       }}>
         {/* Profile row */}
         <div style={{
