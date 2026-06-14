@@ -1,0 +1,193 @@
+.faq {
+  background: transparent;
+  padding: 60px 20px 120px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 5;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.faq__label-top {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+.faq__label-top span {
+  display: inline-flex;
+  align-items: center;
+  background: #EDEDF0;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 9999px;
+  padding: 0.35rem 0.9rem;
+  color: #FF540E;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.faq__inner {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.faq__header {
+  margin-bottom: clamp(40px, 6vw, 56px);
+  text-align: center;
+}
+
+.faq__title {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: clamp(32px, 4.5vw, 56px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #0A0F1E;
+  margin-bottom: 12px;
+  line-height: 1.15;
+}
+
+.faq__title-em {
+  font-family: inherit;
+  font-style: italic;
+  font-weight: 600;
+  color: #FF540E;
+}
+
+.faq__sub {
+  font-size: 1.15rem;
+  color: #4B5563;
+  line-height: 1.6;
+}
+
+.faq__sub a {
+  color: #FF540E;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(255, 84, 14, 0.2);
+  transition: color 0.18s, text-decoration-color 0.18s;
+  font-weight: 600;
+}
+
+.faq__sub a:hover {
+  color: #E64500;
+  text-decoration-color: rgba(255, 84, 14, 0.6);
+}
+
+.faq__list {
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  width: 100%;
+}
+
+.faq__item {
+  border-top: 1px solid rgba(0, 0, 0, 0.07);
+  transition: border-color 0.2s;
+}
+
+.faq__item:last-child {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+.faq__item--open {
+  border-top-color: rgba(0, 0, 0, 0.08);
+}
+
+.faq__item--open .faq__question-text {
+  color: #0A0F1E;
+  font-weight: 600;
+}
+
+.faq__item--open .faq__icon {
+  color: #FF540E;
+}
+
+.faq__question {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: opacity 0.15s;
+  outline: none;
+}
+
+.faq__question:hover .faq__question-text {
+  color: #0A0F1E;
+}
+
+.faq__question-text {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: clamp(15px, 1.3vw, 17px);
+  font-weight: 500;
+  color: #4B5563;
+  line-height: 1.5;
+  transition: color 0.18s;
+}
+
+.faq__icon {
+  flex-shrink: 0;
+  color: rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  transition: color 0.18s, transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.faq__answer-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.faq__item--open .faq__answer-wrap {
+  grid-template-rows: 1fr;
+}
+
+.faq__answer {
+  overflow: hidden;
+}
+
+.faq__answer p {
+  padding: 0 0 22px 0;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1.7;
+  color: #4B5563;
+  border-left: 2px solid rgba(255, 84, 14, 0.2);
+  padding-left: 18px;
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .faq {
+    padding: 60px 0;
+  }
+
+  .faq__inner {
+    padding: 0 20px;
+  }
+
+  .faq__question {
+    padding: 18px 0;
+  }
+
+  .faq__answer p {
+    padding-bottom: 18px;
+  }
+}
