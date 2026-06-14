@@ -1,8 +1,8 @@
-﻿import * as salesService from "./sales.service.js";
+import * as salesService from "./sales.service.js";
 
 export const listSalesOrders = async (req, res, next) => {
   try {
-    const orders = await salesService.listSalesOrders(req.user.tenantId);
+    const orders = await salesService.listSalesOrders(req.user.tenantId, req.query);
     res.status(200).json(orders);
   } catch (err) {
     next(err);

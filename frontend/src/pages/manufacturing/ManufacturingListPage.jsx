@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { getManufacturingOrders, createManufacturingOrder } from "../../api/manufacturing.api";
 import { getBoms } from "../../api/bom.api";
 import { Factory, Plus, Search, Calendar, Filter, RefreshCw, X, Loader2, ArrowRight } from "lucide-react";
 import Loader from "../../components/ui/Loader";
+import Pagination from "../../components/ui/Pagination";
 
 const ManufacturingListPage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = parseInt(searchParams.get("page") || "1", 10);
+  const statusFilter = searchParams.get("status") || "";
+
   const [mos, setMos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState(null);
 
-  // Filters
-  const [statusFilter, setStatusFilter] = useState("");
+  // Search filter
   const [searchTerm, setSearchTerm] = useState("");
 
   // Modal State
@@ -30,10 +35,20 @@ const ManufacturingListPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const params = {};
-      if (statusFilter) params.status = statusFilter;
-      const data = await getManufacturingOrders(params);
-      setMos(data);
+      const params = {
+        page,
+        limit: 10,
+        ...(statusFilter && { status: statusFilter }),
+        ...(searchTerm && { search: searchTerm }),
+      };
+      const response = await getManufacturingOrders(params);
+      if (response && response.data) {
+        setMos(response.data);
+        setPagination(response.pagination);
+      } else {
+        setMos(response);
+        setPagination(null);
+      }
     } catch (err) {
       setError(err.response?.data?.message || "Failed to fetch Manufacturing Orders.");
     } finally {
@@ -58,7 +73,7 @@ const ManufacturingListPage = () => {
 
   useEffect(() => {
     fetchMos();
-  }, [statusFilter]);
+  }, [statusFilter, page, searchTerm]);
 
   useEffect(() => {
     if (isModalOpen) {
@@ -109,6 +124,27 @@ const ManufacturingListPage = () => {
     }
   };
 
+  const handlePageChange = (newPage) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set('page', newPage);
+    setSearchParams(params);
+  };
+
+  const handleStatusFilterChange = (newStatus) => {
+    const params = new URLSearchParams(window.location.search);
+    if (newStatus) params.set('status', newStatus);
+    else params.delete('status');
+    params.set('page', '1');
+    setSearchParams(params);
+  };
+
+  const handleSearchChange = (val) => {
+    setSearchTerm(val);
+    const params = new URLSearchParams(window.location.search);
+    params.set('page', '1');
+    setSearchParams(params);
+  };
+
   const getStatusBadge = (status) => {
     const styles = {
       DRAFT: { bg: "#F3F4F6", text: "#4B5563", label: "Draft" },
@@ -134,16 +170,6 @@ const ManufacturingListPage = () => {
       </span>
     );
   };
-
-  // Filter list by search term (sku or ref)
-  const filteredMos = mos.filter((mo) => {
-    const term = searchTerm.toLowerCase();
-    return (
-      mo.moRef.toLowerCase().includes(term) ||
-      mo.productName.toLowerCase().includes(term) ||
-      mo.productSku.toLowerCase().includes(term)
-    );
-  });
 
   return (
     <div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
@@ -227,7 +253,7 @@ const ManufacturingListPage = () => {
             type="text"
             placeholder="Search by MO reference, product SKU or name..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             style={{
               width: "100%",
               padding: "10px 12px 10px 40px",
@@ -244,7 +270,7 @@ const ManufacturingListPage = () => {
           <Filter size={16} style={{ color: "#6B7280" }} />
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => handleStatusFilterChange(e.target.value)}
             style={{
               padding: "9px 12px",
               border: "1px solid #D1D5DB",
@@ -302,7 +328,7 @@ const ManufacturingListPage = () => {
       {/* Main Grid/Table */}
       {loading ? (
         <Loader size={36} padding="64px 0" />
-      ) : filteredMos.length === 0 ? (
+      ) : mos.length === 0 ? (
         <div
           style={{
             background: "#FFFFFF",
@@ -342,7 +368,7 @@ const ManufacturingListPage = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredMos.map((mo) => (
+              {mos.map((mo) => (
                 <tr
                   key={mo.id}
                   style={{
@@ -422,6 +448,17 @@ const ManufacturingListPage = () => {
               ))}
             </tbody>
           </table>
+          {pagination && (
+            <div style={{ padding: '0 16px' }}>
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                totalItems={pagination.totalItems}
+                limit={pagination.limit}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
         </div>
       )}
 

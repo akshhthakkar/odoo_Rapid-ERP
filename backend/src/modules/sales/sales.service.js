@@ -4,14 +4,44 @@ import { logAudit } from "../../utils/auditLogger.js";
 import { reserveStock, deliverStock, releaseStock } from "../../utils/stockEngine.js";
 import { trigger as triggerProcurement } from "../../utils/procurementEngine.js";
 
-export const listSalesOrders = async (tenantId) => {
-  const orders = await prisma.salesOrder.findMany({
-    where: { tenantId },
-    include: { customer: true, lines: { include: { product: true } } },
-    orderBy: { updatedAt: "desc" },
-  });
+export const listSalesOrders = async (tenantId, query = {}) => {
+  const page = query.page ? parseInt(query.page, 10) : null;
+  const limit = query.limit ? parseInt(query.limit, 10) : null;
+  const search = query.search || "";
+  const status = query.status;
 
-  return orders.map((o) => {
+  const where = {
+    tenantId,
+    ...(status && status !== "all" && { status }),
+    ...(search && {
+      OR: [
+        { orderRef: { contains: search, mode: "insensitive" } },
+        { customer: { name: { contains: search, mode: "insensitive" } } },
+      ],
+    }),
+  };
+
+  const totalItems = await prisma.salesOrder.count({ where });
+
+  let orders;
+  if (page && limit) {
+    const skip = (page - 1) * limit;
+    orders = await prisma.salesOrder.findMany({
+      where,
+      include: { customer: true, lines: { include: { product: true } } },
+      orderBy: { updatedAt: "desc" },
+      skip,
+      take: limit,
+    });
+  } else {
+    orders = await prisma.salesOrder.findMany({
+      where,
+      include: { customer: true, lines: { include: { product: true } } },
+      orderBy: { updatedAt: "desc" },
+    });
+  }
+
+  const formattedOrders = orders.map((o) => {
     const totalAmount = o.lines.reduce((sum, l) => sum + Number(l.qty) * Number(l.unitPrice), 0);
     const totalQty = o.lines.reduce((sum, l) => sum + Number(l.qty), 0);
     const totalDelivered = o.lines.reduce((sum, l) => sum + Number(l.deliveredQty), 0);
@@ -23,6 +53,20 @@ export const listSalesOrders = async (tenantId) => {
       totalAmount, totalQty, totalDelivered, totalReserved, totalShortage,
       createdAt: o.createdAt, updatedAt: o.updatedAt };
   });
+
+  if (page && limit) {
+    return {
+      data: formattedOrders,
+      pagination: {
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+        currentPage: page,
+        limit,
+      },
+    };
+  }
+
+  return formattedOrders;
 };
 
 export const getSalesOrderById = async (id, tenantId) => {

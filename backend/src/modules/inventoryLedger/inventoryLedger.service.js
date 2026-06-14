@@ -6,6 +6,8 @@ export const getInventoryLedger = async ({
   startDate = new Date(0).toISOString(), // default to beginning of time
   endDate = new Date().toISOString(),   // default to now
   tenantId,
+  page,
+  limit,
 }) => {
   if (!productId) {
     throw { status: 400, message: "productId is required" };
@@ -164,6 +166,23 @@ export const getInventoryLedger = async ({
   const closingStock = Number(runningBalance.toFixed(3));
   const netChange = Number((closingStock - openingStock).toFixed(3));
 
+  let paginatedRows = rows;
+  let pagination = null;
+
+  if (page && limit) {
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const totalItems = rows.length;
+    const skip = (pageNum - 1) * limitNum;
+    paginatedRows = rows.slice(skip, skip + limitNum);
+    pagination = {
+      totalItems,
+      totalPages: Math.ceil(totalItems / limitNum),
+      currentPage: pageNum,
+      limit: limitNum,
+    };
+  }
+
   return {
     product: {
       id: product.id,
@@ -180,6 +199,7 @@ export const getInventoryLedger = async ({
     adjustments: adjustmentsTotal,
     transfers: transfersTotal,
     netChange,
-    rows,
+    rows: paginatedRows,
+    ...(pagination && { pagination }),
   };
 };

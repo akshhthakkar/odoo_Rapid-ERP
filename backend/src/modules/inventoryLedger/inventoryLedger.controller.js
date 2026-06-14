@@ -9,7 +9,7 @@ import { logAudit } from "../../utils/auditLogger.js";
 export const getLedger = async (req, res, next) => {
   try {
     const tenantId = req.user.tenantId;
-    const { productId, warehouseId, startDate, endDate } = req.query;
+    const { productId, warehouseId, startDate, endDate, page, limit } = req.query;
 
     if (!productId) {
       return res.status(400).json({ message: "productId query parameter is required" });
@@ -21,6 +21,8 @@ export const getLedger = async (req, res, next) => {
       startDate,
       endDate,
       tenantId,
+      page,
+      limit,
     });
 
     res.status(200).json(ledger);

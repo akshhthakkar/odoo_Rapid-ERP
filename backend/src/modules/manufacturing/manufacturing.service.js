@@ -62,24 +62,70 @@ const formatMO = (mo) => {
 };
 
 export const listManufacturingOrders = async (query = {}, tenantId) => {
+  const page = query.page ? parseInt(query.page, 10) : null;
+  const limit = query.limit ? parseInt(query.limit, 10) : null;
+  const search = query.search || "";
   const { status, productId } = query;
-  const where = { tenantId };
-  if (status) where.status = status;
-  if (productId) where.productId = Number(productId);
 
-  const mos = await prisma.manufacturingOrder.findMany({
-    where,
-    include: {
-      product: true,
-      bom: true,
-      user: true,
-      salesOrder: true,
-      workOrders: { include: { workCenter: true } },
-    },
-    orderBy: { updatedAt: "desc" },
-  });
+  const where = {
+    tenantId,
+    ...(status && status !== "all" && { status }),
+    ...(productId && { productId: Number(productId) }),
+    ...(search && {
+      OR: [
+        { moRef: { contains: search, mode: "insensitive" } },
+        { product: { name: { contains: search, mode: "insensitive" } } },
+      ],
+    }),
+  };
 
-  return mos.map(formatMO);
+  const totalItems = await prisma.manufacturingOrder.count({ where });
+
+  let mos;
+  if (page && limit) {
+    const skip = (page - 1) * limit;
+    mos = await prisma.manufacturingOrder.findMany({
+      where,
+      include: {
+        product: true,
+        bom: true,
+        user: true,
+        salesOrder: true,
+        workOrders: { include: { workCenter: true } },
+      },
+      orderBy: { updatedAt: "desc" },
+      skip,
+      take: limit,
+    });
+  } else {
+    mos = await prisma.manufacturingOrder.findMany({
+      where,
+      include: {
+        product: true,
+        bom: true,
+        user: true,
+        salesOrder: true,
+        workOrders: { include: { workCenter: true } },
+      },
+      orderBy: { updatedAt: "desc" },
+    });
+  }
+
+  const formatted = mos.map(formatMO);
+
+  if (page && limit) {
+    return {
+      data: formatted,
+      pagination: {
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+        currentPage: page,
+        limit,
+      },
+    };
+  }
+
+  return formatted;
 };
 
 export const getManufacturingOrderById = async (id, tenantId) => {

@@ -2,7 +2,7 @@ import * as vendorService from "./vendors.service.js";
 
 export const listVendors = async (req, res, next) => {
   try {
-    const vendors = await vendorService.getVendors(req.user.tenantId);
+    const vendors = await vendorService.getVendors(req.user.tenantId, req.query);
     res.status(200).json(vendors);
   } catch (err) {
     next(err);

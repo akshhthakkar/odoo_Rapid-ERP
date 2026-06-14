@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getBoms, deleteBom } from '../../api/bom.api';
 import { useAuthStore } from '../../store/authStore';
 import Button from '../../components/ui/Button';
 import { Edit2, Trash2, AlertTriangle, CheckCircle2, ClipboardList } from 'lucide-react';
 import Loader from '../../components/ui/Loader';
+import Pagination from '../../components/ui/Pagination';
 
 const BomListPage = () => {
   const navigate = useNavigate();
@@ -13,15 +14,27 @@ const BomListPage = () => {
   const { user } = useAuthStore();
   const userRole = user?.role;
 
-  const [includeInactive, setIncludeInactive] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = parseInt(searchParams.get('page') || '1', 10);
+  const includeInactive = searchParams.get('includeInactive') === 'true';
+
+  const [searchQuery, setSearchQuery] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
   // ─── QUERY: GET BOMS ────────────────────────────────────────────────────────
-  const { data: boms = [], isLoading } = useQuery({
-    queryKey: ['boms', includeInactive],
-    queryFn: () => getBoms({ includeInactive }),
+  const { data: responseData, isLoading } = useQuery({
+    queryKey: ['boms', page, includeInactive, searchQuery],
+    queryFn: () => getBoms({
+      page,
+      limit: 10,
+      includeInactive,
+      search: searchQuery,
+    }),
   });
+
+  const boms = responseData?.data || [];
+  const pagination = responseData?.pagination;
 
   // ─── MUTATION: SOFT DELETE (DEACTIVATE) ──────────────────────────────────────
   const deleteMutation = useMutation({
@@ -46,6 +59,26 @@ const BomListPage = () => {
 
   const handleDelete = (id, productName) => {
     setBomToDeactivate({ id, productName });
+  };
+
+  const handlePageChange = (newPage) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set('page', newPage);
+    setSearchParams(params);
+  };
+
+  const handleIncludeInactiveChange = (checked) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set('includeInactive', checked);
+    params.set('page', '1');
+    setSearchParams(params);
+  };
+
+  const handleSearchChange = (val) => {
+    setSearchQuery(val);
+    const params = new URLSearchParams(window.location.search);
+    params.set('page', '1');
+    setSearchParams(params);
   };
 
   const formatDuration = (mins) => {
@@ -114,14 +147,59 @@ const BomListPage = () => {
 
       {/* Filter and Content Card */}
       <div className="glass-card" style={{ padding: '24px' }}>
-        {/* Toggle option */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+        {/* Search & Toggle Option */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+          {/* Search Input Bar */}
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flex: 1, maxWidth: '400px' }}>
+            <input
+              type="text"
+              placeholder="Search by product SKU or name..."
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 14px',
+                borderRadius: '8px',
+                border: '1px solid var(--border)',
+                background: 'var(--bg-card)',
+                color: 'var(--text-primary)',
+                fontSize: '13.5px',
+                outline: 'none',
+                transition: 'all 0.15s ease',
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = '#FF540E';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255,84,14,0.12)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => handleSearchChange('')}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#EF4444',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer', color: 'var(--text-secondary)' }}>
             <input
               type="checkbox"
               id="toggle-inactive-boms"
               checked={includeInactive}
-              onChange={(e) => setIncludeInactive(e.target.checked)}
+              onChange={(e) => handleIncludeInactiveChange(e.target.checked)}
               style={{
                 width: '16px',
                 height: '16px',
@@ -245,6 +323,15 @@ const BomListPage = () => {
                 ))}
               </tbody>
             </table>
+            {pagination && (
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                totalItems={pagination.totalItems}
+                limit={pagination.limit}
+                onPageChange={handlePageChange}
+              />
+            )}
           </div>
         )}
       </div>

@@ -190,31 +190,6 @@ const AnalyticsDashboardPage = () => {
           );
         })}
       </div>
-
-      {/* Overview Charts Section / Future Planning info */}
-      <div className="glass-card" style={{ padding: "24px 32px" }}>
-        <h3 style={{ fontSize: "15px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "12px" }}>
-          Enterprise Reporting Options
-        </h3>
-        <p style={{ fontSize: "13.5px", color: "var(--text-muted)", lineHeight: 1.6 }}>
-          Select specific departments in the sidebar to view detailed analytics. Navigate to the <strong>Reports</strong> tab to configure custom exports as PDF documents, binary Excel workbooks, or CSV lists.
-        </p>
-        <div
-          style={{
-            marginTop: "16px",
-            fontSize: "12px",
-            color: "var(--accent)",
-            fontWeight: 600,
-            display: "inline-block",
-            padding: "4px 10px",
-            background: "rgba(255, 84, 14, 0.1)",
-            borderRadius: "6px",
-            border: "1px solid rgba(255, 84, 14, 0.2)",
-          }}
-        >
-          Future Scalability: Cache integration with Redis (Phase 8.5) scheduled for high-load analytics stability.
-        </div>
-      </div>
     </div>
   );
 };

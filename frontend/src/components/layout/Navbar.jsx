@@ -24,9 +24,9 @@ export function Navbar() {
     <nav className={`navbar-wrapper ${hidden ? 'navbar-wrapper--hidden' : ''}`}>
       <div className="navbar">
 
-        <div className="navbar-logo">
+        <Link to="/" className="navbar-logo" style={{ display: 'flex', alignItems: 'center' }}>
           <img src={rapidLogo} alt="RAPID" style={{ height: '30px', objectFit: 'contain' }} />
-        </div>
+        </Link>
 
         <ul className="navbar-links">
           {['Features', 'Pricing', 'Docs'].map((label) => (

@@ -65,7 +65,7 @@ const ExecutiveDashboardPage = () => {
 
   const queryParams = getParams();
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: ["executiveDashboardData", queryParams.startDate, queryParams.endDate],
     queryFn: () => getExecutiveDashboard(queryParams),
     refetchInterval: 60000,
@@ -200,27 +200,37 @@ const ExecutiveDashboardPage = () => {
           <button
             onClick={() => refetch()}
             title="Refresh data"
+            disabled={isFetching}
             style={{
               width: "34px",
               height: "34px",
               borderRadius: "8px",
               border: "1px solid var(--border)",
               background: "var(--bg-card)",
-              cursor: "pointer",
+              cursor: isFetching ? "not-allowed" : "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               transition: "all 0.2s",
+              opacity: isFetching ? 0.6 : 1,
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.color = "var(--accent)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "inherit"; }}
+            onMouseEnter={(e) => { 
+              if (!isFetching) {
+                e.currentTarget.style.borderColor = "var(--accent)"; 
+                e.currentTarget.style.color = "var(--accent)"; 
+              }
+            }}
+            onMouseLeave={(e) => { 
+              e.currentTarget.style.borderColor = "var(--border)"; 
+              e.currentTarget.style.color = "inherit"; 
+            }}
           >
-            <RefreshCw size={14} />
+            <RefreshCw size={14} className={isFetching ? "animate-spin" : ""} />
           </button>
         </div>
       </div>
 
-      {/* ── TOP ROW: Morning Brief + Smart Insights ── */}
+      {/* ── TOP ROW: Morning Brief + Dashboard KPIs ── */}
       <div style={{ display: "grid", gridTemplateColumns: "340px 1fr", gap: "20px", alignItems: "stretch" }}>
         {/* Morning Brief */}
         <div
@@ -281,95 +291,42 @@ const ExecutiveDashboardPage = () => {
             style={{
               padding: "10px 16px",
               borderRadius: "10px",
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.14)",
-              color: "#fff",
+              background: "#ffffff",
+              border: "1px solid #ffffff",
+              color: "#FF540E",
               fontSize: "12px",
-              fontWeight: 600,
+              fontWeight: 700,
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               gap: "6px",
               fontFamily: "inherit",
-              transition: "all 0.2s",
+              transition: "all 0.2s ease",
               position: "relative",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.14)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.14)"; }}
+            onMouseEnter={(e) => { 
+              e.currentTarget.style.background = "#ffebe3"; 
+              e.currentTarget.style.borderColor = "#ffebe3";
+              e.currentTarget.style.transform = "translateY(-1px)";
+              e.currentTarget.style.boxShadow = "0 6px 16px rgba(0,0,0,0.12)";
+            }}
+            onMouseLeave={(e) => { 
+              e.currentTarget.style.background = "#ffffff"; 
+              e.currentTarget.style.borderColor = "#ffffff";
+              e.currentTarget.style.transform = "none";
+              e.currentTarget.style.boxShadow = "0 2px 6px rgba(0,0,0,0.06)";
+            }}
           >
             Review System Audit Trail <ArrowRight size={13} />
           </button>
         </div>
 
-        {/* Smart Insights */}
-        <div
-          className="glass-card"
-          style={{ padding: "28px", display: "flex", flexDirection: "column", gap: "16px" }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <div
-              style={{
-                width: "32px",
-                height: "32px",
-                borderRadius: "9px",
-                background: "linear-gradient(135deg, rgba(255,84,14,0.15), rgba(255,84,14,0.05))",
-                border: "1px solid rgba(255,84,14,0.2)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Sparkles size={15} style={{ color: "var(--accent)" }} />
-            </div>
-            <div>
-              <h3 style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
-                Period-Over-Period Smart Insights
-              </h3>
-              <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: 0 }}>AI-derived business observations</p>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px", flex: 1 }}>
-            {data.insights?.map((insight, idx) => (
-              <div
-                key={idx}
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: "10px",
-                  padding: "12px 14px",
-                  background: "var(--bg-primary)",
-                  borderRadius: "10px",
-                  border: "1px solid var(--border)",
-                  transition: "border-color 0.2s",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(255,84,14,0.3)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; }}
-              >
-                <div
-                  style={{
-                    width: "4px",
-                    height: "4px",
-                    borderRadius: "50%",
-                    background: "var(--accent)",
-                    marginTop: "6px",
-                    flexShrink: 0,
-                  }}
-                />
-                <span style={{ fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.55 }}>{insight}</span>
-              </div>
-            ))}
-          </div>
-
-          <p style={{ fontSize: "10.5px", color: "var(--text-muted)", margin: 0 }}>
-            * Derived by comparing current range against the prior matching window.
-          </p>
-        </div>
+        {/* Dashboard KPIs */}
+        <DashboardKPI financials={data.financials} />
       </div>
 
-      {/* ── KPI ROW ── */}
-      <DashboardKPI financials={data.financials} />
 
       {/* ── CHARTS ROW ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>

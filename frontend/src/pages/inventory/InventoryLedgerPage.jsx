@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { getInventoryLedger, exportInventoryLedger } from "../../api/inventoryLedger.api";
 import { getProducts } from "../../api/products.api";
 import { getWarehouses } from "../../api/inventory.api";
 import Loader from "../../components/ui/Loader";
+import Pagination from "../../components/ui/Pagination";
 import {
   BookOpen,
   Calendar,
@@ -19,9 +20,13 @@ import {
   ArrowDownLeft,
   ChevronRight,
   RefreshCw,
+  Clock,
 } from "lucide-react";
 
 const InventoryLedgerPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = parseInt(searchParams.get("page") || "1", 10);
+
   const [productId, setProductId] = useState("");
   const [warehouseId, setWarehouseId] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -30,13 +35,13 @@ const InventoryLedgerPage = () => {
   // Fetch product list
   const { data: products = [], isLoading: isLoadingProducts } = useQuery({
     queryKey: ["products"],
-    queryFn: getProducts,
+    queryFn: () => getProducts(), // fetch all products for selector
   });
 
   // Fetch warehouse list
   const { data: warehouses = [], isLoading: isLoadingWarehouses } = useQuery({
     queryKey: ["warehouses"],
-    queryFn: getWarehouses,
+    queryFn: () => getWarehouses(),
   });
 
   // Set default product when products list is loaded
@@ -53,16 +58,36 @@ const InventoryLedgerPage = () => {
     error: ledgerError,
     refetch: refetchLedger,
   } = useQuery({
-    queryKey: ["inventoryLedger", productId, warehouseId, startDate, endDate],
+    queryKey: ["inventoryLedger", productId, warehouseId, startDate, endDate, page],
     queryFn: () =>
       getInventoryLedger({
         productId,
         warehouseId: warehouseId || undefined,
         startDate: startDate || undefined,
         endDate: endDate || undefined,
+        page,
+        limit: 15,
       }),
     enabled: !!productId,
   });
+
+  const handlePageChange = (newPage) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set("page", newPage);
+    setSearchParams(params);
+  };
+
+  const handleFilterChange = (field, val) => {
+    if (field === "productId") setProductId(val);
+    if (field === "warehouseId") setWarehouseId(val);
+    if (field === "startDate") setStartDate(val);
+    if (field === "endDate") setEndDate(val);
+
+    // Reset page to 1 whenever filters change
+    const params = new URLSearchParams(window.location.search);
+    params.set("page", "1");
+    setSearchParams(params);
+  };
 
   const handleExport = async (format) => {
     if (!productId) return;
@@ -182,7 +207,7 @@ const InventoryLedgerPage = () => {
           </label>
           <select
             value={productId}
-            onChange={(e) => setProductId(e.target.value)}
+            onChange={(e) => handleFilterChange("productId", e.target.value)}
             disabled={isLoadingProducts}
             style={{
               width: "100%",
@@ -215,7 +240,7 @@ const InventoryLedgerPage = () => {
           </label>
           <select
             value={warehouseId}
-            onChange={(e) => setWarehouseId(e.target.value)}
+            onChange={(e) => handleFilterChange("warehouseId", e.target.value)}
             disabled={isLoadingWarehouses}
             style={{
               width: "100%",
@@ -246,7 +271,7 @@ const InventoryLedgerPage = () => {
           <input
             type="date"
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            onChange={(e) => handleFilterChange("startDate", e.target.value)}
             style={{
               width: "100%",
               padding: "9px 12px",
@@ -268,7 +293,7 @@ const InventoryLedgerPage = () => {
           <input
             type="date"
             value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
+            onChange={(e) => handleFilterChange("endDate", e.target.value)}
             style={{
               width: "100%",
               padding: "9px 12px",
@@ -287,6 +312,9 @@ const InventoryLedgerPage = () => {
             setStartDate("");
             setEndDate("");
             setWarehouseId("");
+            const params = new URLSearchParams(window.location.search);
+            params.set("page", "1");
+            setSearchParams(params);
             refetchLedger();
           }}
           style={{
@@ -545,6 +573,15 @@ const InventoryLedgerPage = () => {
                     ))}
                   </tbody>
                 </table>
+                {ledgerData.pagination && (
+                  <Pagination
+                    currentPage={ledgerData.pagination.currentPage}
+                    totalPages={ledgerData.pagination.totalPages}
+                    totalItems={ledgerData.pagination.totalItems}
+                    limit={ledgerData.pagination.limit}
+                    onPageChange={handlePageChange}
+                  />
+                )}
               </div>
             )}
           </div>

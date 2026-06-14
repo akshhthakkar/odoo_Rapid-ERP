@@ -1,7 +1,7 @@
 import api from './axios';
 
-export const getSalesOrders = async () => {
-  const { data } = await api.get('/sales');
+export const getSalesOrders = async (params = {}) => {
+  const { data } = await api.get('/sales', { params });
   return data;
 };
 
