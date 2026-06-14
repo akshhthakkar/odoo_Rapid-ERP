@@ -3,6 +3,7 @@ import { generateRef } from '../../utils/refGen.js';
 import { logAudit } from '../../utils/auditLogger.js';
 import { receiveStock } from '../../utils/stockEngine.js';
 import { validateCreatePO, assertNoReceiptsYet } from './purchase.validation.js';
+import { runSerialized } from '../../utils/mutex.js';
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 
@@ -191,8 +192,12 @@ export const createPurchaseOrder = async (data, userId, tenantId) => {
 
   const { vendorId, notes, lines, expectedDeliveryDate } = data;
 
-  const po = await prisma.$transaction(async (tx) => {
+  let orderRefVal = null;
+  let createdPoId = null;
+
+  const po = await runSerialized(`PO_${tenantId}`, () => prisma.$transaction(async (tx) => {
     const orderRef = await generateRef('PO', tenantId, tx);
+    orderRefVal = orderRef;
 
     const created = await tx.purchaseOrder.create({
       data: {
@@ -213,18 +218,23 @@ export const createPurchaseOrder = async (data, userId, tenantId) => {
       },
       include: PO_INCLUDE_LIST,
     });
-
-    await logAudit({
-      tenantId, userId, action: 'PO_CREATED',
-      entityType: 'PurchaseOrder', entityId: created.id,
-      entityRef: orderRef,
-      description: `Purchase Order ${orderRef} created with ${lines.length} line(s).`,
-      purchaseOrderId: created.id,
-      metadata: { vendorId, lineCount: lines.length },
-    }, tx);
+    createdPoId = created.id;
 
     return created;
-  });
+  }, { timeout: 10000 }));
+
+  try {
+    await logAudit({
+      tenantId, userId, action: 'PO_CREATED',
+      entityType: 'PurchaseOrder', entityId: createdPoId,
+      entityRef: orderRefVal,
+      description: `Purchase Order ${orderRefVal} created with ${lines.length} line(s).`,
+      purchaseOrderId: createdPoId,
+      metadata: { vendorId, lineCount: lines.length },
+    });
+  } catch (auditErr) {
+    console.error("Non-blocking audit log creation failed:", auditErr);
+  }
 
   return formatPO(po);
 };
@@ -243,22 +253,24 @@ export const confirmPurchaseOrder = async (id, userId, tenantId) => {
   }
 
   const updated = await prisma.$transaction(async (tx) => {
-    const result = await tx.purchaseOrder.update({
+    return tx.purchaseOrder.update({
       where: { id },
       data: { status: 'SENT' },
       include: PO_INCLUDE_LIST,
     });
+  }, { timeout: 10000 });
 
+  try {
     await logAudit({
       tenantId, userId, action: 'PO_SENT',
       entityType: 'PurchaseOrder', entityId: id,
       entityRef: po.orderRef,
       description: `Purchase Order ${po.orderRef} confirmed and sent to vendor.`,
       purchaseOrderId: id,
-    }, tx);
-
-    return result;
-  });
+    });
+  } catch (auditErr) {
+    console.error("Non-blocking audit log creation failed:", auditErr);
+  }
 
   return formatPO(updated);
 };
@@ -305,6 +317,10 @@ export const receiveGoods = async (id, receiptsPayload, userId, tenantId) => {
     }
   }
 
+  let auditActionVal = null;
+  let receiptIdVal = null;
+  let newStatusVal = null;
+
   const result = await prisma.$transaction(async (tx) => {
     // 1. Create PurchaseReceipt record
     const receipt = await tx.purchaseReceipt.create({
@@ -325,6 +341,7 @@ export const receiveGoods = async (id, receiptsPayload, userId, tenantId) => {
         },
       },
     });
+    receiptIdVal = receipt.id;
 
     // 2. Update each PO line receivedQty + stock
     for (const r of receipts) {
@@ -352,6 +369,8 @@ export const receiveGoods = async (id, receiptsPayload, userId, tenantId) => {
     } else if (anyReceived) {
       newStatus = 'PARTIALLY_RECEIVED';
     }
+    newStatusVal = newStatus;
+    auditActionVal = newStatus === 'RECEIVED' ? 'PO_RECEIVED' : 'PO_PARTIALLY_RECEIVED';
 
     const updatedPO = await tx.purchaseOrder.update({
       where: { id },
@@ -362,20 +381,22 @@ export const receiveGoods = async (id, receiptsPayload, userId, tenantId) => {
       include: PO_INCLUDE_LIST,
     });
 
-    // 4. Audit log
+    return updatedPO;
+  }, { timeout: 10000 });
+
+  try {
     const totalReceived = receipts.reduce((sum, r) => sum + Number(r.receivedQty), 0);
-    const auditAction = newStatus === 'RECEIVED' ? 'PO_RECEIVED' : 'PO_PARTIALLY_RECEIVED';
     await logAudit({
-      tenantId, userId, action: auditAction,
+      tenantId, userId, action: auditActionVal,
       entityType: 'PurchaseOrder', entityId: id,
       entityRef: po.orderRef,
-      description: `Received ${totalReceived} unit(s) on Purchase Order ${po.orderRef}. Status → ${newStatus}.`,
+      description: `Received ${totalReceived} unit(s) on Purchase Order ${po.orderRef}. Status → ${newStatusVal}.`,
       purchaseOrderId: id,
-      metadata: { receiptId: receipt.id, lines: receipts, newStatus },
-    }, tx);
-
-    return updatedPO;
-  });
+      metadata: { receiptId: receiptIdVal, lines: receipts, newStatus: newStatusVal },
+    });
+  } catch (auditErr) {
+    console.error("Non-blocking audit log creation failed:", auditErr);
+  }
 
   return formatPO(result);
 };
@@ -394,22 +415,24 @@ export const cancelPurchaseOrder = async (id, userId, tenantId) => {
   await assertNoReceiptsYet(id, tenantId);
 
   const updated = await prisma.$transaction(async (tx) => {
-    const result = await tx.purchaseOrder.update({
+    return tx.purchaseOrder.update({
       where: { id },
       data: { status: 'CANCELLED' },
       include: PO_INCLUDE_LIST,
     });
+  }, { timeout: 10000 });
 
+  try {
     await logAudit({
       tenantId, userId, action: 'PO_CANCELLED',
       entityType: 'PurchaseOrder', entityId: id,
       entityRef: po.orderRef,
       description: `Purchase Order ${po.orderRef} cancelled.`,
       purchaseOrderId: id,
-    }, tx);
-
-    return result;
-  });
+    });
+  } catch (auditErr) {
+    console.error("Non-blocking audit log creation failed:", auditErr);
+  }
 
   return formatPO(updated);
 };

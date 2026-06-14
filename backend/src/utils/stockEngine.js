@@ -1,5 +1,48 @@
 import prisma from "../config/prisma.js";
 
+const mainWarehouseCache = new Map();
+const referenceCache = new Map();
+
+/**
+ * Resolves and caches document reference numbers.
+ */
+const getCachedRef = async (type, id, tenantId, tx) => {
+  const cacheKey = `${type}_${tenantId}_${id}`;
+  if (referenceCache.has(cacheKey)) {
+    return referenceCache.get(cacheKey);
+  }
+
+  let ref = `${type} #${id}`;
+  if (type === "SO") {
+    const order = await tx.salesOrder.findFirst({
+      where: { id, tenantId },
+      select: { orderRef: true },
+    });
+    if (order) ref = order.orderRef;
+  } else if (type === "PO") {
+    const order = await tx.purchaseOrder.findFirst({
+      where: { id, tenantId },
+      select: { orderRef: true },
+    });
+    if (order) ref = order.orderRef;
+  } else if (type === "MO") {
+    const mo = await tx.manufacturingOrder.findFirst({
+      where: { id, tenantId },
+      select: { moRef: true },
+    });
+    if (mo) ref = mo.moRef;
+  } else if (type === "TRANSFER") {
+    const transfer = await tx.stockTransfer.findFirst({
+      where: { id, tenantId },
+      select: { transferRef: true },
+    });
+    if (transfer) ref = transfer.transferRef;
+  }
+
+  referenceCache.set(cacheKey, ref);
+  return ref;
+};
+
 /**
  * Helper to update warehouse-specific inventory balance.
  * Finds or creates the InventoryBalance record and updates the onHandQty.
@@ -7,26 +50,31 @@ import prisma from "../config/prisma.js";
 const updateInventoryBalance = async (productId, warehouseId, tenantId, qtyChange, tx) => {
   let resolvedWhId = warehouseId;
   if (!resolvedWhId) {
-    // resolve to default MAIN warehouse
-    let wh = await tx.warehouse.findFirst({
-      where: { tenantId, code: "MAIN" },
-    });
-    if (!wh) {
-      wh = await tx.warehouse.findFirst({
-        where: { tenantId, isActive: true },
+    if (mainWarehouseCache.has(tenantId)) {
+      resolvedWhId = mainWarehouseCache.get(tenantId);
+    } else {
+      // resolve to default MAIN warehouse
+      let wh = await tx.warehouse.findFirst({
+        where: { tenantId, code: "MAIN" },
       });
+      if (!wh) {
+        wh = await tx.warehouse.findFirst({
+          where: { tenantId, isActive: true },
+        });
+      }
+      if (!wh) {
+        wh = await tx.warehouse.create({
+          data: {
+            tenantId,
+            code: "MAIN",
+            name: "Main Warehouse",
+            isActive: true,
+          },
+        });
+      }
+      resolvedWhId = wh.id;
+      mainWarehouseCache.set(tenantId, resolvedWhId);
     }
-    if (!wh) {
-      wh = await tx.warehouse.create({
-        data: {
-          tenantId,
-          code: "MAIN",
-          name: "Main Warehouse",
-          isActive: true,
-        },
-      });
-    }
-    resolvedWhId = wh.id;
   }
 
   const balance = await tx.inventoryBalance.findUnique({
@@ -93,12 +141,7 @@ export const reserveStock = async (productId, qty, referenceId, tenantId, tx = p
       data: { reservedQty: { increment: toReserve } },
     });
 
-    let orderRef = `SO #${referenceId}`;
-    const order = await tx.salesOrder.findFirst({
-      where: { id: referenceId, tenantId },
-      select: { orderRef: true },
-    });
-    if (order) orderRef = order.orderRef;
+    const orderRef = await getCachedRef("SO", referenceId, tenantId, tx);
 
     await tx.stockMovement.create({
       data: {
@@ -137,12 +180,7 @@ export const deliverStock = async (productId, qty, referenceId, tenantId, wareho
     },
   });
 
-  let orderRef = `SO #${referenceId}`;
-  const order = await tx.salesOrder.findFirst({
-    where: { id: referenceId, tenantId },
-    select: { orderRef: true },
-  });
-  if (order) orderRef = order.orderRef;
+  const orderRef = await getCachedRef("SO", referenceId, tenantId, tx);
 
   // Physical stock reduction
   await tx.stockMovement.create({
@@ -188,12 +226,7 @@ export const releaseStock = async (productId, qty, referenceId, tenantId, tx = p
     data: { reservedQty: { decrement: qty } },
   });
 
-  let orderRef = `SO #${referenceId}`;
-  const order = await tx.salesOrder.findFirst({
-    where: { id: referenceId, tenantId },
-    select: { orderRef: true },
-  });
-  if (order) orderRef = order.orderRef;
+  const orderRef = await getCachedRef("SO", referenceId, tenantId, tx);
 
   await tx.stockMovement.create({
     data: {
@@ -273,12 +306,7 @@ export const receiveStock = async (productId, qty, unitCost, referenceId, tenant
     },
   });
 
-  let orderRef = `PO #${referenceId}`;
-  const order = await tx.purchaseOrder.findFirst({
-    where: { id: referenceId, tenantId },
-    select: { orderRef: true },
-  });
-  if (order) orderRef = order.orderRef;
+  const orderRef = await getCachedRef("PO", referenceId, tenantId, tx);
 
   await tx.stockMovement.create({
     data: {
@@ -315,12 +343,7 @@ export const consumeStock = async (productId, qty, referenceId, tenantId, wareho
     },
   });
 
-  let moRef = `MO #${referenceId}`;
-  const mo = await tx.manufacturingOrder.findFirst({
-    where: { id: referenceId, tenantId },
-    select: { moRef: true },
-  });
-  if (mo) moRef = mo.moRef;
+  const moRef = await getCachedRef("MO", referenceId, tenantId, tx);
 
   await tx.stockMovement.create({
     data: {
@@ -357,12 +380,7 @@ export const produceStock = async (productId, qty, referenceId, tenantId, wareho
     },
   });
 
-  let moRef = `MO #${referenceId}`;
-  const mo = await tx.manufacturingOrder.findFirst({
-    where: { id: referenceId, tenantId },
-    select: { moRef: true },
-  });
-  if (mo) moRef = mo.moRef;
+  const moRef = await getCachedRef("MO", referenceId, tenantId, tx);
 
   await tx.stockMovement.create({
     data: {
@@ -400,12 +418,7 @@ export const transferStock = async (
   // Increment destination warehouse balance
   await updateInventoryBalance(productId, destinationWarehouseId, tenantId, qty, tx);
 
-  let transferRef = `Transfer #${referenceId}`;
-  const transfer = await tx.stockTransfer.findFirst({
-    where: { id: referenceId, tenantId },
-    select: { transferRef: true },
-  });
-  if (transfer) transferRef = transfer.transferRef;
+  const transferRef = await getCachedRef("TRANSFER", referenceId, tenantId, tx);
 
   // Log transfer out movement in source warehouse
   await tx.stockMovement.create({

@@ -3,6 +3,7 @@ import { generateRef } from "../../utils/refGen.js";
 import { logAudit } from "../../utils/auditLogger.js";
 import { reserveStock, deliverStock, releaseStock } from "../../utils/stockEngine.js";
 import { trigger as triggerProcurement } from "../../utils/procurementEngine.js";
+import { runSerialized } from "../../utils/mutex.js";
 
 export const listSalesOrders = async (tenantId, query = {}) => {
   const page = query.page ? parseInt(query.page, 10) : null;
@@ -157,7 +158,7 @@ export const createSalesOrder = async (data, userId, tenantId) => {
     parsedDeliveryDate = d;
   }
 
-  const createdOrder = await prisma.$transaction(async (tx) => {
+  const createdOrder = await runSerialized(`SO_${tenantId}`, () => prisma.$transaction(async (tx) => {
     const orderRef = await generateRef("SO", tenantId, tx);
 
     const order = await tx.salesOrder.create({
@@ -179,7 +180,7 @@ export const createSalesOrder = async (data, userId, tenantId) => {
       description: `Sales Order ${orderRef} created in Draft state`, salesOrderId: order.id }, tx);
 
     return order;
-  });
+  }));
 
   return getSalesOrderById(createdOrder.id, tenantId);
 };
@@ -195,7 +196,7 @@ export const confirmSalesOrder = async (orderId, userId, tenantId) => {
 
   const triggeredProcurements = [];
 
-  const confirmedOrder = await prisma.$transaction(async (tx) => {
+  const confirmedOrder = await runSerialized(`SO_CONFIRM_${tenantId}`, () => prisma.$transaction(async (tx) => {
     for (const line of order.lines) {
       const { toReserve, shortage } = await reserveStock(line.productId, Number(line.qty), orderId, tenantId, tx);
 
@@ -223,7 +224,7 @@ export const confirmSalesOrder = async (orderId, userId, tenantId) => {
       salesOrderId: orderId, metadata: { triggered: triggeredProcurements } }, tx);
 
     return updated;
-  });
+  }));
 
   const finalOrder = await getSalesOrderById(confirmedOrder.id, tenantId);
   return { order: finalOrder, triggeredProcurements };

@@ -299,7 +299,7 @@ VITE_API_URL="http://localhost:3000/api"
 
 ### 2. Run Database Setup & Seeding
 
-Navigate into the backend, install dependencies, run schema migrations, and load the 12-month demo dataset:
+Navigate into the backend, install dependencies, run schema migrations, and seed the default admin credentials and tenant:
 
 ```bash
 cd backend
@@ -308,11 +308,8 @@ npm install
 # Run schema migrations to database
 npx prisma migrate dev
 
-# Seed a complete multi-tenant demo environment (3 tenants, 12 months, 1,500+ records)
-node demo/seedDemoData.js
-
-# Seed active stock movements for "today" (so the morning brief is populated)
-node demo/seedTodayMovements.js
+# Seed default admin user (admin@erp.com / Admin@123) and Tenant
+npm run db:seed
 ```
 
 ### 3. Launch Development Servers

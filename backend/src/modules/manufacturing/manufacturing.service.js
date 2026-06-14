@@ -3,6 +3,7 @@ import { generateRef } from "../../utils/refGen.js";
 import { logAudit } from "../../utils/auditLogger.js";
 import { consumeStock, produceStock, reserveStock } from "../../utils/stockEngine.js";
 import { validateMoCreatePayload, validateMoTenantScopes } from "./manufacturing.validation.js";
+import { runSerialized } from "../../utils/mutex.js";
 
 // Helper to calculate MO completion progress percentage
 const calculateMoProgress = (mo) => {
@@ -172,8 +173,12 @@ export const createManufacturingOrder = async (data, userId, tenantId) => {
 
   const qty = Number(data.qty);
 
-  const mo = await prisma.$transaction(async (tx) => {
+  let moRefVal = null;
+  let createdMoId = null;
+
+  const mo = await runSerialized(`MO_${tenantId}`, () => prisma.$transaction(async (tx) => {
     const moRef = await generateRef("MO", tenantId, tx);
+    moRefVal = moRef;
 
     const createdMo = await tx.manufacturingOrder.create({
       data: {
@@ -213,20 +218,25 @@ export const createManufacturingOrder = async (data, userId, tenantId) => {
         components: { include: { product: true } },
       },
     });
+    createdMoId = createdMo.id;
 
+    return createdMo;
+  }, { timeout: 10000 }));
+
+  try {
     await logAudit({
       tenantId,
       userId,
       action: "MO_CREATED",
       entityType: "ManufacturingOrder",
-      entityId: createdMo.id,
-      entityRef: moRef,
-      description: `Manufacturing Order ${moRef} created in Draft state for finished product "${product.name}"`,
-      manufacturingOrderId: createdMo.id,
-    }, tx);
-
-    return createdMo;
-  });
+      entityId: createdMoId,
+      entityRef: moRefVal,
+      description: `Manufacturing Order ${moRefVal} created in Draft state for finished product "${product.name}"`,
+      manufacturingOrderId: createdMoId,
+    });
+  } catch (auditErr) {
+    console.error("Non-blocking audit log creation failed:", auditErr);
+  }
 
   return formatMO(mo);
 };
@@ -246,7 +256,7 @@ export const confirmManufacturingOrder = async (id, userId, tenantId) => {
   await validateMoTenantScopes(mo.productId, mo.bomId, tenantId);
 
   const updatedMo = await prisma.$transaction(async (tx) => {
-    const updated = await tx.manufacturingOrder.update({
+    return tx.manufacturingOrder.update({
       where: { id: mo.id },
       data: { status: "CONFIRMED" },
       include: {
@@ -258,7 +268,9 @@ export const confirmManufacturingOrder = async (id, userId, tenantId) => {
         components: { include: { product: true } },
       },
     });
+  }, { timeout: 10000 });
 
+  try {
     await logAudit({
       tenantId,
       userId,
@@ -268,10 +280,10 @@ export const confirmManufacturingOrder = async (id, userId, tenantId) => {
       entityRef: mo.moRef,
       description: `Manufacturing Order ${mo.moRef} confirmed. Component requirements locked.`,
       manufacturingOrderId: mo.id,
-    }, tx);
-
-    return updated;
-  });
+    });
+  } catch (auditErr) {
+    console.error("Non-blocking audit log creation failed:", auditErr);
+  }
 
   return formatMO(updatedMo);
 };
@@ -310,6 +322,9 @@ export const startManufacturingOrder = async (id, userId, tenantId) => {
   }
 
   // 2. Perform consumption and start
+  const auditLogsToRun = [];
+
+  // 2. Perform consumption and start
   const updatedMo = await prisma.$transaction(async (tx) => {
     // A. Consume components stock
     for (const comp of mo.components) {
@@ -322,23 +337,16 @@ export const startManufacturingOrder = async (id, userId, tenantId) => {
 
     // B. Start first Work Order (sequence ascending)
     const sortedWos = [...mo.workOrders].sort((a, b) => a.sequence - b.sequence);
+    let startedWoId = null;
+    let startedWoOpName = "";
     if (sortedWos.length > 0) {
       const firstWo = sortedWos[0];
+      startedWoId = firstWo.id;
+      startedWoOpName = firstWo.operationName;
       await tx.workOrder.update({
         where: { id: firstWo.id },
         data: { status: "IN_PROGRESS", startedAt: new Date() },
       });
-
-      await logAudit({
-        tenantId,
-        userId,
-        action: "WORK_ORDER_STARTED",
-        entityType: "WorkOrder",
-        entityId: firstWo.id,
-        entityRef: mo.moRef,
-        description: `Work Order operation "${firstWo.operationName}" started.`,
-        manufacturingOrderId: mo.id,
-      }, tx);
     }
 
     // C. Transition MO Status to IN_PROGRESS
@@ -355,7 +363,21 @@ export const startManufacturingOrder = async (id, userId, tenantId) => {
       },
     });
 
-    await logAudit({
+    // Queue audit logs to execute after transaction success
+    if (startedWoId) {
+      auditLogsToRun.push({
+        tenantId,
+        userId,
+        action: "WORK_ORDER_STARTED",
+        entityType: "WorkOrder",
+        entityId: startedWoId,
+        entityRef: mo.moRef,
+        description: `Work Order operation "${startedWoOpName}" started.`,
+        manufacturingOrderId: mo.id,
+      });
+    }
+
+    auditLogsToRun.push({
       tenantId,
       userId,
       action: "MO_STARTED",
@@ -364,9 +386,9 @@ export const startManufacturingOrder = async (id, userId, tenantId) => {
       entityRef: mo.moRef,
       description: `Manufacturing started. Raw components consumed.`,
       manufacturingOrderId: mo.id,
-    }, tx);
+    });
 
-    await logAudit({
+    auditLogsToRun.push({
       tenantId,
       userId,
       action: "MANUFACTURING_CONSUME",
@@ -375,10 +397,19 @@ export const startManufacturingOrder = async (id, userId, tenantId) => {
       entityRef: mo.moRef,
       description: `Consumed components for MO ${mo.moRef}.`,
       manufacturingOrderId: mo.id,
-    }, tx);
+    });
 
     return updated;
-  });
+  }, { timeout: 10000 });
+
+  // Write audit logs outside the transaction
+  for (const log of auditLogsToRun) {
+    try {
+      await logAudit(log);
+    } catch (auditErr) {
+      console.error("Non-blocking audit log creation failed:", auditErr);
+    }
+  }
 
   return formatMO(updatedMo);
 };
@@ -515,7 +546,7 @@ export const completeManufacturingOrder = async (id, userId, tenantId) => {
     }
 
     // 3. Complete MO
-    const updated = await tx.manufacturingOrder.update({
+    return tx.manufacturingOrder.update({
       where: { id: mo.id },
       data: { status: "DONE", completedAt: new Date() },
       include: {
@@ -527,7 +558,9 @@ export const completeManufacturingOrder = async (id, userId, tenantId) => {
         components: { include: { product: true } },
       },
     });
+  }, { timeout: 10000 });
 
+  try {
     await logAudit({
       tenantId,
       userId,
@@ -537,7 +570,7 @@ export const completeManufacturingOrder = async (id, userId, tenantId) => {
       entityRef: mo.moRef,
       description: `Finished goods produced: +${mo.qty} units of "${mo.product?.name || 'product'}".`,
       manufacturingOrderId: mo.id,
-    }, tx);
+    });
 
     await logAudit({
       tenantId,
@@ -548,10 +581,10 @@ export const completeManufacturingOrder = async (id, userId, tenantId) => {
       entityRef: mo.moRef,
       description: `Manufacturing order completed successfully.`,
       manufacturingOrderId: mo.id,
-    }, tx);
-
-    return updated;
-  });
+    });
+  } catch (auditErr) {
+    console.error("Non-blocking audit log creation failed:", auditErr);
+  }
 
   return formatMO(completedMo);
 };
@@ -567,7 +600,7 @@ export const cancelManufacturingOrder = async (id, userId, tenantId) => {
   }
 
   const cancelledMo = await prisma.$transaction(async (tx) => {
-    const updated = await tx.manufacturingOrder.update({
+    return tx.manufacturingOrder.update({
       where: { id: mo.id },
       data: { status: "CANCELLED" },
       include: {
@@ -579,7 +612,9 @@ export const cancelManufacturingOrder = async (id, userId, tenantId) => {
         components: { include: { product: true } },
       },
     });
+  }, { timeout: 10000 });
 
+  try {
     await logAudit({
       tenantId,
       userId,
@@ -589,10 +624,10 @@ export const cancelManufacturingOrder = async (id, userId, tenantId) => {
       entityRef: mo.moRef,
       description: `Manufacturing order ${mo.moRef} cancelled.`,
       manufacturingOrderId: mo.id,
-    }, tx);
-
-    return updated;
-  });
+    });
+  } catch (auditErr) {
+    console.error("Non-blocking audit log creation failed:", auditErr);
+  }
 
   return formatMO(cancelledMo);
 };

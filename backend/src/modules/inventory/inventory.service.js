@@ -3,6 +3,7 @@ import { generateRef } from "../../utils/refGen.js";
 import { logAudit } from "../../utils/auditLogger.js";
 import { transferStock, adjustStock } from "../../utils/stockEngine.js";
 import { validateWarehouse, validateStockTransfer, validateInventoryAdjustment } from "./inventory.validation.js";
+import { runSerialized } from "../../utils/mutex.js";
 
 /**
  * Fetch Inventory Dashboard statistics.
@@ -383,7 +384,7 @@ export const createStockTransfer = async (data, userId, tenantId) => {
   }
 
   // 3. Perform transfer transactionally
-  const transfer = await prisma.$transaction(async (tx) => {
+  const transfer = await runSerialized(`TRA_${tenantId}`, () => prisma.$transaction(async (tx) => {
     const transferRef = await generateRef("TRA", tenantId, tx);
 
     const createdTransfer = await tx.stockTransfer.create({
@@ -427,7 +428,7 @@ export const createStockTransfer = async (data, userId, tenantId) => {
     }, tx);
 
     return createdTransfer;
-  });
+  }));
 
   return transfer;
 };
@@ -492,50 +493,71 @@ export const createInventoryAdjustment = async (data, userId, tenantId) => {
     }
   }
 
-  // 3. Commit adjustment
-  const adjustment = await prisma.$transaction(async (tx) => {
-    const adjustmentRef = await generateRef("ADJ", tenantId, tx);
+  // 3. Commit adjustment with transaction retries for unique constraint safety
+  let attempts = 0;
+  const maxAttempts = 10;
+  let adjustment;
 
-    const createdAdjustment = await tx.inventoryAdjustment.create({
-      data: {
-        tenantId,
-        adjustmentRef,
-        reason: data.reason.trim(),
-        createdById: userId,
-        lines: {
-          create: data.lines.map(l => ({
-            productId: Number(l.productId),
-            qtyChange: Number(l.qty),
+  while (attempts < maxAttempts) {
+    try {
+      adjustment = await prisma.$transaction(async (tx) => {
+        const adjustmentRef = await generateRef("ADJ", tenantId, tx);
+
+        const createdAdjustment = await tx.inventoryAdjustment.create({
+          data: {
+            tenantId,
+            adjustmentRef,
             reason: data.reason.trim(),
-          })),
-        },
-      },
-    });
+            createdById: userId,
+            lines: {
+              create: data.lines.map(l => ({
+                productId: Number(l.productId),
+                qtyChange: Number(l.qty),
+                reason: data.reason.trim(),
+              })),
+            },
+          },
+        });
 
-    // Run stock ledger adjustments
-    for (const line of data.lines) {
-      await adjustStock(
-        Number(line.productId),
-        Number(line.qty),
-        tenantId,
-        warehouseId,
-        data.reason.trim(),
-        createdAdjustment.id,
-        tx
-      );
+        // Run stock ledger adjustments
+        for (const line of data.lines) {
+          await adjustStock(
+            Number(line.productId),
+            Number(line.qty),
+            tenantId,
+            warehouseId,
+            data.reason.trim(),
+            createdAdjustment.id,
+            tx
+          );
+        }
+
+        await logAudit({
+          tenantId,
+          userId,
+          action: "INVENTORY_ADJUSTMENT_CREATED",
+          entityType: "InventoryAdjustment",
+          entityId: createdAdjustment.id,
+          description: `Manual adjustment ${adjustmentRef} — reason: "${data.reason.trim()}" in warehouse "${wh.name}" (${data.lines.length} line(s)).`,
+        }, tx);
+
+        return createdAdjustment;
+      });
+
+      break; // Success! Break out of the retry loop.
+    } catch (error) {
+      // Prisma error code for unique constraint violation is P2002
+      const isUniqueConstraint = error.code === "P2002" && 
+        (error.meta?.target?.includes("adjustmentRef") || error.message?.includes("adjustmentRef") || error.message?.includes("Unique constraint failed"));
+
+      if (isUniqueConstraint && attempts < maxAttempts - 1) {
+        attempts++;
+        console.warn(`Unique constraint failed on adjustmentRef. Retrying adjustment creation (attempt ${attempts + 1}/${maxAttempts})...`);
+        continue;
+      }
+      throw error;
     }
-
-    await logAudit({
-      tenantId,
-      userId,
-      action: "INVENTORY_ADJUSTMENT_CREATED",
-      entityType: "InventoryAdjustment",
-      entityId: createdAdjustment.id,
-      description: `Manual adjustment ${adjustmentRef} — reason: "${data.reason.trim()}" in warehouse "${wh.name}" (${data.lines.length} line(s)).`,
-    }, tx);
-
-    return createdAdjustment;
-  });
+  }
 
   return adjustment;
 };
