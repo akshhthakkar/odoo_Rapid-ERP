@@ -13,11 +13,15 @@ const PurchaseAnalyticsPage = () => {
   const { data: purchaseData, isLoading: purLoading, error: purError, refetch } = useQuery({
     queryKey: ["purchaseAnalytics", startDate, endDate],
     queryFn: () => getPurchaseAnalytics({ startDate, endDate }),
+    refetchInterval: 60000,
+    refetchOnWindowFocus: true,
   });
 
   const { data: vendorData, isLoading: venLoading, error: venError } = useQuery({
     queryKey: ["vendorPerformance"],
     queryFn: getVendorsAnalytics,
+    refetchInterval: 60000,
+    refetchOnWindowFocus: true,
   });
 
   const formatCurrency = (val) => {

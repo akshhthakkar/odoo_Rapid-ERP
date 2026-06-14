@@ -11,6 +11,8 @@ const ManufacturingAnalyticsPage = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ["manufacturingAnalytics"],
     queryFn: getManufacturingAnalytics,
+    refetchInterval: 60000,
+    refetchOnWindowFocus: true,
   });
 
   if (isLoading) return <Loader padding="120px 0" size={36} />;

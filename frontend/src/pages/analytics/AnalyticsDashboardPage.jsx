@@ -30,6 +30,8 @@ const AnalyticsDashboardPage = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ["executiveDashboard"],
     queryFn: getDashboard,
+    refetchInterval: 60000,
+    refetchOnWindowFocus: true,
   });
 
   const formatCurrency = (val) => {
