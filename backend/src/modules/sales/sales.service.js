@@ -257,7 +257,8 @@ export const deliverSalesOrder = async (orderId, lineDeliveries, userId, tenantI
       if (qtyToDeliver > remainingOrdered) throw { status: 400, message: `Cannot deliver ${qtyToDeliver} units for SKU ${line.product.sku}. Remaining ordered quantity is only ${remainingOrdered} units.` };
 
       const product = await tx.product.findUnique({ where: { id: line.productId } });
-      if (qtyToDeliver > Number(product.onHandQty)) throw { status: 400, message: `Insufficient stock on hand for SKU ${line.product.sku}. Physical count: ${Number(product.onHandQty)}, Attempted to deliver: ${qtyToDeliver}.` };
+      const freeToUse = Number(product.onHandQty) - Number(product.reservedQty);
+      if (qtyToDeliver > freeToUse) throw { status: 400, message: `Insufficient available stock for SKU ${line.product.sku}. Available (unreserved): ${freeToUse}, Attempted to deliver: ${qtyToDeliver}.` };
 
       await deliverStock(line.productId, qtyToDeliver, orderId, tenantId, null, tx);
       await tx.salesOrderLine.update({ where: { id: lineId }, data: { deliveredQty: { increment: qtyToDeliver } } });
