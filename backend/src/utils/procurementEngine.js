@@ -12,6 +12,10 @@ import { logAudit } from "./auditLogger.js";
  * @param {object} tx - Prisma transaction client
  */
 export const trigger = async (product, shortage, salesOrderId, userId, tenantId, tx = prisma) => {
+  // Fetch human-readable SO ref for use in notes
+  const salesOrder = await tx.salesOrder.findUnique({ where: { id: salesOrderId }, select: { orderRef: true } });
+  const soRef = salesOrder?.orderRef || `SO-ID-${salesOrderId}`;
+
   if (product.procurementType === "PURCHASE") {
     const vendors = await tx.productVendor.findMany({
       where: { productId: product.id },
@@ -38,7 +42,7 @@ export const trigger = async (product, shortage, salesOrderId, userId, tenantId,
         salesOrderId,
         tenantId,
         status: "DRAFT",
-        notes: `MTO auto-generated from Sales Order ID ${salesOrderId}`,
+        notes: `MTO auto-generated from Sales Order ${soRef}`,
         lines: {
           create: [{ productId: product.id, qty: shortage, unitCost: cheapestVendor.unitPrice }],
         },
@@ -88,7 +92,7 @@ export const trigger = async (product, shortage, salesOrderId, userId, tenantId,
         salesOrderId,
         tenantId,
         status: "DRAFT",
-        notes: `MTO auto-generated from Sales Order ID ${salesOrderId}`,
+        notes: `MTO auto-generated from Sales Order ${soRef}`,
         workOrders: {
           create: bom.operations.map((op) => ({
             workCenterId: op.workCenterId,
