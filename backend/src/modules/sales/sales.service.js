@@ -295,10 +295,10 @@ export const cancelSalesOrder = async (orderId, userId, tenantId) => {
 
   await prisma.$transaction(async (tx) => {
     for (const line of order.lines) {
-      const remainingReserved = Number(line.reservedQty) - Number(line.deliveredQty);
+      const remainingReserved = Number(line.reservedQty);
       if (remainingReserved > 0) {
         await releaseStock(line.productId, remainingReserved, orderId, tenantId, tx);
-        await tx.salesOrderLine.update({ where: { id: line.id }, data: { reservedQty: Number(line.deliveredQty) } });
+        await tx.salesOrderLine.update({ where: { id: line.id }, data: { reservedQty: 0 } });
         await logAudit({ tenantId, userId, action: "STOCK_RELEASED", entityType: "Product", entityId: line.productId,
           description: `Released ${remainingReserved} reserved units of product SKU ${line.product.sku} due to Sales Order cancellation`,
           salesOrderId: orderId }, tx);
