@@ -238,7 +238,7 @@ export const updateUserStatusService = async (id, isActive, adminUser) => {
   await logAudit({
     tenantId: adminUser.tenantId,
     userId: adminUser.id,
-    action: updated.isActive ? "USER_CREATED" : "USER_DEACTIVATED",
+    action: updated.isActive ? "USER_REACTIVATED" : "USER_DEACTIVATED",
     entityType: "User",
     entityId: user.id,
     description: `User "${user.name}" status updated to ${updated.isActive ? 'Active' : 'Inactive'}`,
