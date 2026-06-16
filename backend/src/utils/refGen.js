@@ -13,13 +13,18 @@ const MODEL_MAP = {
  * Each tenant gets its own independent sequence for each prefix.
  * Safe to call inside a transaction.
  *
- * @param {"SO"|"PO"|"MO"} prefix
+ * NOTE: This uses COUNT + 1 which can produce duplicate refs under concurrent
+ * requests for the same tenant+prefix. Callers that require strict uniqueness
+ * under high concurrency should implement retry logic on P2002 errors, or
+ * migrate to a dedicated SequenceCounter table with atomic increments.
+ *
+ * @param {"SO"|"PO"|"MO"|"ADJ"|"TRA"} prefix
  * @param {number} tenantId - Scope the sequence to this tenant
  * @param {object} tx - Prisma transaction client (optional)
  */
 export const generateRef = async (prefix, tenantId, tx = prisma) => {
   const modelName = MODEL_MAP[prefix];
-  if (!modelName) throw new Error(`Unknown prefix: ${prefix}`);
+  if (!modelName) throw new Error(`generateRef: unknown prefix "${prefix}". Valid prefixes: ${Object.keys(MODEL_MAP).join(", ")}`);
 
   const count = await tx[modelName].count({ where: { tenantId } });
   return `${prefix}-${String(count + 1).padStart(4, "0")}`;
