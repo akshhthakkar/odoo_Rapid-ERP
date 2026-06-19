@@ -352,7 +352,7 @@ The frontend uses React Router for client-side routing. To prevent `404 Not Foun
 
 ### ⚙️ Render (Backend & Frontend Blueprint)
 
-A `render.yaml` infrastructure-as-code file is included in the root directory. It automatically configures the Node.js backend Web Service and provides the necessary rewrite rules for a static frontend site if you choose to host both on Render.
+The `render.yaml` infrastructure-as-code file is included in the root directory. It automatically configures the Node.js backend Web Service and provides the necessary rewrite rules for a static frontend site if you choose to host both on Render.
 
 ---
 
