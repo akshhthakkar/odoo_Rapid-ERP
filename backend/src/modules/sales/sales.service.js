@@ -257,7 +257,8 @@ export const deliverSalesOrder = async (orderId, lineDeliveries, userId, tenantI
       if (qtyToDeliver > remainingOrdered) throw { status: 400, message: `Cannot deliver ${qtyToDeliver} units for SKU ${line.product.sku}. Remaining ordered quantity is only ${remainingOrdered} units.` };
 
       const product = await tx.product.findUnique({ where: { id: line.productId } });
-      if (qtyToDeliver > Number(product.onHandQty)) throw { status: 400, message: `Insufficient stock on hand for SKU ${line.product.sku}. Physical count: ${Number(product.onHandQty)}, Attempted to deliver: ${qtyToDeliver}.` };
+      const freeToUse = Number(product.onHandQty) - Number(product.reservedQty);
+      if (qtyToDeliver > freeToUse) throw { status: 400, message: `Insufficient available stock for SKU ${line.product.sku}. Available (unreserved): ${freeToUse}, Attempted to deliver: ${qtyToDeliver}.` };
 
       await deliverStock(line.productId, qtyToDeliver, orderId, tenantId, null, tx);
       await tx.salesOrderLine.update({ where: { id: lineId }, data: { deliveredQty: { increment: qtyToDeliver } } });
@@ -294,10 +295,10 @@ export const cancelSalesOrder = async (orderId, userId, tenantId) => {
 
   await prisma.$transaction(async (tx) => {
     for (const line of order.lines) {
-      const remainingReserved = Number(line.reservedQty) - Number(line.deliveredQty);
+      const remainingReserved = Number(line.reservedQty);
       if (remainingReserved > 0) {
         await releaseStock(line.productId, remainingReserved, orderId, tenantId, tx);
-        await tx.salesOrderLine.update({ where: { id: line.id }, data: { reservedQty: Number(line.deliveredQty) } });
+        await tx.salesOrderLine.update({ where: { id: line.id }, data: { reservedQty: 0 } });
         await logAudit({ tenantId, userId, action: "STOCK_RELEASED", entityType: "Product", entityId: line.productId,
           description: `Released ${remainingReserved} reserved units of product SKU ${line.product.sku} due to Sales Order cancellation`,
           salesOrderId: orderId }, tx);

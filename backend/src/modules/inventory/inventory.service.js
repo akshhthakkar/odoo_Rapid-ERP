@@ -346,6 +346,10 @@ export const createStockTransfer = async (data, userId, tenantId) => {
   const sourceId = Number(data.sourceWarehouseId);
   const destId = Number(data.destinationWarehouseId);
 
+  if (sourceId === destId) {
+    throw { status: 400, message: "Source and destination warehouse cannot be the same." };
+  }
+
   // 1. Verify warehouses exist and belong to tenant
   const warehouses = await prisma.warehouse.findMany({
     where: {
@@ -553,6 +557,7 @@ export const createInventoryAdjustment = async (data, userId, tenantId) => {
       if (isUniqueConstraint && attempts < maxAttempts - 1) {
         attempts++;
         console.warn(`Unique constraint failed on adjustmentRef. Retrying adjustment creation (attempt ${attempts + 1}/${maxAttempts})...`);
+        await new Promise(resolve => setTimeout(resolve, 10 + Math.random() * 40));
         continue;
       }
       throw error;

@@ -155,8 +155,12 @@ export const updateBom = async (id, data, userId, tenantId) => {
       await tx.boM.updateMany({ where: { productId, tenantId, isActive: true, id: { not: id } }, data: { isActive: false } });
     }
 
-    await tx.boMComponent.deleteMany({ where: { bomId: id } });
-    await tx.boMOperation.deleteMany({ where: { bomId: id } });
+    if (data.components !== undefined) {
+      await tx.boMComponent.deleteMany({ where: { bomId: id } });
+    }
+    if (data.operations !== undefined) {
+      await tx.boMOperation.deleteMany({ where: { bomId: id } });
+    }
 
     const bom = await tx.boM.update({
       where: { id },
@@ -165,8 +169,12 @@ export const updateBom = async (id, data, userId, tenantId) => {
         version: data.version?.trim() || existingBom.version,
         isActive,
         notes: data.notes !== undefined ? (data.notes?.trim() || null) : existingBom.notes,
-        components: { create: components.map((c) => ({ productId: Number(c.productId), qty: Number(c.qty) })) },
-        operations: { create: operations.map((o) => ({ workCenterId: Number(o.workCenterId), name: o.name.trim(), durationMins: Number(o.durationMins), sequence: Number(o.sequence) })) },
+        ...(data.components !== undefined && {
+          components: { create: components.map((c) => ({ productId: Number(c.productId), qty: Number(c.qty) })) },
+        }),
+        ...(data.operations !== undefined && {
+          operations: { create: operations.map((o) => ({ workCenterId: Number(o.workCenterId), name: o.name.trim(), durationMins: Number(o.durationMins), sequence: Number(o.sequence) })) },
+        }),
       },
       include: { product: true, components: { include: { product: true } }, operations: { include: { workCenter: true } } },
     });

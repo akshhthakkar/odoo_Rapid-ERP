@@ -172,11 +172,14 @@ export const reserveStock = async (productId, qty, referenceId, tenantId, tx = p
 export const deliverStock = async (productId, qty, referenceId, tenantId, warehouseId = null, tx = prisma) => {
   const resolvedWhId = await updateInventoryBalance(productId, warehouseId, tenantId, -qty, tx);
 
+  const productBeforeDelivery = await tx.product.findUnique({ where: { id: productId }, select: { reservedQty: true } });
+  const reservedDecrement = Math.min(qty, Number(productBeforeDelivery.reservedQty));
+
   await tx.product.update({
     where: { id: productId },
     data: {
       onHandQty: { decrement: qty },
-      reservedQty: { decrement: qty },
+      reservedQty: { decrement: reservedDecrement },
     },
   });
 

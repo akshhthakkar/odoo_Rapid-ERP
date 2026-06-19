@@ -321,7 +321,6 @@ export const startManufacturingOrder = async (id, userId, tenantId) => {
     };
   }
 
-  // 2. Perform consumption and start
   const auditLogsToRun = [];
 
   // 2. Perform consumption and start
@@ -500,7 +499,7 @@ export const completeWorkOrder = async (moId, woId, userId, tenantId) => {
 export const completeManufacturingOrder = async (id, userId, tenantId) => {
   const mo = await prisma.manufacturingOrder.findFirst({
     where: { id: Number(id), tenantId },
-    include: { workOrders: true },
+    include: { workOrders: true, product: { select: { name: true } } },
   });
 
   if (!mo) throw { status: 404, message: "Manufacturing Order not found" };
@@ -529,16 +528,14 @@ export const completeManufacturingOrder = async (id, userId, tenantId) => {
         // Reserve the produced stock for the SO Line
         await reserveStock(mo.productId, Number(mo.qty), mo.salesOrderId, tenantId, tx);
 
-        // Update the line's shortages and replenishment status
+        // Update shortage and replenishment status only
         const currentShortage = Number(line.shortageQty);
         const newShortage = Math.max(0, currentShortage - Number(mo.qty));
-        const newReserved = Number(line.reservedQty) + Number(mo.qty);
 
         await tx.salesOrderLine.update({
           where: { id: line.id },
           data: {
             shortageQty: newShortage,
-            reservedQty: newReserved,
             replenishmentStatus: "COMPLETED",
           },
         });
