@@ -254,49 +254,7 @@
     0 1px 0 rgba(255, 255, 255, 0.9) inset;
 }
 
-/* ── Responsive Styling ── */
 
-
-@media (max-width: 992px) {
-  .hero-section {
-    padding-top: 150px;
-  }
-  
-  .hero-title {
-    font-size: 3rem;
-  }
-
-  .features-grid {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-
-  .features-title {
-    font-size: 2.8rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .hero-title {
-    font-size: 2.4rem;
-  }
-  
-  .hero-subtitle {
-    font-size: 1rem;
-  }
-
-  .features-title {
-    font-size: 2.2rem;
-  }
-
-  .features-subtitle {
-    font-size: 1rem;
-  }
-
-  .feature-img-box {
-    height: 220px;
-  }
-}
 
 /* ── Unique Features Section ── */
 .features-section {
@@ -446,7 +404,8 @@
   transition-delay: var(--delay, 0ms);
 }
 
-.is-visible .reveal-card {
+.is-visible .reveal-card,
+.reveal-card.is-visible {
   opacity: 1;
   transform: translateY(0);
 }
@@ -458,4 +417,84 @@
 .features-title em {
   color: var(--accent);
   font-style: normal;
+}
+
+/* ── Responsive Styling ── */
+
+@media (max-width: 992px) {
+  .hero-section {
+    padding-top: 150px;
+  }
+  
+  .hero-title {
+    font-size: 3rem;
+  }
+
+  .features-title {
+    font-size: 2.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.4rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .features-title {
+    font-size: 2.2rem;
+  }
+
+  .features-subtitle {
+    font-size: 1rem;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .feature-card {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 24px;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .feature-img-box {
+    height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 8px;
+    background: transparent;
+  }
+
+  .feature-info {
+    margin-top: 0;
+  }
+
+  .feature-card-title {
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+  }
+
+  .feature-card-desc {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .reveal-card {
+    transition-delay: 0ms !important;
+  }
 }

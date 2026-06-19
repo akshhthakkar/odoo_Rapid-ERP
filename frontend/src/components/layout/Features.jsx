@@ -20,7 +20,25 @@ const CARDS = [
 const wordDelay = (i) => `${100 + i * 60}ms`;
 // After all title words: 100 + 8*60 = 580ms
 const SUBTITLE_DELAY = '600ms';
-const CARD_BASE_DELAY = 700;
+const FeatureCard = ({ card, index }) => {
+  const [cardRef, inView] = useInView({ threshold: 0.1 });
+
+  return (
+    <div
+      ref={cardRef}
+      className={`feature-card reveal-card${inView ? ' is-visible' : ''}`}
+      style={{ '--delay': `${index * 100}ms` }}
+    >
+      <div className="feature-img-box">
+        <img src={card.src} alt={card.alt} className="feature-img" />
+      </div>
+      <div className="feature-info">
+        <h3 className="feature-card-title">{card.title}</h3>
+        <p className="feature-card-desc">{card.desc}</p>
+      </div>
+    </div>
+  );
+};
 
 export const Features = () => {
   const [sectionRef, inView] = useInView({ threshold: 0.1 });
@@ -84,22 +102,10 @@ export const Features = () => {
         </p>
       </div>
 
-      {/* Cards — slide up only, no animation on inner text */}
+      {/* Cards — slide up individually as they enter the screen */}
       <div className="features-grid">
         {CARDS.map((card, i) => (
-          <div
-            key={card.title}
-            className="feature-card reveal-card"
-            style={{ '--delay': `${CARD_BASE_DELAY + i * 100}ms` }}
-          >
-            <div className="feature-img-box">
-              <img src={card.src} alt={card.alt} className="feature-img" />
-            </div>
-            <div className="feature-info">
-              <h3 className="feature-card-title">{card.title}</h3>
-              <p className="feature-card-desc">{card.desc}</p>
-            </div>
-          </div>
+          <FeatureCard key={card.title} card={card} index={i} />
         ))}
       </div>
     </section>
